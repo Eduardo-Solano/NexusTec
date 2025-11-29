@@ -10,9 +10,26 @@ class EventController extends Controller
     /**
      * Display a listing of the resource.
      */
+
+    // Opcional: Constructor para proteger todo el controlador con Spatie
+    /*
+    public function __construct()
+    {
+        $this->middleware('permission:events.view')->only('index');
+        $this->middleware('permission:events.create')->only(['create', 'store']);
+        // etc...
+    }
+    */
+
     public function index()
     {
-        //
+        // Obtener todos los eventos con sus equipos asociados ordenados por fecha de inicio descendente.
+        // Usamos 'paginate(10)' para que si hay 100 eventos, no explote la pantalla
+        $events = Event::with('teams') // Eager loading (optimización)
+            ->orderBy('start_date', 'desc')
+            ->paginate(9);
+
+        return view('events.index', compact('events'));
     }
 
     /**

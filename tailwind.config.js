@@ -14,6 +14,13 @@ export default {
             fontFamily: {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
             },
+            // --- AGREGA ESTO AQUÍ ---
+            colors: {
+                'ito-orange': '#F05E23', // Naranja Oficial
+                'tecnm-blue': '#1B396A', // Azul Oficial
+                'tecnm-blue-dark': '#122646', // Azul Oscuro (para hover)
+            }
+            // ------------------------
         },
     },
 
