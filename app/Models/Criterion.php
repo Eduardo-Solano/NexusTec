@@ -9,4 +9,15 @@ class Criterion extends Model
 {
     /** @use HasFactory<\Database\Factories\CriterionFactory> */
     use HasFactory;
+
+    protected $table = 'criteria';
+    protected $fillable = [
+        'name',
+        'max_points',
+    ];
+
+    // --- Relaciones de 1:N ---
+    public function evaluations() {
+        return $this->hasMany(Evaluation::class);
+    }
 }

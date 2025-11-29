@@ -9,4 +9,15 @@ class StaffProfile extends Model
 {
     /** @use HasFactory<\Database\Factories\StaffProfileFactory> */
     use HasFactory;
+
+    protected $fillable = [
+        'user_id',
+        'employee_number',
+        'department',
+    ];
+
+    // --- Relaciones de 1:1 ---
+    public function user() {
+        return $this->belongsTo(User::class);
+    }
 }

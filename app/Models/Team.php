@@ -9,4 +9,28 @@ class Team extends Model
 {
     /** @use HasFactory<\Database\Factories\TeamFactory> */
     use HasFactory;
+
+    protected $fillable = ['name', 'event_id', 'leader_id'];
+
+    // El evento al que pertenece
+    public function event() {
+        return $this->belongsTo(Event::class);
+    }
+
+    // El Líder (Creador) es un Usuario
+    public function leader() {
+        return $this->belongsTo(User::class, 'leader_id');
+    }
+
+    // Los Miembros (Muchos a Muchos)
+    public function members() {
+        return $this->belongsToMany(User::class, 'team_user')
+                    ->withPivot('is_accepted') // Importante para saber si aceptaron invitación
+                    ->withTimestamps();
+    }
+
+    // Un equipo tiene UN proyecto
+    public function project() {
+        return $this->hasOne(Project::class);
+    }
 }
