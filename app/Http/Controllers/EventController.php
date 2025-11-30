@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Event;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class EventController extends Controller
 {
@@ -75,8 +76,19 @@ class EventController extends Controller
      */
     public function show(Event $event)
     {
+       // Cargamos los equipos
         $event->load(['teams.leader', 'teams.members']);
-        return view('events.show', compact('event'));
+        
+        $userHasTeam = false;
+        
+        // CORRECCIÓN AQUÍ: Usamos Auth::check() y Auth::id()
+        if (Auth::check()) {
+            $userHasTeam = $event->teams()->whereHas('members', function($query) {
+                $query->where('user_id', Auth::id());
+            })->exists();
+        }
+        
+        return view('events.show', compact('event', 'userHasTeam'));
     }
 
     /**
