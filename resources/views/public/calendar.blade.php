@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Calendario de Eventos - NexusTec</title>
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+    </head>
+    <body class="antialiased bg-gray-50 text-gray-800">
+        
+        <nav class="bg-tecnm-blue shadow-lg">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between h-16 items-center">
+                    <a href="/" class="flex items-center gap-2 text-white font-bold text-xl">
+                        <img src="{{ asset('img/logo-ito.png') }}" class="h-8 w-auto bg-white rounded-full p-0.5" alt="Logo">
+                        NexusTec
+                    </a>
+                    <a href="{{ route('login') }}" class="text-sm font-medium text-white hover:text-ito-orange transition">
+                        Iniciar Sesión &rarr;
+                    </a>
+                </div>
+            </div>
+        </nav>
+
+        <div class="bg-white border-b border-gray-200 py-12">
+            <div class="max-w-4xl mx-auto px-4 text-center">
+                <h1 class="text-4xl font-black text-tecnm-blue mb-2">Calendario Académico</h1>
+                <p class="text-gray-500 text-lg">Próximos Hackathons, Congresos y Talleres.</p>
+            </div>
+        </div>
+
+        <div class="max-w-4xl mx-auto px-4 py-12">
+            
+            @forelse($events as $month => $monthEvents)
+                <div class="relative flex items-center justify-center mb-10">
+                    <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-gray-300"></div></div>
+                    <div class="relative z-10 bg-gray-50 px-4">
+                        <span class="text-lg font-bold text-ito-orange uppercase tracking-widest bg-white border border-gray-200 px-4 py-1 rounded-full shadow-sm">
+                            {{ $month }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="space-y-8 mb-12">
+                    @foreach($monthEvents as $event)
+                        <div class="group relative bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 hover:border-ito-orange/30 overflow-hidden">
+                            
+                            <div class="absolute left-0 top-0 bottom-0 w-2 {{ $event->is_active ? 'bg-green-500' : 'bg-gray-400' }}"></div>
+
+                            <div class="flex flex-col md:flex-row gap-6 items-center">
+                                <div class="flex flex-col items-center justify-center bg-gray-100 rounded-xl p-4 min-w-[100px] border border-gray-200 text-center">
+                                    <span class="text-xs font-bold text-gray-500 uppercase">{{ $event->start_date->format('M') }}</span>
+                                    <span class="text-3xl font-black text-tecnm-blue">{{ $event->start_date->format('d') }}</span>
+                                    <span class="text-xs font-medium text-gray-400">{{ $event->start_date->format('l') }}</span>
+                                </div>
+
+                                <div class="flex-1 text-center md:text-left">
+                                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-2 mb-2">
+                                        <h3 class="text-xl font-bold text-gray-900 group-hover:text-tecnm-blue transition">
+                                            {{ $event->name }}
+                                        </h3>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $event->is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
+                                            {{ $event->is_active ? 'Inscripciones Abiertas' : 'Finalizado' }}
+                                        </span>
+                                    </div>
+                                    
+                                    <p class="text-gray-600 mb-4 line-clamp-2">
+                                        {{ $event->description }}
+                                    </p>
+
+                                    <div class="flex items-center justify-center md:justify-start gap-4 text-sm text-gray-500">
+                                        <div class="flex items-center">
+                                            <svg class="w-4 h-4 mr-1.5 text-ito-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                            {{ $event->start_date->format('H:i') }} - {{ $event->end_date->format('H:i') }}
+                                        </div>
+                                        <div class="flex items-center">
+                                            <svg class="w-4 h-4 mr-1.5 text-ito-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                                            {{ $event->teams->count() }} Equipos
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <a href="{{ route('login') }}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-ito-orange hover:bg-orange-600 shadow-sm transition">
+                                        Ver Detalles
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            @empty
+                <div class="text-center py-20">
+                    <svg class="mx-auto h-16 w-16 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    <h3 class="mt-4 text-lg font-medium text-gray-900">No hay eventos programados</h3>
+                    <p class="mt-1 text-gray-500">Mantente atento a próximas convocatorias.</p>
+                </div>
+            @endforelse
+
+        </div>
+
+    </body>
+</html>

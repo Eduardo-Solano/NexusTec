@@ -25,12 +25,29 @@ class TeamController extends Controller
      */
     public function create(Request $request)
     {
-        //
-        // ... validaciones ...
+        // 1. Validar ID del evento
+        if (! $request->has('event_id')) {
+            return redirect()->route('events.index')->with('error', 'Falta el evento.');
+        }
         
         $event = Event::findOrFail($request->query('event_id'));
 
-        // ... más validaciones ...
+        // 2. Validar si está activo
+        if (! $event->is_active) {
+            return redirect()->route('events.show', $event)->with('error', 'Evento cerrado.');
+        }
+
+        // --- 3. NUEVA VALIDACIÓN DE INTEGRIDAD ---
+        // Verificar si el usuario YA pertenece a un equipo en este evento
+        $alreadyInTeam = $event->teams()->whereHas('members', function($q) {
+            $q->where('user_id', Auth::id());
+        })->exists();
+
+        if ($alreadyInTeam) {
+            // Si ya tiene equipo, lo pateamos fuera con error
+            return redirect()->route('events.show', $event)
+                ->with('error', 'Error: Ya estás registrado en un equipo para este evento.');
+        }
 
         // ¡ESTA LÍNEA ES CRUCIAL!
         return view('teams.create', compact('event'));

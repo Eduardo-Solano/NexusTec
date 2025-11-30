@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\TeamController;
 use App\Http\Controllers\ProjectController;
+use App\Models\Event;
 
 Route::get('/', function () {
     return view('welcome');
@@ -13,6 +14,20 @@ Route::get('/', function () {
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
+
+// Ruta para el Calendario Público
+    Route::get('/calendar', function () {
+        // Obtenemos eventos ordenados por fecha de inicio, solo los futuros o recientes
+        $events = Event::where('end_date', '>=', now()->subMonths(1)) // Incluimos recientes de hace 1 mes
+                    ->orderBy('start_date', 'asc')
+                    ->get()
+                    ->groupBy(function($date) {
+                        // Agrupamos por Mes y Año (Ej: "Diciembre 2025")
+                        return \Carbon\Carbon::parse($date->start_date)->format('F Y');
+                    });
+
+        return view('public.calendar', compact('events'));
+    })->name('public.calendar');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
