@@ -17,7 +17,15 @@ class TeamController extends Controller
      */
     public function index()
     {
-        //
+        // Solo para Admin/Staff (Seguridad básica)
+        if (!Auth::user()->hasAnyRole(['admin', 'staff'])) {
+            abort(403);
+        }
+        $teams = Team::with(['event', 'leader'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(12);
+
+        return view('teams.index', compact('teams'));
     }
 
     /**
@@ -130,7 +138,10 @@ class TeamController extends Controller
      */
     public function show(Team $team)
     {
-        //
+        // Cargar relaciones necesarias para la vista
+        $team->load(['members', 'event', 'project', 'leader']);
+        
+        return view('teams.show', compact('team'));
         
     }
 

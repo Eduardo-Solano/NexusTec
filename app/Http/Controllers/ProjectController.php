@@ -52,6 +52,7 @@ class ProjectController extends Controller
             'name' => 'required|string|max:100',
             'description' => 'required|string|max:1000',
             'repository_url' => 'required|url', // Validamos que sea un link real
+            'advisor_id' => 'required|exists:users,id',
         ]);
 
         $team = Team::findOrFail($request->team_id);
@@ -62,7 +63,7 @@ class ProjectController extends Controller
             'description' => $request->description,
             'repository_url' => $request->repository_url,
             'team_id' => $team->id,
-            // 'advisor_id' => null, // Opcional por ahora
+            'advisor_id' => $request->advisor_id,
         ]);
 
         // Redirigir al evento con éxito
@@ -104,5 +105,23 @@ class ProjectController extends Controller
     public function destroy(Project $project)
     {
         //
+    }
+
+    public function respondAdvisory(Request $request, Project $project, $status)
+    {
+        // Seguridad: Solo el asesor asignado puede responder
+        if (Auth::id() !== $project->advisor_id) {
+            abort(403);
+        }
+
+        // Validar estado
+        if (!in_array($status, ['accepted', 'rejected'])) {
+            abort(400);
+        }
+
+        $project->update(['advisor_status' => $status]);
+
+        $msg = $status === 'accepted' ? 'Has aceptado la asesoría.' : 'Has rechazado la solicitud.';
+        return back()->with('success', $msg);
     }
 }

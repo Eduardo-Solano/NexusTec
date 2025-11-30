@@ -90,7 +90,39 @@
                                 </div>
                             </li>
                             @endif
+                            <div class="bg-gray-800 border border-gray-700 rounded-2xl p-6 shadow-lg mb-6">
+                                <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Asesor Académico</h3>
+                                
+                                @if($project->advisor)
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-10 h-10 rounded-full bg-indigo-900/50 flex items-center justify-center text-indigo-400 font-bold border border-indigo-700">
+                                                {{ substr($project->advisor->name, 0, 1) }}
+                                            </div>
+                                            <div>
+                                                <p class="text-white text-sm font-bold">{{ $project->advisor->name }}</p>
+                                                <p class="text-gray-500 text-xs">{{ $project->advisor->email }}</p>
+                                            </div>
+                                        </div>
 
+                                        @if($project->advisor_status === 'accepted')
+                                            <span class="px-2 py-1 bg-green-500/10 text-green-400 text-[10px] font-bold uppercase rounded border border-green-500/20">
+                                                Verificado
+                                            </span>
+                                        @elseif($project->advisor_status === 'rejected')
+                                            <span class="px-2 py-1 bg-red-500/10 text-red-400 text-[10px] font-bold uppercase rounded border border-red-500/20">
+                                                Rechazado
+                                            </span>
+                                        @else
+                                            <span class="px-2 py-1 bg-yellow-500/10 text-yellow-400 text-[10px] font-bold uppercase rounded border border-yellow-500/20 animate-pulse">
+                                                Pendiente
+                                            </span>
+                                        @endif
+                                    </div>
+                                @else
+                                    <p class="text-gray-500 text-sm italic">Sin asesor asignado.</p>
+                                @endif
+                            </div>
                             @foreach($project->team->members as $member)
                                 @if($member->id !== $project->team->leader_id)
                                     <li class="flex items-center gap-4 px-3 py-1 group opacity-80 hover:opacity-100 transition">

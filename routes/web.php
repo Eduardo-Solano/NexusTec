@@ -5,6 +5,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\TeamController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\StaffProfileController;
 use App\Models\Event;
 
 Route::get('/', function () {
@@ -29,11 +31,15 @@ Route::get('/dashboard', function () {
         return view('public.calendar', compact('events'));
     })->name('public.calendar');
 
-Route::middleware('auth')->group(function () {
+    Route::middleware('auth')->group(function () {
+    
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
+    
+
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     // Rutas para la gestión de eventos
     Route::resource('events', EventController::class);
     // Rutas para la gestión de equipos
@@ -44,6 +50,11 @@ Route::middleware('auth')->group(function () {
     Route::resource('projects', ProjectController::class);
     Route::post('/teams/{team}/accept/{user}', [TeamController::class, 'acceptMember'])->name('teams.accept');
     Route::post('/teams/{team}/reject/{user}', [TeamController::class, 'rejectMember'])->name('teams.reject');
+    Route::patch('/projects/{project}/advisor/{status}', [ProjectController::class, 'respondAdvisory'])
+    ->name('projects.advisor.response');
+    Route::group(['middleware' => ['role:admin']], function () {
+    Route::resource('staff', StaffProfileController::class);
+});
 });
 
 require __DIR__.'/auth.php';

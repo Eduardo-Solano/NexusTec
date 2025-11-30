@@ -21,6 +21,20 @@
                         {{ __('Eventos') }}
                     </x-nav-link>
                 </div>
+                @hasanyrole('admin|staff')
+                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                    <x-nav-link :href="route('teams.index')" :active="request()->routeIs('teams.*')">
+                        {{ __('Equipos') }}
+                    </x-nav-link>
+                </div>
+                @endhasanyrole
+                @role('admin')
+                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                    <x-nav-link :href="route('staff.index')" :active="request()->routeIs('staff.*')">
+                        {{ __('Docentes') }}
+                    </x-nav-link>
+                </div>
+                @endrole
             </div>
 
             <!-- Settings Dropdown -->
