@@ -38,6 +38,7 @@ class EventController extends Controller
     public function create()
     {
         //
+        return view('events.create');
     }
 
     /**
@@ -46,6 +47,27 @@ class EventController extends Controller
     public function store(Request $request)
     {
         //
+        // 1. Validaciones Robustas
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string|max:1000',
+            'start_date' => 'required|date',
+            // Regla 'after': La fecha fin debe ser POSTERIOR a la fecha inicio
+            'end_date' => 'required|date|after:start_date', 
+        ]);
+
+        // 2. Crear el Evento
+        Event::create([
+            'name' => $validated['name'],
+            'description' => $validated['description'],
+            'start_date' => $validated['start_date'],
+            'end_date' => $validated['end_date'],
+            'is_active' => true, // Por defecto nace activo
+        ]);
+
+        // 3. Redireccionar con Mensaje de Éxito
+        return redirect()->route('events.index')
+            ->with('success', 'Evento creado exitosamente.');
     }
 
     /**
