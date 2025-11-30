@@ -87,79 +87,158 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         @forelse($event->teams as $team)
                             
-                            <div class="group relative flex flex-col justify-between h-full bg-gray-800 border-2 border-gray-700 rounded-2xl p-6 transition-all duration-300 hover:-translate-y-2 hover:border-ito-orange hover:shadow-[0_10px_40px_-10px_rgba(240,94,35,0.2)]">
+                            <div class="group relative flex flex-col h-full bg-gray-800 border-2 border-gray-700 rounded-2xl p-5 transition-all duration-300 hover:-translate-y-2 hover:border-ito-orange hover:shadow-[0_10px_40px_-10px_rgba(240,94,35,0.2)]">
+                                <div class="flex justify-between items-start mb-3">
+                                    <div class="w-10 h-10 rounded-lg bg-gray-900 border border-gray-600 flex items-center justify-center text-gray-500 group-hover:text-ito-orange group-hover:border-ito-orange transition duration-300">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                        </svg>
+                                    </div>
+                                    
+                                    <span class="text-[10px] font-bold text-gray-400 bg-black/40 px-2 py-1 rounded border border-gray-600">
+                                        {{ $team->members->count() }}/5
+                                    </span>
+                                </div>
+
+                                <h4 class="text-lg font-bold text-white mb-4 truncate group-hover:text-ito-orange transition">
+                                    {{ $team->name }}
+                                </h4>
                                 
-                                <div>
-                                    <div class="flex justify-between items-start mb-4">
-                                        <div class="w-12 h-12 rounded-xl bg-gray-900 border border-gray-600 flex items-center justify-center text-gray-500 group-hover:text-ito-orange group-hover:border-ito-orange transition duration-300">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                                            </svg>
+                                <div class="flex-grow space-y-2 mb-6">
+                                    @php $leader = $team->members->find($team->leader_id); @endphp
+                                    
+                                    @if($leader)
+                                    <div class="flex items-center justify-between text-sm p-2 rounded bg-blue-900/20 border border-blue-500/30">
+                                        <div class="flex items-center gap-2 overflow-hidden">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-blue-400 shrink-0 animate-pulse"></span>
+                                            <span class="text-gray-200 truncate font-bold text-xs">{{ Str::limit($leader->name, 14) }}</span>
                                         </div>
-                                        
-                                        <span class="text-xs font-bold text-gray-400 bg-black/40 px-2 py-1 rounded-md border border-gray-600">
-                                            {{ $team->members->count() }}/5
+                                        <span class="text-[9px] uppercase font-black text-blue-300 bg-blue-900/50 px-2 py-0.5 rounded border border-blue-500/30 tracking-wider">
+                                            {{ $leader->pivot->role ?? 'Capitán' }}
                                         </span>
                                     </div>
+                                    @endif
 
-                                    <h4 class="text-lg font-bold text-white mb-2 truncate group-hover:text-ito-orange transition">
-                                        {{ $team->name }}
-                                    </h4>
+                                    @foreach($team->members as $member)
+                                        @if($member->id !== $team->leader_id)
+                                            <div class="flex items-center justify-between text-xs p-1.5 rounded hover:bg-gray-700/50 transition group/member">
+                                                <div class="flex items-center gap-2 overflow-hidden">
+                                                    <span class="w-1.5 h-1.5 rounded-full bg-gray-600 group-hover/member:bg-ito-orange transition shrink-0"></span>
+                                                    <span class="text-gray-400 truncate group-hover/member:text-gray-200 transition">{{ Str::limit($member->name, 14) }}</span>
+                                                </div>
+                                                
+                                                <span class="text-[9px] uppercase font-bold text-gray-500 shrink-0 ml-1 border border-gray-700 px-2 py-0.5 rounded bg-gray-800 group-hover/member:border-gray-500 group-hover/member:text-gray-300 transition">
+                                                    {{ $member->pivot->role ?? 'Miembro' }}
+                                                </span>
+                                            </div>
+                                        @endif
+                                    @endforeach
                                     
-                                    <div class="flex items-center text-sm text-gray-400 mb-4">
-                                        <div class="w-6 h-6 rounded-full bg-blue-900/50 flex items-center justify-center text-xs text-blue-400 font-bold mr-2 border border-blue-900">
-                                            L
+                                    @if($team->members->count() < 5)
+                                        <div class="pt-2">
+                                            <div class="border border-dashed border-gray-700 rounded p-1.5 text-center">
+                                                <span class="text-[9px] text-gray-600 italic">Espacio disponible ({{ 5 - $team->members->count() }})</span>
+                                            </div>
                                         </div>
-                                        <span class="truncate">{{ $team->leader->name }}</span>
-                                    </div>
+                                    @endif
+                                    @if(Auth::id() === $team->leader_id)
+                                        @php
+                                            // Filtramos los miembros pendientes
+                                            $pendingMembers = $team->members()->wherePivot('is_accepted', false)->get();
+                                        @endphp
+
+                                        @if($pendingMembers->count() > 0)
+                                            <div class="mt-4 pt-4 border-t border-gray-700 bg-gray-900/50 -mx-5 -mb-5 p-4 rounded-b-2xl">
+                                                <p class="text-xs text-gray-400 font-bold uppercase mb-3">Solicitudes Pendientes</p>
+                                                
+                                                @foreach($pendingMembers as $pending)
+                                                    <div class="flex items-center justify-between bg-gray-800 p-2 rounded-lg mb-2 border border-gray-700">
+                                                        <div>
+                                                            <p class="text-white text-xs font-bold">{{ $pending->name }}</p>
+                                                            <p class="text-[10px] text-gray-500">{{ $pending->pivot->role }}</p>
+                                                        </div>
+                                                        
+                                                        <div class="flex gap-1">
+                                                            <form action="{{ route('teams.accept', [$team, $pending]) }}" method="POST">
+                                                                @csrf
+                                                                <button type="submit" class="p-1.5 bg-green-600 hover:bg-green-500 text-white rounded transition" title="Aceptar">
+                                                                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                                                </button>
+                                                            </form>
+
+                                                            <form action="{{ route('teams.reject', [$team, $pending]) }}" method="POST">
+                                                                @csrf
+                                                                <button type="submit" class="p-1.5 bg-red-600 hover:bg-red-500 text-white rounded transition" title="Rechazar">
+                                                                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                                </button>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        @endif
+                                    @endif
                                 </div>
 
                                 @role('student')
-                                    <div class="mt-4 pt-4 border-t border-gray-700/50">
+                                    <div class="mt-auto pt-4 border-t border-gray-700/50">
                                         
-                                        @if($team->members->contains(Auth::id()))
-                                            <div class="flex flex-col gap-3">
-                                                <div class="w-full py-1.5 bg-green-500/10 border border-green-500/20 text-green-400 text-[10px] font-bold uppercase tracking-widest rounded-lg text-center">
-                                                    ✅ Tu Equipo
+                                        @php
+                                            // Buscamos si el usuario actual está en la lista de miembros
+                                            $membership = $team->members->find(Auth::id());
+                                        @endphp
+
+                                        @if($membership)
+                                            @if($membership->pivot->is_accepted)
+                                                <div class="flex flex-col gap-2">
+                                                    <div class="w-full py-1 bg-green-500/10 border border-green-500/20 text-green-400 text-[10px] font-bold uppercase rounded text-center">
+                                                        ✅ Tu Equipo
+                                                    </div>
+                                                    @if($team->project)
+                                                        <a href="{{ route('projects.show', $team->project) }}" class="w-full py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-bold uppercase rounded text-center transition">
+                                                            VER PROYECTO
+                                                        </a>
+                                                    @else
+                                                        <a href="{{ route('projects.create', ['team_id' => $team->id]) }}" class="w-full py-1.5 bg-purple-600 hover:bg-purple-500 text-white text-[10px] font-bold uppercase rounded text-center transition">
+                                                            ENTREGAR
+                                                        </a>
+                                                    @endif
                                                 </div>
 
-                                                @if($team->project)
-                                                    <a href="{{ route('projects.show', $team->project) }}" class="w-full py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold uppercase rounded-lg text-center shadow-lg transition shadow-blue-500/20">
-                                                        Ver Proyecto Enviado
-                                                    </a>
-                                                @else
-                                                    <a href="{{ route('projects.create', ['team_id' => $team->id]) }}" 
-                                                    class="w-full py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold uppercase rounded-lg text-center shadow-lg hover:shadow-purple-500/30 transition transform hover:-translate-y-0.5 border border-purple-500/50">
-                                                        🚀 Entregar Proyecto
-                                                    </a>
-                                                @endif
-                                            </div>
+                                            @else
+                                                <div class="w-full py-2 bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 text-[10px] font-bold uppercase rounded-lg text-center animate-pulse">
+                                                    ⏳ Solicitud Pendiente
+                                                </div>
+                                            @endif
 
                                         @elseif($userHasTeam)
-                                            <button disabled class="w-full py-2 bg-gray-900 border border-gray-700 text-gray-600 text-xs font-bold uppercase rounded-lg cursor-not-allowed opacity-50">
+                                            <button disabled class="w-full py-2 bg-gray-900 border border-gray-700 text-gray-600 text-xs font-bold uppercase rounded cursor-not-allowed">
                                                 🚫 Ya tienes equipo
                                             </button>
 
                                         @elseif(!$event->is_active)
-                                            <div class="text-center text-gray-500 text-xs font-bold uppercase">
-                                                Evento Cerrado
-                                            </div>
+                                            <div class="text-center text-gray-500 text-xs font-bold uppercase">Cerrado</div>
 
                                         @elseif($team->members->count() >= 5)
-                                            <div class="text-center w-full py-2 bg-red-500/10 text-red-400 text-xs font-bold uppercase rounded-lg border border-red-500/20">
-                                                ⛔ Equipo Lleno
+                                            <div class="text-center w-full py-2 bg-red-500/10 text-red-400 text-xs font-bold uppercase rounded border border-red-500/20">
+                                                ⛔ Lleno
                                             </div>
 
                                         @else
-                                            <form action="{{ route('teams.join', $team) }}" method="POST" 
-                                                onsubmit="return confirm('⚠️ CONFIRMACIÓN ⚠️\n\n¿Deseas unirte al equipo {{ $team->name }}?');">
+                                            <form action="{{ route('teams.join', $team) }}" method="POST" class="space-y-2">
                                                 @csrf
-                                                <button type="submit" class="w-full py-2.5 bg-gray-700 hover:bg-ito-orange text-white text-xs font-bold uppercase tracking-wider rounded-lg transition-all duration-200 shadow-md group-hover:shadow-orange-500/20 border border-gray-600 group-hover:border-orange-500">
-                                                    Unirme al Escuadrón
+                                                <select name="role" required class="w-full bg-gray-900 border-gray-600 text-gray-300 text-[10px] rounded focus:border-ito-orange focus:ring-0 py-1">
+                                                    <option value="" disabled selected>Elige Rol...</option>
+                                                    @foreach($event->available_roles as $role)
+                                                        <option value="{{ $role }}">{{ $role }}</option>
+                                                    @endforeach
+                                                </select>
+                                                <button type="submit" onclick="return confirm('¿Enviar solicitud a {{ $team->name }}?')" 
+                                                        class="w-full py-1.5 bg-gray-700 hover:bg-ito-orange text-white text-[10px] font-bold uppercase rounded transition">
+                                                    ENVIAR SOLICITUD
                                                 </button>
                                             </form>
                                         @endif
-
                                     </div>
                                 @endrole
                             </div>
@@ -178,5 +257,6 @@
 
             </div>
         </div>
+        
     </div>
 </x-app-layout>

@@ -27,6 +27,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/teams/{team}/join', [TeamController::class, 'join'])->name('teams.join');
     // Rutas para la gestión de proyectos
     Route::resource('projects', ProjectController::class);
+    Route::post('/teams/{team}/accept/{user}', [TeamController::class, 'acceptMember'])->name('teams.accept');
+    Route::post('/teams/{team}/reject/{user}', [TeamController::class, 'rejectMember'])->name('teams.reject');
 });
 
 require __DIR__.'/auth.php';

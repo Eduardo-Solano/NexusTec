@@ -25,7 +25,7 @@ class Team extends Model
     // Los Miembros (Muchos a Muchos)
     public function members() {
         return $this->belongsToMany(User::class, 'team_user')
-                    ->withPivot('is_accepted') // Importante para saber si aceptaron invitación
+                    ->withPivot('is_accepted', 'role') // <--- ¡ESTO ES LO QUE FALTABA!
                     ->withTimestamps();
     }
 
