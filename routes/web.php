@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\EventController;
+use App\Http\Controllers\TeamController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -19,6 +20,10 @@ Route::middleware('auth')->group(function () {
 
     // Rutas para la gestión de eventos
     Route::resource('events', EventController::class);
+    // Rutas para la gestión de equipos
+    Route::resource('teams', TeamController::class);
+    // NUEVA RUTA: Unirse a equipo existente
+    Route::post('/teams/{team}/join', [TeamController::class, 'join'])->name('teams.join');
 });
 
 require __DIR__.'/auth.php';
