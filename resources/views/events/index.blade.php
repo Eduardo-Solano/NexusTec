@@ -69,8 +69,13 @@
                                     {{ $event->teams_count ?? 0 }} Equipos
                                 </div>
                                 
-                                <div class="flex items-center gap-2">
-                                    
+                                <div class="flex items-center gap-3">
+                                    <a href="{{ route('events.show', $event) }}" class="text-sm font-bold text-ito-orange hover:text-orange-500 flex items-center transition">
+                                        Ver Detalles
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                        </svg>
+                                    </a>
                                     @can('events.edit')
                                         <a href="{{ route('events.edit', $event) }}" class="text-gray-400 hover:text-blue-500 transition" title="Editar Evento">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

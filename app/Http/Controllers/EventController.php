@@ -38,7 +38,7 @@ class EventController extends Controller
     public function create()
     {
         //
-        return view('events.create', compact('event'));
+        return view('events.create');
     }
 
     /**
@@ -75,7 +75,8 @@ class EventController extends Controller
      */
     public function show(Event $event)
     {
-        //
+        $event->load(['teams.leader', 'teams.members']);
+        return view('events.show', compact('event'));
     }
 
     /**
