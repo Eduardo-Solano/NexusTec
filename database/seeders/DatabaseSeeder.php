@@ -35,6 +35,20 @@ class DatabaseSeeder extends Seeder
             Career::firstOrCreate($carrera);
         }
 
+        // 2.5 Crear Especialidades (Para los Jueces)
+        $especialidades = [
+            ['name' => 'Desarrollo de Software / Web'],
+            ['name' => 'Ciberseguridad y Redes'],
+            ['name' => 'Inteligencia Artificial y Ciencia de Datos'],
+            ['name' => 'Internet de las Cosas (IoT)'],
+            ['name' => 'Innovación y Emprendimiento'],
+            ['name' => 'Diseño UI/UX'],
+        ];
+
+        foreach ($especialidades as $sp) {
+            \App\Models\Specialty::firstOrCreate($sp);
+        }
+
         // 3. Crear TU Usuario Administrador (Para que puedas entrar)
         $admin = User::create([
             'name' => 'Admin NexusTec',
