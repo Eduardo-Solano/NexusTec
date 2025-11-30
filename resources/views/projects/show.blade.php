@@ -67,36 +67,46 @@
                     </div>
 
                     <div class="bg-gray-800 rounded-2xl p-6 border border-gray-700 shadow-lg">
-                        <div class="flex items-center justify-between mb-6 border-b border-gray-700 pb-4">
-                            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider">Integrantes</h3>
-                            <span class="bg-gray-700 text-gray-300 text-xs px-2 py-1 rounded font-mono">{{ $project->team->members->count() }}</span>
+                        <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-700">
+                            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider">INTEGRANTES</h3>
+                            <span class="bg-gray-700 text-gray-300 text-xs font-bold px-2 py-0.5 rounded">{{ $project->team->members->count() }}</span>
                         </div>
-
-                        <div class="space-y-4">
-                            <div class="flex items-center">
-                                <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center text-white font-bold text-sm mr-3 shadow-lg">
-                                    {{ substr($project->team->leader->name, 0, 1) }}
+                        
+                        <ul class="space-y-4">
+                            @php 
+                                $leader = $project->team->members->find($project->team->leader_id);
+                            @endphp
+                            
+                            @if($leader)
+                            <li class="flex items-center gap-4 bg-blue-900/20 p-3 rounded-xl border border-blue-500/20">
+                                <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center text-white font-bold text-sm shadow-lg ring-1 ring-blue-500/50">
+                                    {{ substr($leader->name, 0, 1) }}
                                 </div>
-                                <div>
-                                    <p class="text-white text-sm font-bold">{{ $project->team->leader->name }}</p>
-                                    <p class="text-blue-400 text-xs font-bold uppercase tracking-wider">Líder del Equipo</p>
+                                <div class="overflow-hidden">
+                                    <p class="text-white text-sm font-bold truncate">{{ $leader->name }}</p>
+                                    <p class="text-blue-400 text-[10px] font-black uppercase tracking-wider truncate">
+                                        {{ $leader->pivot->role ?? 'Líder del Equipo' }}
+                                    </p>
                                 </div>
-                            </div>
+                            </li>
+                            @endif
 
                             @foreach($project->team->members as $member)
                                 @if($member->id !== $project->team->leader_id)
-                                    <div class="flex items-center opacity-80">
-                                        <div class="w-10 h-10 rounded-lg bg-gray-700 flex items-center justify-center text-gray-400 font-bold text-sm mr-3 border border-gray-600">
+                                    <li class="flex items-center gap-4 px-3 py-1 group opacity-80 hover:opacity-100 transition">
+                                        <div class="w-9 h-9 rounded-lg bg-gray-700 flex items-center justify-center text-gray-300 font-bold text-xs border border-gray-600 group-hover:border-gray-500 transition">
                                             {{ substr($member->name, 0, 1) }}
                                         </div>
-                                        <div>
-                                            <p class="text-gray-300 text-sm font-medium">{{ $member->name }}</p>
-                                            <p class="text-gray-500 text-xs">Desarrollador</p>
+                                        <div class="overflow-hidden">
+                                            <p class="text-gray-200 text-sm font-medium truncate">{{ $member->name }}</p>
+                                            <p class="text-gray-500 text-[10px] uppercase tracking-wider group-hover:text-gray-400 transition truncate">
+                                                {{ $member->pivot->role ?? 'Colaborador' }}
+                                            </p>
                                         </div>
-                                    </div>
+                                    </li>
                                 @endif
                             @endforeach
-                        </div>
+                        </ul>
                     </div>
 
                 </div>

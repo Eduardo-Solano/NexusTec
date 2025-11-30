@@ -26,7 +26,7 @@ class EventController extends Controller
     {
         // Obtener todos los eventos con sus equipos asociados ordenados por fecha de inicio descendente.
         // Usamos 'paginate(10)' para que si hay 100 eventos, no explote la pantalla
-        $events = Event::with('teams') // Eager loading (optimización)
+        $events = Event::withCount('teams') // Eager loading (optimización)
             ->orderBy('start_date', 'desc')
             ->paginate(9);
 
