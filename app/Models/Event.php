@@ -18,6 +18,44 @@ class Event extends Model
         'is_active' => 'boolean',
     ];
 
+    public function getAvailableRolesAttribute()
+    {
+        $name = strtolower($this->name);
+
+        // CASO A: Hackathons (Enfoque 100% Software)
+        if (str_contains($name, 'hack')) {
+            return [
+                'Full Stack Developer',
+                'Backend Developer',
+                'Frontend Developer',
+                'UI/UX Designer',
+                'Data Scientist',
+                'QA / Tester'
+            ];
+        }
+
+        // CASO B: InnovaTec / Emprendimiento (Enfoque Multidisciplinario)
+        // Cubre las áreas de: Técnica, Negocios, Diseño y Finanzas
+        if (str_contains($name, 'innova') || str_contains($name, 'emprende')) {
+            return [
+                'Líder de Proyecto',       // El CEO del equipo
+                'Desarrollador Técnico',   // El que construye el prototipo (Ingenierías)
+                'Analista de Negocios',    // El que hace el Canvas (Gestión/Admin)
+                'Especialista Financiero', // Costos y Rentabilidad
+                'Diseñador de Producto',   // Imagen y Marketing
+                'Investigador'             // Fundamentación teórica
+            ];
+        }
+
+        // CASO C: Otros (Robótica, Ciencias Básicas, etc.)
+        return [
+            'Capitán',
+            'Investigador',
+            'Orador',
+            'Apoyo Logístico',
+            'Miembro General'
+        ];
+    }
     // --- Relaciones de 1:N ---
     public function teams() {
         return $this->hasMany(Team::class);

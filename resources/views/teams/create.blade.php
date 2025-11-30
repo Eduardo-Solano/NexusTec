@@ -42,20 +42,35 @@
                                 type="text" name="name" :value="old('name')" required autofocus placeholder="Ej: Los Innovadores" />
                             <x-input-error :messages="$errors->get('name')" class="mt-2" />
                         </div>
-
+                        {{-- Agregue: Eleccion del rol --}}
+                        <div class="mt-6">
+                            <x-input-label for="leader_role" :value="__('Tu Rol en el Equipo')" class="text-white font-bold mb-2" />
+                            <select name="leader_role" id="leader_role" class="block w-full bg-gray-900 border-gray-600 text-white rounded-md focus:border-ito-orange focus:ring-ito-orange">
+                                @foreach($event->available_roles as $role)
+                                    <option value="{{ $role }}">{{ $role }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                         <div class="border-t border-gray-700 pt-6">
                             <h3 class="text-lg font-bold text-white mb-1">Integrantes</h3>
                             <p class="text-gray-500 text-sm mb-6">Agrega los correos de tus compañeros (Opcional).</p>
                             
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 @for ($i = 1; $i <= 4; $i++)
-                                    <div>
-                                        <label for="member_{{ $i }}" class="block text-xs font-bold text-gray-400 uppercase mb-2">
-                                            Miembro #{{ $i }}
-                                        </label>
-                                        <x-text-input id="member_{{ $i }}" 
-                                            class="block w-full bg-gray-900 border border-gray-600 text-white placeholder-gray-600 focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-sm" 
-                                            type="email" name="members[]" placeholder="correo@institucional.com" />
+                                    <div class="space-y-2 p-4 bg-gray-900/50 rounded-lg border border-gray-700">
+                                        <label class="text-xs font-bold text-gray-500 uppercase">Miembro #{{ $i }}</label>
+                                        
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <x-text-input class="bg-gray-800 border-gray-600 text-white" 
+                                                        type="email" name="members[]" placeholder="Correo Institucional" />
+                                            
+                                            <select name="member_roles[]" class="bg-gray-800 border-gray-600 text-white rounded-md focus:border-ito-orange focus:ring-ito-orange text-sm">
+                                                <option value="">Seleccionar Rol...</option>
+                                                @foreach($event->available_roles as $role)
+                                                    <option value="{{ $role }}">{{ $role }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
                                     </div>
                                 @endfor
                             </div>

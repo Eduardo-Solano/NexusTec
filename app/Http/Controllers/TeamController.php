@@ -41,18 +41,17 @@ class TeamController extends Controller
      */
     public function store(Request $request)
     {
-        //
-        // 1. Validación Básica
+        // 1. Validación Actualizada
         $request->validate([
             'name' => 'required|string|max:50',
             'event_id' => 'required|exists:events,id',
-            'members' => 'array|max:4', // Máximo 4 compañeros (+ el líder = 5)
-            'members.*' => 'nullable|email|distinct', // Correos válidos y no repetidos
+            'leader_role' => 'required|string', // Nuevo: Rol del líder
+            'members' => 'array|max:4',
+            'member_roles' => 'array', // Nuevo: Roles de los miembros
+            'members.*' => 'nullable|email|distinct',
         ]);
 
-        // 2. Transacción (Todo o Nada)
         return DB::transaction(function () use ($request) {
-            
             $event = Event::findOrFail($request->event_id);
 
             // Regla de Negocio: ¿El usuario ya es líder o miembro de otro equipo en este evento?
@@ -69,46 +68,43 @@ class TeamController extends Controller
                 ]);
             }
 
-            // 3. Crear el Equipo
+            // Crear Equipo
             $team = Team::create([
                 'name' => $request->name,
                 'event_id' => $event->id,
                 'leader_id' => Auth::id(),
             ]);
 
-            // 4. Agregar al Líder (Tú) a la tabla de miembros automáticamente
-            $team->members()->attach(Auth::id(), ['is_accepted' => true]);
+            // Guardar al LIDER con su Rol
+            $team->members()->attach(Auth::id(), [
+                'is_accepted' => true,
+                'role' => $request->leader_role // <--- AQUÍ SE GUARDA
+            ]);
 
-            // 5. Procesar los Integrantes
-            // Filtramos el array para quitar campos vacíos (si solo puso 1 correo de 4)
-            $memberEmails = array_filter($request->members, fn($value) => !is_null($value) && $value !== '');
+            // Procesar Miembros
+            $memberEmails = $request->members ?? [];
+            $memberRoles = $request->member_roles ?? [];
 
-            foreach ($memberEmails as $email) {
-                // Buscamos al usuario por correo
+            foreach ($memberEmails as $index => $email) {
+                if (empty($email)) continue;
+
                 $user = User::where('email', $email)->first();
-
-                if (! $user) {
-                    // Si un correo no existe, cancelamos TODO.
-                    throw ValidationException::withMessages([
-                        'members' => "El usuario con correo '$email' no está registrado en la plataforma."
-                    ]);
+                if (!$user) {
+                    throw ValidationException::withMessages(['members' => "El correo $email no existe."]);
                 }
 
-                if ($user->id === Auth::id()) {
-                    continue; // Si se puso a sí mismo, lo saltamos (ya se agregó arriba)
-                }
+                if ($user->id === Auth::id()) continue;
 
-                // TODO: Aquí podrías validar si ese usuario ya está en otro equipo, 
-                // pero por ahora lo dejaremos pasar para no complicar.
-
-                // Agregamos al miembro
-                // 'is_accepted' => false significa que le llegó invitación pero no ha aceptado.
-                // Si quieres que entren directo, ponle true.
-                $team->members()->attach($user->id, ['is_accepted' => true]);
+                // Guardar Miembro con su Rol correspondiente (por índice)
+                $role = $memberRoles[$index] ?? 'Colaborador'; // Default
+                
+                $team->members()->attach($user->id, [
+                    'is_accepted' => true,
+                    'role' => $role // <--- AQUÍ SE GUARDA
+                ]);
             }
 
-            return redirect()->route('events.show', $event)
-                ->with('success', '¡Equipo registrado correctamente!');
+            return redirect()->route('events.show', $event)->with('success', 'Equipo registrado con roles.');
         });
     }
 
@@ -146,8 +142,11 @@ class TeamController extends Controller
         //
     }
 
-    public function join(Team $team)
+    public function join(Team $team, Request $request)
     {
+        $request->validate([
+            'role' => 'required|string'
+        ]);
         // 1. Validar si el equipo ya está lleno (Max 5)
         if ($team->members()->count() >= 5) {
             return back()->with('error', 'Este equipo ya está lleno.');
@@ -167,8 +166,37 @@ class TeamController extends Controller
         // 3. Unir al usuario
         // 'is_accepted' => true para que entre directo. 
         // Si quisieras aprobación del líder, pondrías false.
-        $team->members()->attach(Auth::id(), ['is_accepted' => true]);
+        $team->members()->attach(Auth::id(), [
+            'is_accepted' => false,
+            'role' => $request->role // <--- Guardamos el rol elegido
+        ]);
 
-        return back()->with('success', 'Te has unido al equipo ' . $team->name . ' correctamente.');
+        return back()->with('success', 'Solicitud enviada. Espera a que el líder te acepte.');
+    }
+
+    public function acceptMember(Team $team, User $user)
+    {
+        // Seguridad: Solo el líder puede aceptar
+        if (Auth::id() !== $team->leader_id) {
+            abort(403, 'No eres el líder de este equipo.');
+        }
+
+        // Actualizar pivote
+        $team->members()->updateExistingPivot($user->id, ['is_accepted' => true]);
+
+        return back()->with('success', 'Miembro aceptado en el equipo.');
+    }
+
+    public function rejectMember(Team $team, User $user)
+    {
+        // Seguridad: Solo el líder puede rechazar
+        if (Auth::id() !== $team->leader_id) {
+            abort(403);
+        }
+
+        // Borrar relación (pivote)
+        $team->members()->detach($user->id);
+
+        return back()->with('success', 'Solicitud rechazada.');
     }
 }
