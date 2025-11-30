@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\TeamController;
+use App\Http\Controllers\ProjectController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -24,6 +25,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('teams', TeamController::class);
     // NUEVA RUTA: Unirse a equipo existente
     Route::post('/teams/{team}/join', [TeamController::class, 'join'])->name('teams.join');
+    // Rutas para la gestión de proyectos
+    Route::resource('projects', ProjectController::class);
 });
 
 require __DIR__.'/auth.php';

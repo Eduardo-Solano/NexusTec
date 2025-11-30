@@ -118,8 +118,21 @@
                                     <div class="mt-4 pt-4 border-t border-gray-700/50">
                                         
                                         @if($team->members->contains(Auth::id()))
-                                            <div class="w-full py-2 bg-green-500/10 border border-green-500/20 text-green-400 text-xs font-bold uppercase rounded-lg text-center shadow-[0_0_10px_rgba(74,222,128,0.1)]">
-                                                ✅ Tu Equipo
+                                            <div class="flex flex-col gap-3">
+                                                <div class="w-full py-1.5 bg-green-500/10 border border-green-500/20 text-green-400 text-[10px] font-bold uppercase tracking-widest rounded-lg text-center">
+                                                    ✅ Tu Equipo
+                                                </div>
+
+                                                @if($team->project)
+                                                    <a href="{{ route('projects.show', $team->project) }}" class="w-full py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold uppercase rounded-lg text-center shadow-lg transition shadow-blue-500/20">
+                                                        Ver Proyecto Enviado
+                                                    </a>
+                                                @else
+                                                    <a href="{{ route('projects.create', ['team_id' => $team->id]) }}" 
+                                                    class="w-full py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold uppercase rounded-lg text-center shadow-lg hover:shadow-purple-500/30 transition transform hover:-translate-y-0.5 border border-purple-500/50">
+                                                        🚀 Entregar Proyecto
+                                                    </a>
+                                                @endif
                                             </div>
 
                                         @elseif($userHasTeam)
