@@ -38,7 +38,7 @@ class EventController extends Controller
     public function create()
     {
         //
-        return view('events.create');
+        return view('events.create', compact('event'));
     }
 
     /**
@@ -84,6 +84,7 @@ class EventController extends Controller
     public function edit(Event $event)
     {
         //
+        return view('events.edit', compact('event'));
     }
 
     /**
@@ -92,6 +93,28 @@ class EventController extends Controller
     public function update(Request $request, Event $event)
     {
         //
+        // 1. Validar (Igual que en store, pero a veces es bueno permitir no cambiar nada)
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string|max:1000',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after:start_date',
+            // El checkbox si no se marca no se envía, así que lo manejamos abajo
+        ]);
+
+        // 2. Actualizar
+        $event->update([
+            'name' => $validated['name'],
+            'description' => $validated['description'],
+            'start_date' => $validated['start_date'],
+            'end_date' => $validated['end_date'],
+            // Truco para checkbox: Si viene en el request es true, si no, false
+            'is_active' => $request->has('is_active'), 
+        ]);
+
+        // 3. Redireccionar
+        return redirect()->route('events.index')
+            ->with('success', 'Evento actualizado correctamente.');
     }
 
     /**
@@ -99,6 +122,10 @@ class EventController extends Controller
      */
     public function destroy(Event $event)
     {
-        //
+        // Simplemente lo borramos
+        $event->delete();
+
+        return redirect()->route('events.index')
+            ->with('success', 'Evento eliminado del sistema.');
     }
 }
