@@ -38,7 +38,9 @@ Route::get('/dashboard', function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    
+    Route::get('/recuperarcontra', function(){
+        return view ('auth.reset-password');
+    });
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     // Rutas para la gestión de eventos
