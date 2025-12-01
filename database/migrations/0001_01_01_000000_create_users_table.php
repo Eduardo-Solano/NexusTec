@@ -17,7 +17,6 @@ return new class extends Migration
         $table->string('email')->unique();
         
         // --- CAMPOS FALTANTES QUE CAUSAN EL ERROR ---
-        $table->string('control_number', 20)->nullable()->unique(); 
         $table->string('phone', 20)->nullable();
         $table->boolean('is_active')->default(true); // <--- ESTE ES EL CULPABLE
         // --------------------------------------------

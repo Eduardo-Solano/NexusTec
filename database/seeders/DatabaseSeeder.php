@@ -81,13 +81,10 @@ class DatabaseSeeder extends Seeder
                 'is_active' => true
             ]);
             
-        // Crea 20 Alumnos sueltos con perfil
         User::factory(20)->create()->each(function ($user) {
             $user->assignRole('student');
-            $user->studentProfile()->create([
-                'career_id' => Career::inRandomOrder()->first()->id,
-                'semester' => rand(1, 9)
-            ]);
+            // El factory de StudentProfile ahora se encarga del control_number
+            $user->studentProfile()->save(\App\Models\StudentProfile::factory()->make());
         });
     }
 }

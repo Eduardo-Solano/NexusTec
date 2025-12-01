@@ -9,6 +9,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rules;
+use Illuminate\Support\Facades\Auth;
 
 class StaffProfileController extends Controller
 {
@@ -130,8 +131,13 @@ class StaffProfileController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(StaffProfile $staffProfile)
+    public function destroy(User $staff)
     {
-        //
+        // Cambio: De auth()->id() a Auth::id()
+        if ($staff->id === Auth::id()) {
+            return back()->with('error', 'No puedes eliminar tu propia cuenta.');
+        }
+        $staff->delete();
+        return back()->with('success', 'Docente eliminado del sistema.');
     }
 }

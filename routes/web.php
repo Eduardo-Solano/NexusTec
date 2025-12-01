@@ -7,6 +7,7 @@ use App\Http\Controllers\TeamController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\StaffProfileController;
+use App\Http\Controllers\StudentProfileController;
 use App\Models\Event;
 
 Route::get('/', function () {
@@ -54,7 +55,8 @@ Route::get('/dashboard', function () {
     ->name('projects.advisor.response');
     Route::group(['middleware' => ['role:admin']], function () {
     Route::resource('staff', StaffProfileController::class);
-});
+    Route::resource('students', StudentProfileController::class);
+    });
 });
 
 require __DIR__.'/auth.php';

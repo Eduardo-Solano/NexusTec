@@ -167,7 +167,12 @@ class TeamController extends Controller
      */
     public function destroy(Team $team)
     {
-        //
+        // Seguridad: Solo admin o el líder pueden borrar
+        if (!Auth::user()->hasRole('admin') && Auth::id() !== $team->leader_id) {
+            abort(403);
+        }
+        $team->delete(); // El cascadeOnDelete de la BD borrará miembros y proyectos
+        return back()->with('success', 'Equipo eliminado correctamente.');
     }
 
     public function join(Team $team, Request $request)

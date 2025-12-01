@@ -13,6 +13,7 @@ class StudentProfile extends Model
     protected $fillable = [
         'user_id',
         'career_id',
+        'control_number',
         'semester',
     ];
 

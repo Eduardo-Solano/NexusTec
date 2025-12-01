@@ -52,7 +52,6 @@ class RegisteredUserController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'phone' => $request->phone,
-            'control_number' => $request->role === 'student' ? $request->control_number : null,
             'password' => Hash::make($request->password),
             'is_active' => true,
         ]);
@@ -63,6 +62,7 @@ class RegisteredUserController extends Controller
         // 3. Crear Perfil Específico
         if ($request->role === 'student') {
             $user->studentProfile()->create([
+                'control_number' => $request->control_number,
                 'career_id' => $request->career_id,
                 'semester' => $request->semester,
             ]);
