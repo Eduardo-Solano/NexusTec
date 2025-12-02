@@ -66,7 +66,7 @@
 
                     <!-- Notifications Dropdown -->
                     <div x-show="notificationsOpen" @click.away="notificationsOpen = false"
-                        class="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden z-20">
+                        class="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden z-20">
                         <div class="py-2">
                             @if ($pendingMembers->count() > 0)
                                 <p class="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 font-bold">Notificaciones
@@ -75,10 +75,44 @@
                                     @foreach ($pendingMembers as $pending)
                                         <li
                                             class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer">
-                                            <a href="{{ route('teams.show', $pending->pivot->team_id) }}"
-                                                class="block text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">
-                                                {{ $pending->name }} - {{ $pending->pivot->role }}
-                                            </a>
+                                            <div class="flex justify-between items-center">
+                                                <div>
+                                                    <p class="text-gray-600 dark:text-gray-400">Tienes una solicitud de
+                                                        unión al equipo <strong>{{ $pending->name }}</strong> como
+                                                        <strong>{{ $pending->pivot->role }}</strong>.
+                                                    </p>
+                                                </div>
+                                                <div class="flex gap-1">
+                                                    <form
+                                                        action="{{ route('teams.accept', [$pending->pivot->team_id, $pending->id]) }}"
+                                                        method="POST">
+                                                        @csrf
+                                                        <button type="submit"
+                                                            class="p-1.5 bg-green-600 hover:bg-green-500 text-white rounded transition"
+                                                            title="Aceptar">
+                                                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24"
+                                                                stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                                    stroke-width="2" d="M5 13l4 4L19 7" />
+                                                            </svg>
+                                                        </button>
+                                                    </form>
+                                                    <form
+                                                        action="{{ route('teams.reject', [$pending->pivot->team_id, $pending->id]) }}"
+                                                        method="POST">
+                                                        @csrf
+                                                        <button type="submit"
+                                                            class="p-1.5 bg-red-600 hover:bg-red-500 text-white rounded transition"
+                                                            title="Rechazar">
+                                                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24"
+                                                                stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                                    stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                            </svg>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
                                         </li>
                                     @endforeach
                                 </ul>
@@ -93,7 +127,7 @@
                     <x-slot name="trigger">
                         <button
                             class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
-                            <div>{{ Auth::user()->name }}</div>
+                            <div>{{ Auth::check() ? Auth::user()->name : 'Invitado' }}</div>
 
                             <div class="ms-1">
                                 <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg"
@@ -163,7 +197,8 @@
         <!-- Responsive Settings Options -->
         <div class="pt-4 pb-1 border-t border-gray-200 dark:border-gray-600">
             <div class="px-4">
-                <div class="font-medium text-base text-gray-800 dark:text-gray-200">{{ Auth::user()->name }}</div>
+                <div class="font-medium text-base text-gray-800 dark:text-gray-200">
+                    {{ Auth::check() ? Auth::user()->name : 'Invitado' }}</div>
                 <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>
             </div>
 
