@@ -1,4 +1,4 @@
-<nav x-data="{ open: false }" class="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
+<nav x-data="{ open: false, notificationsOpen: false }" class="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
@@ -50,11 +50,44 @@
             <!-- Settings Dropdown -->
             <div class="hidden sm:flex sm:items-center sm:ms-6">
                 <!-- Notification Bell -->
-                <a href="#" class="relative text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-gray-100 me-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V4a2 2 0 10-4 0v1.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                    </svg>
-                </a>
+                <div class="relative">
+                    <button @click="notificationsOpen = !notificationsOpen"
+                        class="relative text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-gray-100 me-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V4a2 2 0 10-4 0v1.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                        </svg>
+                        @if ($pendingMembers->count() > 0)
+                            <span
+                                class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-600 ring-2 ring-white"></span>
+                        @endif
+                    </button>
+
+                    <!-- Notifications Dropdown -->
+                    <div x-show="notificationsOpen" @click.away="notificationsOpen = false"
+                        class="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden z-20">
+                        <div class="py-2">
+                            @if ($pendingMembers->count() > 0)
+                                <p class="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 font-bold">Notificaciones
+                                </p>
+                                <ul>
+                                    @foreach ($pendingMembers as $pending)
+                                        <li
+                                            class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer">
+                                            <a href="{{ route('teams.show', $pending->pivot->team_id) }}"
+                                                class="block text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">
+                                                {{ $pending->name }} - {{ $pending->pivot->role }}
+                                            </a>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            @else
+                                <p class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400">No hay notificaciones</p>
+                            @endif
+                        </div>
+                    </div>
+                </div>
 
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
