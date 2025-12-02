@@ -8,6 +8,7 @@ use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\StaffProfileController;
 use App\Http\Controllers\StudentProfileController;
+use App\Http\Controllers\JudgeController;
 use App\Models\Event;
 
 Route::get('/', function () {
@@ -59,7 +60,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('staff', StaffProfileController::class);
     Route::resource('students', StudentProfileController::class);
     // Rutas para gestión de jueces (admin)
-    Route::resource('judges', App\Http\Controllers\JudgeController::class);
+    Route::resource('judges', JudgeController::class);
   });
 });
 

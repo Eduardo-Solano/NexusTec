@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Route;
 use App\Http\ViewComposers\NotificationComposer;
 use App\Models\User;
+use Carbon\Carbon;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -23,10 +24,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Configurar Carbon en español
+        Carbon::setLocale('es');
+
         // Registrar el View Composer para notificaciones
         View::composer('*', NotificationComposer::class);
 
-        // Binding personalizado para rutas de students
-        Route::model('student', User::class);
     }
 }
