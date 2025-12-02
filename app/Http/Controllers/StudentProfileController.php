@@ -99,7 +99,6 @@ class StudentProfileController extends Controller
             'career_id' => 'required|exists:careers,id',
             'semester' => 'required|integer|min:1|max:12',
             'phone' => 'nullable|string|max:20',
-            'password' => ['nullable', 'string', 'min:8', 'confirmed'],
         ]);
 
         DB::transaction(function () use ($request, $student) {
@@ -111,9 +110,9 @@ class StudentProfileController extends Controller
                 'is_active' => $request->has('is_active'),
             ];
 
-            // Solo actualizar contraseña si se proporcionó
-            if ($request->filled('password')) {
-                $userData['password'] = Hash::make($request->password);
+            // Restablecer contraseña si se solicitó
+            if ($request->has('reset_password')) {
+                $userData['password'] = Hash::make('password');
             }
 
             $student->update($userData);

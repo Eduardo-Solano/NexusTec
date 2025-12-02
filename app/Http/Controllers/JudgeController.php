@@ -74,4 +74,53 @@ class JudgeController extends Controller
         $judge->delete();
         return back()->with('success', 'Juez eliminado.');
     }
+
+    /**
+     * Show the form for editing the specified judge.
+     */
+    public function edit(User $judge)
+    {
+        $judge->load('judgeProfile.specialty');
+        $specialties = Specialty::all();
+        return view('judges.edit', compact('judge', 'specialties'));
+    }
+
+    /**
+     * Update the specified judge in storage.
+     */
+    public function update(Request $request, User $judge)
+    {
+        $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $judge->id],
+            'phone' => ['nullable', 'string', 'max:20'],
+            'company' => ['nullable', 'string', 'max:255'],
+            'specialty_id' => ['nullable', 'exists:specialties,id'],
+        ]);
+
+        DB::transaction(function () use ($request, $judge) {
+            // 1. Actualizar Usuario
+            $userData = [
+                'name' => $request->name,
+                'email' => $request->email,
+                'phone' => $request->phone,
+                'is_active' => $request->has('is_active'),
+            ];
+
+            // Restablecer contraseña si se solicitó
+            if ($request->has('reset_password')) {
+                $userData['password'] = Hash::make('password');
+            }
+
+            $judge->update($userData);
+
+            // 2. Actualizar Perfil de Juez
+            $judge->judgeProfile->update([
+                'specialty_id' => $request->specialty_id,
+                'company' => $request->company,
+            ]);
+        });
+
+        return redirect()->route('judges.index')->with('success', 'Juez actualizado correctamente.');
+    }
 }

@@ -8,6 +8,7 @@ use App\Models\Event;
 use App\Models\Team;
 use App\Models\User;
 use App\Models\Project;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -24,7 +25,7 @@ class DashboardController extends Controller
                 'active_events' => Event::where('is_active', true)->count(),
                 'total_teams' => Team::count(),
                 'projects_delivered' => Project::count(),
-                'recent_teams' => Team::with('event')->latest()->take(5)->get(),
+                'recent_teams' => Team::with(['event', 'leader', 'members'])->latest()->take(5)->get(),
             ];
 
             // LÓGICA NUEVA: Solicitudes de Asesoría Pendientes
@@ -37,6 +38,28 @@ class DashboardController extends Controller
             $data['my_projects'] = Project::where('advisor_id', $user->id)
                                           ->where('advisor_status', 'accepted')
                                           ->count();
+
+            // Datos para gráficas - Equipos por día (últimos 14 días)
+            $data['teams_by_day'] = Team::selectRaw('DATE(created_at) as date, COUNT(*) as count')
+                ->where('created_at', '>=', now()->subDays(14))
+                ->groupBy('date')
+                ->orderBy('date')
+                ->get();
+
+            // Proyectos por evento
+            $data['projects_by_event'] = Event::withCount('teams')
+                ->orderBy('teams_count', 'desc')
+                ->take(5)
+                ->get();
+
+            // Estudiantes por carrera (top 5)
+            $data['students_by_career'] = DB::table('student_profiles')
+                ->join('careers', 'student_profiles.career_id', '=', 'careers.id')
+                ->select('careers.name', DB::raw('COUNT(*) as count'))
+                ->groupBy('careers.id', 'careers.name')
+                ->orderByDesc('count')
+                ->take(5)
+                ->get();
         } 
         elseif ($user->hasRole('student')) {
             // Lógica para ESTUDIANTE

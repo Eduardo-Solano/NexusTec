@@ -167,51 +167,158 @@
                             </div>
                             <p class="text-3xl font-black text-white">{{ $data['projects_delivered'] }}</p>
                         </div>
+                    </div>
 
-                        @role('admin')
-                            <a href="{{ route('staff.index') }}"
-                                class="group bg-gradient-to-br from-indigo-900 to-blue-900 p-6 rounded-2xl border border-indigo-500/30 shadow-lg hover:shadow-indigo-500/20 transition transform hover:-translate-y-1 relative overflow-hidden">
-                                <div
-                                    class="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-white/10 rounded-full blur-2xl group-hover:bg-white/20 transition">
+                    {{-- Sección de Gráficas --}}
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+                        {{-- Gráfica de Equipos por Día --}}
+                        <div class="bg-gray-800 border border-gray-700 rounded-2xl p-6 shadow-lg">
+                            <div class="flex items-center justify-between mb-6">
+                                <div class="flex items-center gap-3">
+                                    <div class="p-2 bg-blue-500/10 rounded-lg">
+                                        <svg class="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-bold text-white">Equipos Registrados</h3>
+                                        <p class="text-xs text-gray-500">Últimos 14 días</p>
+                                    </div>
                                 </div>
-                                <div class="flex items-center justify-between mb-4">
-                                    <h3 class="text-indigo-200 text-xs font-bold uppercase tracking-wider">Admin Docentes</h3>
-                                    <span
-                                        class="p-2 bg-indigo-500/20 text-white rounded-lg group-hover:bg-indigo-500 transition"><svg
-                                            class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                                        </svg></span>
+                            </div>
+                            <div class="h-48">
+                                <canvas id="teamsChart"></canvas>
+                            </div>
+                        </div>
+
+                        {{-- Gráfica de Estudiantes por Carrera --}}
+                        <div class="bg-gray-800 border border-gray-700 rounded-2xl p-6 shadow-lg">
+                            <div class="flex items-center justify-between mb-6">
+                                <div class="flex items-center gap-3">
+                                    <div class="p-2 bg-purple-500/10 rounded-lg">
+                                        <svg class="w-5 h-5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-bold text-white">Estudiantes por Carrera</h3>
+                                        <p class="text-xs text-gray-500">Top 5 carreras</p>
+                                    </div>
                                 </div>
-                                <div class="flex items-end justify-between">
-                                    <p class="text-3xl font-black text-white">
-                                        {{ \App\Models\User::role(['staff', 'advisor'])->count() }}</p>
-                                    <span class="text-xs text-indigo-300 font-medium group-hover:text-white transition">Gestionar
-                                        &rarr;</span>
+                            </div>
+                            <div class="h-48">
+                                <canvas id="careersChart"></canvas>
+                            </div>
+                        </div>
+
+                        {{-- Gráfica de Equipos por Evento --}}
+                        <div class="bg-gray-800 border border-gray-700 rounded-2xl p-6 shadow-lg lg:col-span-2">
+                            <div class="flex items-center justify-between mb-6">
+                                <div class="flex items-center gap-3">
+                                    <div class="p-2 bg-green-500/10 rounded-lg">
+                                        <svg class="w-5 h-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-bold text-white">Participación por Evento</h3>
+                                        <p class="text-xs text-gray-500">Equipos inscritos en cada evento</p>
+                                    </div>
                                 </div>
-                            </a>
-                        @endrole
+                            </div>
+                            <div class="h-64">
+                                <canvas id="eventsChart"></canvas>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="bg-gray-800 border border-gray-700 rounded-2xl overflow-hidden shadow-lg mt-8">
-                        <div class="p-6 border-b border-gray-700">
-                            <h3 class="font-bold text-white">Equipos Recientes</h3>
+                        <div class="px-6 py-5 border-b border-gray-700 flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="p-2 bg-purple-500/10 rounded-lg">
+                                    <svg class="w-5 h-5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-white">Equipos Registrados Recientemente</h3>
+                                    <p class="text-xs text-gray-500">Últimos equipos inscritos en eventos activos</p>
+                                </div>
+                            </div>
+                            <a href="{{ route('teams.index') }}" class="text-xs text-gray-400 hover:text-white transition flex items-center gap-1">
+                                Ver todos
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                            </a>
                         </div>
-                        <div class="p-6">
-                            <ul class="space-y-4">
-                                @foreach ($data['recent_teams'] as $team)
-                                    <li class="flex justify-between items-center text-sm">
-                                        <div class="flex items-center gap-3">
-                                            <div class="w-2 h-2 rounded-full bg-blue-500"></div>
-                                            <span class="text-white font-medium">{{ $team->name }}</span>
-                                            <span class="text-gray-500 text-xs">en {{ $team->event->name }}</span>
+                        
+                        <div class="divide-y divide-gray-700/50">
+                            @forelse ($data['recent_teams'] as $team)
+                                <div class="px-6 py-4 hover:bg-gray-700/30 transition group">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center gap-4">
+                                            {{-- Avatar del equipo --}}
+                                            <div class="relative">
+                                                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                                                    {{ strtoupper(substr($team->name, 0, 2)) }}
+                                                </div>
+                                                <span class="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-gray-800 rounded-full"></span>
+                                            </div>
+                                            
+                                            {{-- Info del equipo --}}
+                                            <div>
+                                                <div class="flex items-center gap-2">
+                                                    <h4 class="font-bold text-white group-hover:text-purple-400 transition">{{ $team->name }}</h4>
+                                                    <span class="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                                                        {{ $team->members->count() }}/5
+                                                    </span>
+                                                </div>
+                                                <div class="flex items-center gap-2 mt-1">
+                                                    <span class="text-xs text-gray-500">{{ $team->event->name }}</span>
+                                                    <span class="text-gray-600">•</span>
+                                                    <span class="text-xs text-gray-500">Líder: {{ $team->leader->name ?? 'N/A' }}</span>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <a href="{{ route('teams.show', $team) }}"
-                                            class="text-ito-orange hover:text-white font-bold text-xs bg-orange-500/10 px-3 py-1 rounded transition hover:bg-orange-500">Ver</a>
-                                    </li>
-                                @endforeach
-                            </ul>
+                                        
+                                        {{-- Fecha y acciones --}}
+                                        <div class="flex items-center gap-4">
+                                            <div class="text-right hidden sm:block">
+                                                <p class="text-xs text-gray-500">Registrado</p>
+                                                <p class="text-sm text-gray-400 font-mono">{{ $team->created_at->diffForHumans() }}</p>
+                                            </div>
+                                            <a href="{{ route('teams.show', $team) }}" 
+                                                class="p-2.5 bg-gray-700/50 hover:bg-ito-orange text-gray-400 hover:text-white rounded-xl transition group-hover:bg-ito-orange group-hover:text-white">
+                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                                </svg>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            @empty
+                                <div class="px-6 py-12 text-center">
+                                    <div class="inline-flex p-3 rounded-full bg-gray-700/50 mb-3">
+                                        <svg class="w-6 h-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                                        </svg>
+                                    </div>
+                                    <p class="text-gray-500 text-sm">No hay equipos registrados recientemente</p>
+                                </div>
+                            @endforelse
                         </div>
+                        
+                        @if(count($data['recent_teams']) > 0)
+                            <div class="px-6 py-4 bg-gray-900/30 border-t border-gray-700">
+                                <div class="flex items-center justify-between text-xs">
+                                    <span class="text-gray-500">Mostrando {{ count($data['recent_teams']) }} equipos más recientes</span>
+                                    <a href="{{ route('events.index') }}" class="text-ito-orange hover:text-orange-400 font-bold transition">
+                                        Ver todos los eventos →
+                                    </a>
+                                </div>
+                            </div>
+                        @endif
                     </div>
                 @endhasanyrole
 
@@ -314,4 +421,156 @@
 
         </div>
     </div>
+
+    @hasanyrole('admin|staff')
+    @push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Configuración global de Chart.js
+            Chart.defaults.color = '#9CA3AF';
+            Chart.defaults.borderColor = '#374151';
+
+            // Datos para gráfica de equipos por día
+            const teamsData = @json($data['teams_by_day'] ?? []);
+            const dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+            
+            const teamsLabels = teamsData.map(item => {
+                const date = new Date(item.date + 'T00:00:00');
+                return dayNames[date.getDay()] + ' ' + date.getDate();
+            });
+            const teamsCounts = teamsData.map(item => item.count);
+
+            // Gráfica de Equipos por Día (Línea con área)
+            new Chart(document.getElementById('teamsChart'), {
+                type: 'line',
+                data: {
+                    labels: teamsLabels.length ? teamsLabels : ['Sin datos'],
+                    datasets: [{
+                        label: 'Equipos',
+                        data: teamsCounts.length ? teamsCounts : [0],
+                        backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                        borderColor: 'rgba(59, 130, 246, 1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: 'rgba(59, 130, 246, 1)',
+                        pointBorderColor: '#1F2937',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { stepSize: 1 },
+                            grid: { color: 'rgba(55, 65, 81, 0.5)' }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+
+            // Datos para gráfica de estudiantes por carrera
+            const careersData = @json($data['students_by_career'] ?? []);
+            const careersLabels = careersData.map(item => item.name.length > 15 ? item.name.substring(0, 15) + '...' : item.name);
+            const careersCounts = careersData.map(item => item.count);
+
+            // Gráfica de Estudiantes por Carrera (Dona)
+            new Chart(document.getElementById('careersChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: careersLabels.length ? careersLabels : ['Sin datos'],
+                    datasets: [{
+                        data: careersCounts.length ? careersCounts : [1],
+                        backgroundColor: [
+                            'rgba(139, 92, 246, 0.8)',
+                            'rgba(59, 130, 246, 0.8)',
+                            'rgba(16, 185, 129, 0.8)',
+                            'rgba(245, 158, 11, 0.8)',
+                            'rgba(239, 68, 68, 0.8)',
+                        ],
+                        borderColor: '#1F2937',
+                        borderWidth: 3,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                boxWidth: 12,
+                                padding: 15,
+                                font: { size: 11 }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Datos para gráfica de eventos
+            const eventsData = @json($data['projects_by_event'] ?? []);
+            const eventsLabels = eventsData.map(item => item.name.length > 20 ? item.name.substring(0, 20) + '...' : item.name);
+            const eventsCounts = eventsData.map(item => item.teams_count);
+
+            // Gráfica de Participación por Evento (Barras Horizontales)
+            new Chart(document.getElementById('eventsChart'), {
+                type: 'bar',
+                data: {
+                    labels: eventsLabels.length ? eventsLabels : ['Sin eventos'],
+                    datasets: [{
+                        label: 'Equipos inscritos',
+                        data: eventsCounts.length ? eventsCounts : [0],
+                        backgroundColor: [
+                            'rgba(16, 185, 129, 0.8)',
+                            'rgba(59, 130, 246, 0.8)',
+                            'rgba(139, 92, 246, 0.8)',
+                            'rgba(245, 158, 11, 0.8)',
+                            'rgba(239, 68, 68, 0.8)',
+                        ],
+                        borderColor: [
+                            'rgba(16, 185, 129, 1)',
+                            'rgba(59, 130, 246, 1)',
+                            'rgba(139, 92, 246, 1)',
+                            'rgba(245, 158, 11, 1)',
+                            'rgba(239, 68, 68, 1)',
+                        ],
+                        borderWidth: 1,
+                        borderRadius: 6,
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: { stepSize: 1 },
+                            grid: { color: 'rgba(55, 65, 81, 0.5)' }
+                        },
+                        y: {
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+    @endpush
+    @endhasanyrole
 </x-app-layout>
