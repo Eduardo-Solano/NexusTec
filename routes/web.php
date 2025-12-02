@@ -58,6 +58,8 @@ Route::get('/dashboard', function () {
     Route::group(['middleware' => ['role:admin']], function () {
     Route::resource('staff', StaffProfileController::class);
     Route::resource('students', StudentProfileController::class);
+    // Rutas para gestión de jueces (admin)
+    Route::resource('judges', App\Http\Controllers\JudgeController::class);
     });
 });
 

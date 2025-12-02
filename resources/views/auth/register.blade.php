@@ -44,7 +44,7 @@
             </div>
             
             <div>
-                <x-input-label for="phone" :value="__('Teléfono / WhatsApp')" class="text-gray-300" />
+                <x-input-label for="phone" :value="__('Teléfono')" class="text-gray-300" />
                 <x-text-input id="phone" class="block mt-1 w-full bg-gray-900 border-gray-600 text-gray-200 focus:border-orange-500 focus:ring-orange-500 rounded-lg" type="text" name="phone" :value="old('phone')" required />
             </div>
         </div>

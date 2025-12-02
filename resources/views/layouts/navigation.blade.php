@@ -39,6 +39,11 @@
                     {{ __('Alumnos') }}
                 </x-nav-link>
                 </div>
+                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                    <x-nav-link :href="route('judges.index')" :active="request()->routeIs('judges.*')">
+                        {{ __('Jueces') }}
+                    </x-nav-link>
+                </div>
                 @endrole
             </div>
 
@@ -94,6 +99,17 @@
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
+            @role('admin')
+                <x-responsive-nav-link :href="route('staff.index')" :active="request()->routeIs('staff.*')">
+                    {{ __('Docentes') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('students.index')" :active="request()->routeIs('students.*')">
+                    {{ __('Alumnos') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('judges.index')" :active="request()->routeIs('judges.*')">
+                    {{ __('Jueces') }}
+                </x-responsive-nav-link>
+            @endrole
         </div>
 
         <!-- Responsive Settings Options -->
