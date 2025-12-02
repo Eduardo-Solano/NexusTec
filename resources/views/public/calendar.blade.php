@@ -25,7 +25,7 @@
         <div class="bg-white border-b border-gray-200 py-12">
             <div class="max-w-4xl mx-auto px-4 text-center">
                 <h1 class="text-4xl font-black text-tecnm-blue mb-2">Calendario Académico</h1>
-                <p class="text-gray-500 text-lg">Próximos Hackathons, Congresos y Talleres.</p>
+                <p class="text-gray-500 text-lg">Próximos Eventos.</p>
             </div>
         </div>
 
@@ -36,7 +36,7 @@
                     <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-gray-300"></div></div>
                     <div class="relative z-10 bg-gray-50 px-4">
                         <span class="text-lg font-bold text-ito-orange uppercase tracking-widest bg-white border border-gray-200 px-4 py-1 rounded-full shadow-sm">
-                            {{ $month }}
+                            {{ \Carbon\Carbon::parse($month)->locale('es')->translatedFormat('F Y') }}
                         </span>
                     </div>
                 </div>
