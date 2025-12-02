@@ -8,6 +8,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
+use App\Notifications\ResetPasswordNotification;
+
 
 class User extends Authenticatable
 {
@@ -64,5 +66,11 @@ class User extends Authenticatable
 
     public function staffProfile() {
         return $this->hasOne(StaffProfile::class);
+    }
+
+    //notificacion correo
+    public function sendPasswordResetNotification($token)
+    {
+        $this->notify(new ResetPasswordNotification($token));
     }
 }

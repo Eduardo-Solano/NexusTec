@@ -9,7 +9,9 @@ use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+
 
 Route::middleware('guest')->group(function () {
     Route::get('register', [RegisteredUserController::class, 'create'])
@@ -57,3 +59,20 @@ Route::middleware('auth')->group(function () {
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
         ->name('logout');
 });
+
+Route::get('forgot-password/verify', function (Request $request) {
+    return view('auth.verify-token', ['email' => $request->email]);
+})->name('password.verify');
+
+
+// ---------------------------------------------------------------------
+// RUTA 2: Recibe el token y lo manda a cambiar contraseña
+// Esta es la ruta que busca tu formulario HTML: 'password.reset.verify'
+// ---------------------------------------------------------------------
+Route::get('forgot-password/check-token', function (Request $request) {
+    // Redirige pasando el token real que pegaste y el email
+    return redirect()->route('password.reset', [
+        'token' => $request->token, 
+        'email' => $request->email
+    ]);
+})->name('password.reset.verify');
