@@ -68,6 +68,12 @@ class User extends Authenticatable
         return $this->hasOne(StaffProfile::class);
     }
 
+    // Relación con equipos (muchos a muchos)
+    public function teams()
+    {
+        return $this->belongsToMany(Team::class)->withPivot('is_accepted');
+    }
+
     //notificacion correo
     public function sendPasswordResetNotification($token)
     {
