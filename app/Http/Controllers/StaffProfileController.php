@@ -37,12 +37,12 @@ class StaffProfileController extends Controller
      */
     public function store(Request $request)
     {
-        //
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:'.User::class],
             'employee_number' => ['required', 'string', 'unique:staff_profiles'],
             'department' => ['required', 'string'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
 
         DB::transaction(function () use ($request) {
@@ -50,7 +50,7 @@ class StaffProfileController extends Controller
             $user = User::create([
                 'name' => $request->name,
                 'email' => $request->email,
-                'password' => Hash::make('password'), // Contraseña default
+                'password' => Hash::make($request->password),
                 'is_active' => true,
             ]);
 
@@ -65,7 +65,7 @@ class StaffProfileController extends Controller
             ]);
         });
 
-        return redirect()->route('staff.index')->with('success', 'Docente registrado correctamente. Contraseña temporal: "password"');
+        return redirect()->route('staff.index')->with('success', 'Docente registrado correctamente.');
     
     }
 

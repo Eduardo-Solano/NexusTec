@@ -36,12 +36,12 @@ class StudentProfileController extends Controller
      */
     public function store(Request $request)
     {
-        // Validación similar al registro
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users',
-            'control_number' => 'required|unique:users',
-            'career_id' => 'required'
+            'control_number' => 'required|unique:student_profiles',
+            'career_id' => 'required|exists:careers,id',
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
         
         DB::transaction(function () use ($request) {
@@ -49,12 +49,12 @@ class StudentProfileController extends Controller
             $user = User::create([
                 'name' => $request->name,
                 'email' => $request->email,
-                'password' => Hash::make('password'), // Contraseña default
+                'password' => Hash::make($request->password),
                 'is_active' => true,
             ]);
 
-            // 2. Asignar Roles (Staff y Advisor)
-            $user->assignRole(['staff', 'advisor']);
+            // 2. Asignar Roles
+            $user->assignRole(['student']);
 
             // 3. Crear Perfil
             StudentProfile::create([
@@ -64,7 +64,7 @@ class StudentProfileController extends Controller
             ]);
         });
         
-        return redirect()->route('students.index')->with('success', 'Alumno registrado.');
+        return redirect()->route('students.index')->with('success', 'Alumno registrado correctamente.');
     }
 
     /**
