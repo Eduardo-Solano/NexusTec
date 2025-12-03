@@ -1,4 +1,5 @@
-<nav x-data="{ open: false, notificationsOpen: false }" class="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
+<nav x-data="{ open: false, notificationsOpen: false }"
+    class="sticky top-0 z-50 bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
@@ -22,28 +23,28 @@
                     </x-nav-link>
                 </div>
                 @hasanyrole('admin|staff')
-                    <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                        <x-nav-link :href="route('teams.index')" :active="request()->routeIs('teams.*')">
-                            {{ __('Equipos') }}
-                        </x-nav-link>
-                    </div>
+                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                    <x-nav-link :href="route('teams.index')" :active="request()->routeIs('teams.*')">
+                        {{ __('Equipos') }}
+                    </x-nav-link>
+                </div>
                 @endhasanyrole
                 @role('admin')
-                    <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                        <x-nav-link :href="route('staff.index')" :active="request()->routeIs('staff.*')">
-                            {{ __('Docentes') }}
-                        </x-nav-link>
-                    </div>
-                    <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                        <x-nav-link :href="route('students.index')" :active="request()->routeIs('students.*')">
-                            {{ __('Alumnos') }}
-                        </x-nav-link>
-                    </div>
-                    <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                        <x-nav-link :href="route('judges.index')" :active="request()->routeIs('judges.*')">
-                            {{ __('Jueces') }}
-                        </x-nav-link>
-                    </div>
+                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                    <x-nav-link :href="route('staff.index')" :active="request()->routeIs('staff.*')">
+                        {{ __('Docentes') }}
+                    </x-nav-link>
+                </div>
+                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                    <x-nav-link :href="route('students.index')" :active="request()->routeIs('students.*')">
+                        {{ __('Alumnos') }}
+                    </x-nav-link>
+                </div>
+                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                    <x-nav-link :href="route('judges.index')" :active="request()->routeIs('judges.*')">
+                        {{ __('Jueces') }}
+                    </x-nav-link>
+                </div>
                 @endrole
             </div>
 
@@ -115,8 +116,7 @@
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
 
-                            <x-dropdown-link :href="route('logout')"
-                                onclick="event.preventDefault();
+                            <x-dropdown-link :href="route('logout')" onclick="event.preventDefault();
                                                 this.closest('form').submit();">
                                 {{ __('Log Out') }}
                             </x-dropdown-link>
@@ -148,15 +148,15 @@
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
             @role('admin')
-                <x-responsive-nav-link :href="route('staff.index')" :active="request()->routeIs('staff.*')">
-                    {{ __('Docentes') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('students.index')" :active="request()->routeIs('students.*')">
-                    {{ __('Alumnos') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('judges.index')" :active="request()->routeIs('judges.*')">
-                    {{ __('Jueces') }}
-                </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('staff.index')" :active="request()->routeIs('staff.*')">
+                {{ __('Docentes') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('students.index')" :active="request()->routeIs('students.*')">
+                {{ __('Alumnos') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('judges.index')" :active="request()->routeIs('judges.*')">
+                {{ __('Jueces') }}
+            </x-responsive-nav-link>
             @endrole
         </div>
 
@@ -176,8 +176,7 @@
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
 
-                    <x-responsive-nav-link :href="route('logout')"
-                        onclick="event.preventDefault();
+                    <x-responsive-nav-link :href="route('logout')" onclick="event.preventDefault();
                                         this.closest('form').submit();">
                         {{ __('Log Out') }}
                     </x-responsive-nav-link>
