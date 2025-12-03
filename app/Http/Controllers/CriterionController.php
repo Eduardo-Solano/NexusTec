@@ -12,7 +12,11 @@ class CriterionController extends Controller
      */
     public function index()
     {
-        //
+        $criteria = Criterion::withCount('events')
+            ->orderBy('name')
+            ->paginate(15);
+
+        return view('criteria.index', compact('criteria'));
     }
 
     /**
@@ -20,7 +24,7 @@ class CriterionController extends Controller
      */
     public function create()
     {
-        //
+        return view('criteria.create');
     }
 
     /**
@@ -28,7 +32,15 @@ class CriterionController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'name' => 'required|string|max:255|unique:criteria,name',
+            'max_points' => 'required|integer|min:1|max:100',
+        ]);
+
+        Criterion::create($validated);
+
+        return redirect()->route('criteria.index')
+            ->with('success', 'Criterio creado exitosamente.');
     }
 
     /**
@@ -36,7 +48,7 @@ class CriterionController extends Controller
      */
     public function show(Criterion $criterion)
     {
-        //
+        return view('criteria.show', compact('criterion'));
     }
 
     /**
@@ -44,7 +56,7 @@ class CriterionController extends Controller
      */
     public function edit(Criterion $criterion)
     {
-        //
+        return view('criteria.edit', compact('criterion'));
     }
 
     /**
@@ -52,7 +64,15 @@ class CriterionController extends Controller
      */
     public function update(Request $request, Criterion $criterion)
     {
-        //
+        $validated = $request->validate([
+            'name' => 'required|string|max:255|unique:criteria,name,' . $criterion->id,
+            'max_points' => 'required|integer|min:1|max:100',
+        ]);
+
+        $criterion->update($validated);
+
+        return redirect()->route('criteria.index')
+            ->with('success', 'Criterio actualizado exitosamente.');
     }
 
     /**
@@ -60,6 +80,16 @@ class CriterionController extends Controller
      */
     public function destroy(Criterion $criterion)
     {
-        //
+        // Verificar si tiene evaluaciones asociadas
+        if ($criterion->evaluations()->exists()) {
+            return redirect()->route('criteria.index')
+                ->with('error', 'No se puede eliminar el criterio porque tiene evaluaciones asociadas.');
+        }
+
+        $criterion->events()->detach();
+        $criterion->delete();
+
+        return redirect()->route('criteria.index')
+            ->with('success', 'Criterio eliminado exitosamente.');
     }
 }

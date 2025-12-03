@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\User;
 use App\Models\Career;
 use App\Models\Event;
+use \App\Models\Criterion;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -16,6 +17,11 @@ class DatabaseSeeder extends Seeder
         $this->call([
             RoleSeeder::class,
         ]);
+
+        // CREAR CRITERIOS (Si no los tenías en una variable, defínelos aquí)
+        $critInnovacion = Criterion::firstOrCreate(['name' => 'Innovación', 'max_points' => 30]);
+        $critTecnico = Criterion::firstOrCreate(['name' => 'Complejidad Técnica', 'max_points' => 40]);
+        $critNegocio = Criterion::firstOrCreate(['name' => 'Modelo de Negocio', 'max_points' => 30]);
 
         // 2. Crear Carreras (Catálogo real del Tec)
         $carreras = [
@@ -53,7 +59,7 @@ class DatabaseSeeder extends Seeder
         $admin = User::create([
             'name' => 'Admin NexusTec',
             'email' => 'admin@nexustec.com',
-            'password' => Hash::make('password'), // Contraseña fácil para desarrollo
+            'password' => Hash::make('admin123'), // Contraseña fácil para desarrollo
             'is_active' => true,
         ]);
         $admin->assignRole('admin');
@@ -74,12 +80,21 @@ class DatabaseSeeder extends Seeder
 
         // 5. Crear Datos Masivos (Factories)
         // Crea 1 Evento con 5 Equipos
-        Event::factory()
+        $evento = Event::factory()
             ->hasTeams(5) 
             ->create([
                 'name' => 'HackTec 2025',
-                'is_active' => true
+                'is_active' => true,
+                'start_date' => now(),
+                'end_date' => now()->addDays(3),
             ]);
+
+        // === ASIGNACIÓN DE CRITERIOS AL EVENTO ===
+        $evento->criteria()->attach([
+            $critInnovacion->id, 
+            $critTecnico->id, 
+            $critNegocio->id
+        ]);
             
         User::factory(20)->create()->each(function ($user) {
             $user->assignRole('student');

@@ -77,6 +77,27 @@
                             <x-input-error :messages="$errors->get('members')" class="mt-4" />
                         </div>
 
+                        <div class="mt-8 pt-6 border-t border-gray-700">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                                    <svg class="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                                    Asesor Académico
+                                </h3>
+                                <span class="text-[10px] font-bold text-gray-400 bg-gray-800 px-2 py-1 rounded border border-gray-600">REQUERIDO</span>
+                            </div>
+
+                            <div class="relative group">
+                                <select name="advisor_id" required style="color-scheme: dark;"
+                                        class="block w-full pl-4 pr-10 py-3 bg-gray-900 border border-gray-600 text-white rounded-xl focus:border-ito-orange focus:ring-ito-orange appearance-none cursor-pointer">
+                                    <option value="" disabled selected>Selecciona un Docente...</option>
+                                    @foreach(\App\Models\User::role(['advisor', 'staff'])->get() as $advisor)
+                                        <option value="{{ $advisor->id }}">
+                                            {{ $advisor->name }} ({{ $advisor->staffProfile->department ?? 'Docente' }})
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
                         <div class="flex items-center justify-end gap-4 pt-6 border-t border-gray-700">
                             <a href="{{ route('events.show', $event) }}" class="px-4 py-2 text-sm font-medium text-gray-400 hover:text-white transition">
                                 Cancelar

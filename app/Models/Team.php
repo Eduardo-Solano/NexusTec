@@ -10,7 +10,10 @@ class Team extends Model
     /** @use HasFactory<\Database\Factories\TeamFactory> */
     use HasFactory;
 
-    protected $fillable = ['name', 'event_id', 'leader_id'];
+    protected $fillable = [
+        'name', 'event_id', 'leader_id', 
+        'advisor_id', 'advisor_status'
+    ];
 
     // El evento al que pertenece
     public function event() {
@@ -32,5 +35,11 @@ class Team extends Model
     // Un equipo tiene UN proyecto
     public function project() {
         return $this->hasOne(Project::class);
+    }
+
+    // Relación con el Asesor
+    public function advisor()
+    {
+        return $this->belongsTo(User::class, 'advisor_id');
     }
 }
