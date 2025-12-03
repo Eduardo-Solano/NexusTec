@@ -65,9 +65,11 @@ class NotificationComposer
             // 5. Notificaciones de BD (premios, invitaciones)
             // =================================================
             $unreadNotifications = $user->unreadNotifications()
+                ->where('type', '!=', 'App\Notifications\AwardNotification') // <-- Oculta premios
                 ->latest()
                 ->take(10)
                 ->get();
+
         }
 
         // Pasar datos a la vista

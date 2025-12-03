@@ -10,15 +10,27 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use App\Notifications\TeamInvitationNotification;
+use App\Notifications\TeamJoinRequestNotification;
 
 class TeamController extends Controller
 {
     /**
      * Crear equipo
      */
+    public function index()
+    {
+        // Mostrar todos los equipos para todos los usuarios
+        $teams = Team::with(['event', 'members', 'leader', 'advisor'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+
+        return view('teams.index', compact('teams'));
+    }
+
+
+
     public function store(Request $request)
     {
-        // Validación base
         $request->validate([
             'name' => 'required|string|max:50',
             'event_id' => 'required|exists:events,id',
@@ -29,19 +41,16 @@ class TeamController extends Controller
             'advisor_id' => 'required|exists:users,id',
         ]);
 
-        // Validación personalizada de correos
-        $memberEmails = array_filter($request->members ?? []);
+        // Validar correos
         $correosInvalidos = [];
-
-        foreach ($memberEmails as $email) {
+        foreach (array_filter($request->members ?? []) as $email) {
             if (!User::where('email', $email)->exists()) {
                 $correosInvalidos[] = $email;
             }
         }
-
-        if (!empty($correosInvalidos)) {
+        if ($correosInvalidos) {
             throw ValidationException::withMessages([
-                'members' => 'Los siguientes correos no existen: ' . implode(', ', $correosInvalidos)
+                'members' => 'Correos no válidos: ' . implode(', ', $correosInvalidos)
             ]);
         }
 
@@ -49,16 +58,16 @@ class TeamController extends Controller
 
             $event = Event::findOrFail($request->event_id);
 
-            // Verificar si el usuario YA está inscrito en un equipo del evento
-            $existingEntry = DB::table('team_user')
+            // Verificar si ya pertenece a un equipo del evento
+            $exists = DB::table('team_user')
                 ->join('teams', 'team_user.team_id', '=', 'teams.id')
                 ->where('teams.event_id', $event->id)
                 ->where('team_user.user_id', Auth::id())
                 ->exists();
 
-            if ($existingEntry) {
+            if ($exists) {
                 throw ValidationException::withMessages([
-                    'event_id' => 'Ya estás registrado en un equipo de este evento.'
+                    'event_id' => 'Ya estás en un equipo de este evento.'
                 ]);
             }
 
@@ -71,39 +80,31 @@ class TeamController extends Controller
                 'advisor_status' => 'pending'
             ]);
 
-            // Agregar líder
+            // LÍDER
             $team->members()->attach(Auth::id(), [
                 'is_accepted' => true,
                 'requested_by_user' => false,
                 'role' => $request->leader_role
             ]);
 
-            // Procesar miembros invitados
-            $memberEmails = $request->members ?? [];
-            $memberRoles = $request->member_roles ?? [];
-
-            foreach ($memberEmails as $index => $email) {
-
-                if (empty($email))
+            // MIEMBROS INVITADOS
+            foreach (($request->members ?? []) as $index => $email) {
+                if (!$email)
                     continue;
 
                 $user = User::where('email', $email)->first();
-
-                if (!$user)
-                    continue;
-                if ($user->id == Auth::id())
+                if (!$user || $user->id === Auth::id())
                     continue;
 
-                $role = $memberRoles[$index] ?? 'Miembro';
+                $role = $request->member_roles[$index] ?? 'Miembro';
 
-                // INVITACIÓN (no solicitud)
                 $team->members()->attach($user->id, [
                     'is_accepted' => false,
-                    'requested_by_user' => false, // ← Aquí marcamos que fue el líder quien lo invitó
+                    'requested_by_user' => false,
                     'role' => $role
                 ]);
 
-                // Enviar notificación
+                // Notificación de invitación
                 $user->notify(new TeamInvitationNotification($team));
             }
 
@@ -112,106 +113,88 @@ class TeamController extends Controller
         });
     }
 
+    /**
+     * Mostrar equipo
+     */
+    public function show(Team $team)
+    {
+        $team->load(['event', 'members', 'leader', 'advisor', 'project']);
+        $event = $team->event;
+        return view('teams.show', compact('team', 'event'));
+    }
+
     public function create(Request $request)
     {
-        $eventId = $request->input('event_id');
-
-        if (!$eventId || !is_numeric($eventId)) {
-            abort(404, 'El evento no existe o no es válido.');
-        }
-
-        $event = Event::find($eventId);
-
-        if (!$event) {
-            abort(404, 'Evento no encontrado.');
-        }
-
+        $event = Event::find($request->event_id);
+        abort_unless($event, 404);
         return view('teams.create', compact('event'));
     }
 
     /**
-     * Método para aceptar invitación
+     * Enviar solicitud para UNIRSE a un equipo
      */
-    public function acceptInvitation(Team $team, $notificationId = null)
+    public function requestJoin(Request $request, Team $team)
     {
         $user = Auth::user();
 
-        // Marcar notificación como leída
-        if ($notificationId) {
-            $user->notifications()->where('id', $notificationId)->update(['read_at' => now()]);
+        $request->validate([
+            'role' => 'required|string'
+        ]);
+
+        // Verificar si ya existe relación
+        $existing = $team->members()->where('user_id', $user->id)->first();
+        if ($existing) {
+            if ($existing->pivot->is_accepted)
+                return back()->with('error', 'Ya estás en este equipo.');
+
+            if ($existing->pivot->requested_by_user)
+                return back()->with('error', 'Ya enviaste una solicitud.');
+
+            return back()->with('error', 'Tienes una invitación pendiente.');
         }
 
-        // Confirmar que existe invitación
-        $exists = $team->members()
-            ->wherePivot('user_id', $user->id)
-            ->wherePivot('requested_by_user', false)
-            ->wherePivot('is_accepted', false)
-            ->exists();
+        // Crear solicitud
+        $team->members()->attach($user->id, [
+            'is_accepted' => false,
+            'requested_by_user' => true,
+            'role' => $request->role
+        ]);
 
-        if (!$exists) {
-            return back()->with('error', 'No tienes una invitación pendiente.');
+        // Notificar líder
+        $team->leader->notify(new TeamJoinRequestNotification($team, $user));
+
+        return back()->with('success', 'Solicitud enviada.');
+    }
+
+    /**
+     * Aceptar solicitud o invitación (LÍDER o invitado)
+     */
+    public function accept(Team $team, User $user, Request $request)
+    {
+        if ($request->notification) {
+            Auth::user()->notifications()->where('id', $request->notification)->update(['read_at' => now()]);
         }
 
-        // Aceptar
         $team->members()->updateExistingPivot($user->id, [
             'is_accepted' => true
         ]);
 
-        return back()->with('success', 'Has aceptado la invitación.');
+        return back()->with('success', 'Miembro aceptado.');
     }
 
+
     /**
-     * Método para rechazar invitación
+     * Rechazar solicitud o invitación
      */
-    public function rejectInvitation(Team $team, $notificationId = null)
+    public function reject(Team $team, User $user, Request $request)
     {
-        $user = Auth::user();
-
-        // Marcar notificación como leída
-        if ($notificationId) {
-            $user->notifications()->where('id', $notificationId)->update(['read_at' => now()]);
+        if ($request->notification) {
+            Auth::user()->notifications()->where('id', $request->notification)->update(['read_at' => now()]);
         }
 
-        // Confirmar que existe invitación
-        $exists = $team->members()
-            ->wherePivot('user_id', $user->id)
-            ->wherePivot('requested_by_user', false)
-            ->wherePivot('is_accepted', false)
-            ->exists();
-
-        if (!$exists) {
-            return back()->with('error', 'No tienes una invitación pendiente.');
-        }
-
-        // Rechazar (eliminar la invitación)
         $team->members()->detach($user->id);
 
-        return back()->with('success', 'Has rechazado la invitación.');
+        return back()->with('success', 'Solicitud rechazada.');
     }
 
-
-    /**
-     * (OPCIONAL) Método para solicitar unirse a un equipo
-     * Si NO lo tenías, podés pegarlo.
-     */
-    public function requestJoin(Team $team)
-    {
-        $user = Auth::user();
-
-        // Verificar si ya existe relación
-        if ($team->members()->where('user_id', $user->id)->exists()) {
-            return back()->with('error', 'Ya existe una relación con este equipo.');
-        }
-
-        // SOLICITUD (no invitación)
-        $team->members()->attach($user->id, [
-            'is_accepted' => false,
-            'requested_by_user' => true  // ← El usuario pidió unirse
-        ]);
-
-        // Notificar al líder
-        $team->leader->notify(new \App\Notifications\TeamJoinRequestNotification($team, $user));
-
-        return back()->with('success', 'Solicitud enviada.');
-    }
 }

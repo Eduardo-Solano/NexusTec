@@ -122,6 +122,64 @@
                         </div>
 
                         <div class="max-h-80 overflow-y-auto">
+                            {{-- SOLICITUDES DE UNIÓN A EQUIPO --}}
+                            @foreach ($unreadNotifications as $notification)
+                                @if (isset($notification->data['type']) && $notification->data['type'] === 'join_request')
+                                    <div
+                                        class="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 border-b border-gray-100 dark:border-gray-700 transition">
+                                        <div class="flex items-start gap-3">
+
+                                            {{-- Icono --}}
+                                            <div class="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
+                                                <svg class="w-4 h-4 text-orange-600 dark:text-orange-400" fill="none"
+                                                    viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                                </svg>
+                                            </div>
+
+                                            {{-- Contenido --}}
+                                            <div class="flex-1 min-w-0">
+                                                <p class="text-sm font-semibold text-gray-800 dark:text-white">
+                                                    {{ $notification->data['message'] }}
+                                                </p>
+
+                                                <p class="text-[10px] text-gray-500 dark:text-gray-400">
+                                                    Rol solicitado: {{ $notification->data['role'] ?? 'Miembro' }}
+                                                </p>
+
+                                                <div class="flex gap-2 mt-3">
+
+                                                    {{-- Aceptar --}}
+                                                    <form action="{{ $notification->data['accept_url'] }}"
+                                                        method="POST">
+                                                        @csrf
+                                                        <button type="submit"
+                                                            class="px-3 py-1.5 text-xs font-bold bg-green-600 hover:bg-green-500 text-white rounded-lg transition">
+                                                            Aceptar
+                                                        </button>
+                                                    </form>
+
+                                                    {{-- Rechazar --}}
+                                                    <form action="{{ $notification->data['reject_url'] }}"
+                                                        method="POST">
+                                                        @csrf
+                                                        <button type="submit"
+                                                            class="px-3 py-1.5 text-xs font-bold bg-red-600 hover:bg-red-500 text-white rounded-lg transition">
+                                                            Rechazar
+                                                        </button>
+                                                    </form>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    @php continue; @endphp
+                                @endif
+                            @endforeach
+
                             @if ($totalNotifications > 0)
                                 {{-- Solicitudes de Asesoría Pendientes --}}
                                 @if ($pendingAdvisories->count() > 0)
@@ -306,20 +364,28 @@
                                                             <form action="{{ $notification->data['accept_url'] }}"
                                                                 method="POST">
                                                                 @csrf
+                                                                <input type="hidden" name="notification"
+                                                                    value="{{ $notification->id }}">
+
                                                                 <button type="submit"
                                                                     class="px-3 py-1 text-xs font-bold bg-green-600 hover:bg-green-500 text-white rounded-lg transition">
                                                                     Aceptar
                                                                 </button>
                                                             </form>
 
+
                                                             <form action="{{ $notification->data['reject_url'] }}"
                                                                 method="POST">
                                                                 @csrf
+                                                                <input type="hidden" name="notification"
+                                                                    value="{{ $notification->id }}">
+
                                                                 <button type="submit"
                                                                     class="px-3 py-1 text-xs font-bold bg-red-600 hover:bg-red-500 text-white rounded-lg transition">
                                                                     Rechazar
                                                                 </button>
                                                             </form>
+
 
                                                         </div>
                                                     </div>
