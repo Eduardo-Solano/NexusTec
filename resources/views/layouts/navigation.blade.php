@@ -1,4 +1,5 @@
-<nav x-data="{ open: false, notificationsOpen: false }" class="sticky top-0 z-40 bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
+<nav x-data="{ open: false, notificationsOpen: false }"
+    class="sticky top-0 z-40 bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
@@ -63,7 +64,11 @@
                 <!-- Notification Bell -->
                 <div class="relative">
                     @php
-                        $totalNotifications = ($pendingMembers->count() ?? 0) + ($pendingAdvisories->count() ?? 0) + ($pendingEvaluations->count() ?? 0) + ($unreadNotifications->count() ?? 0);
+                        $totalNotifications =
+                            ($pendingMembers->count() ?? 0) +
+                            ($pendingAdvisories->count() ?? 0) +
+                            ($pendingEvaluations->count() ?? 0) +
+                            ($unreadNotifications->count() ?? 0);
                     @endphp
                     <button @click="notificationsOpen = !notificationsOpen"
                         class="relative text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-gray-100 me-4">
@@ -89,22 +94,26 @@
                         x-transition:leave-start="transform opacity-100 scale-100"
                         x-transition:leave-end="transform opacity-0 scale-95"
                         class="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-xl shadow-xl overflow-hidden z-50 border border-gray-200 dark:border-gray-700">
-                        
+
                         {{-- Header --}}
-                        <div class="px-4 py-3 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+                        <div
+                            class="px-4 py-3 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
                             <div class="flex items-center justify-between">
                                 <h3 class="text-sm font-bold text-gray-800 dark:text-white">Notificaciones</h3>
                                 <div class="flex items-center gap-2">
-                                    @if($unreadNotifications->count() > 0)
-                                        <form action="{{ route('notifications.markAllAsRead') }}" method="POST" class="inline">
+                                    @if ($unreadNotifications->count() > 0)
+                                        <form action="{{ route('notifications.markAllAsRead') }}" method="POST"
+                                            class="inline">
                                             @csrf
-                                            <button type="submit" class="text-xs text-blue-600 dark:text-blue-400 hover:underline">
+                                            <button type="submit"
+                                                class="text-xs text-blue-600 dark:text-blue-400 hover:underline">
                                                 Marcar leídas
                                             </button>
                                         </form>
                                     @endif
-                                    @if($totalNotifications > 0)
-                                        <span class="px-2 py-0.5 text-xs font-bold bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-full">
+                                    @if ($totalNotifications > 0)
+                                        <span
+                                            class="px-2 py-0.5 text-xs font-bold bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-full">
                                             {{ $totalNotifications }}
                                         </span>
                                     @endif
@@ -113,38 +122,113 @@
                         </div>
 
                         <div class="max-h-80 overflow-y-auto">
+                            {{-- SOLICITUDES DE UNIÓN A EQUIPO --}}
+                            @foreach ($unreadNotifications as $notification)
+                                @if (isset($notification->data['type']) && $notification->data['type'] === 'join_request')
+                                    <div
+                                        class="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 border-b border-gray-100 dark:border-gray-700 transition">
+                                        <div class="flex items-start gap-3">
+
+                                            {{-- Icono --}}
+                                            <div class="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
+                                                <svg class="w-4 h-4 text-orange-600 dark:text-orange-400" fill="none"
+                                                    viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                                </svg>
+                                            </div>
+
+                                            {{-- Contenido --}}
+                                            <div class="flex-1 min-w-0">
+                                                <p class="text-sm font-semibold text-gray-800 dark:text-white">
+                                                    {{ $notification->data['message'] }}
+                                                </p>
+
+                                                <p class="text-[10px] text-gray-500 dark:text-gray-400">
+                                                    Rol solicitado: {{ $notification->data['role'] ?? 'Miembro' }}
+                                                </p>
+
+                                                <div class="flex gap-2 mt-3">
+
+                                                    {{-- Aceptar --}}
+                                                    <form action="{{ $notification->data['accept_url'] }}"
+                                                        method="POST">
+                                                        @csrf
+                                                        <button type="submit"
+                                                            class="px-3 py-1.5 text-xs font-bold bg-green-600 hover:bg-green-500 text-white rounded-lg transition">
+                                                            Aceptar
+                                                        </button>
+                                                    </form>
+
+                                                    {{-- Rechazar --}}
+                                                    <form action="{{ $notification->data['reject_url'] }}"
+                                                        method="POST">
+                                                        @csrf
+                                                        <button type="submit"
+                                                            class="px-3 py-1.5 text-xs font-bold bg-red-600 hover:bg-red-500 text-white rounded-lg transition">
+                                                            Rechazar
+                                                        </button>
+                                                    </form>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    @php continue; @endphp
+                                @endif
+                            @endforeach
+
                             @if ($totalNotifications > 0)
                                 {{-- Solicitudes de Asesoría Pendientes --}}
                                 @if ($pendingAdvisories->count() > 0)
-                                    <div class="px-4 py-2 bg-indigo-50 dark:bg-indigo-900/20 border-b border-indigo-100 dark:border-indigo-800">
-                                        <p class="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider flex items-center gap-1">
-                                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                                    <div
+                                        class="px-4 py-2 bg-indigo-50 dark:bg-indigo-900/20 border-b border-indigo-100 dark:border-indigo-800">
+                                        <p
+                                            class="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider flex items-center gap-1">
+                                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24"
+                                                stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                                             </svg>
                                             Solicitudes de Asesoría
                                         </p>
                                     </div>
                                     @foreach ($pendingAdvisories as $advisory)
-                                        <div class="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 border-b border-gray-100 dark:border-gray-700 transition">
+                                        <div
+                                            class="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 border-b border-gray-100 dark:border-gray-700 transition">
                                             <div class="flex items-start gap-3">
                                                 <div class="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
-                                                    <svg class="w-4 h-4 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                    <svg class="w-4 h-4 text-indigo-600 dark:text-indigo-400"
+                                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
                                                     </svg>
                                                 </div>
                                                 <div class="flex-1 min-w-0">
-                                                    <p class="text-sm font-semibold text-gray-800 dark:text-white truncate">{{ $advisory->name }}</p>
-                                                    <p class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ $advisory->event->name ?? 'Sin evento' }}</p>
+                                                    <p
+                                                        class="text-sm font-semibold text-gray-800 dark:text-white truncate">
+                                                        {{ $advisory->name }}</p>
+                                                    <p class="text-xs text-gray-500 dark:text-gray-400 truncate">
+                                                        {{ $advisory->event->name ?? 'Sin evento' }}</p>
                                                     <div class="flex gap-2 mt-2">
-                                                        <form action="{{ route('teams.advisor.response', ['team' => $advisory, 'status' => 'accepted']) }}" method="POST">
+                                                        <form
+                                                            action="{{ route('teams.advisor.response', ['team' => $advisory, 'status' => 'accepted']) }}"
+                                                            method="POST">
                                                             @csrf @method('PATCH')
-                                                            <button type="submit" class="px-2.5 py-1 text-xs font-bold bg-green-600 hover:bg-green-500 text-white rounded-lg transition">
+                                                            <button type="submit"
+                                                                class="px-2.5 py-1 text-xs font-bold bg-green-600 hover:bg-green-500 text-white rounded-lg transition">
                                                                 Aceptar
                                                             </button>
                                                         </form>
-                                                        <form action="{{ route('teams.advisor.response', ['team' => $advisory, 'status' => 'rejected']) }}" method="POST">
+                                                        <form
+                                                            action="{{ route('teams.advisor.response', ['team' => $advisory, 'status' => 'rejected']) }}"
+                                                            method="POST">
                                                             @csrf @method('PATCH')
-                                                            <button type="submit" class="px-2.5 py-1 text-xs font-bold bg-red-600 hover:bg-red-500 text-white rounded-lg transition">
+                                                            <button type="submit"
+                                                                class="px-2.5 py-1 text-xs font-bold bg-red-600 hover:bg-red-500 text-white rounded-lg transition">
                                                                 Rechazar
                                                             </button>
                                                         </form>
@@ -157,10 +241,14 @@
 
                                 {{-- Miembros Pendientes de Aceptación --}}
                                 @if ($pendingMembers->count() > 0)
-                                    <div class="px-4 py-2 bg-orange-50 dark:bg-orange-900/20 border-b border-orange-100 dark:border-orange-800">
-                                        <p class="text-xs font-bold text-orange-600 dark:text-orange-400 uppercase tracking-wider flex items-center gap-1">
-                                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+                                    <div
+                                        class="px-4 py-2 bg-orange-50 dark:bg-orange-900/20 border-b border-orange-100 dark:border-orange-800">
+                                        <p
+                                            class="text-xs font-bold text-orange-600 dark:text-orange-400 uppercase tracking-wider flex items-center gap-1">
+                                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24"
+                                                stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                                             </svg>
                                             Solicitudes de Unión
                                         </p>
@@ -170,16 +258,24 @@
                                             class="block px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 border-b border-gray-100 dark:border-gray-700 transition">
                                             <div class="flex items-center gap-3">
                                                 <div class="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
-                                                    <svg class="w-4 h-4 text-orange-600 dark:text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                                    <svg class="w-4 h-4 text-orange-600 dark:text-orange-400"
+                                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                                     </svg>
                                                 </div>
                                                 <div class="flex-1 min-w-0">
-                                                    <p class="text-sm font-semibold text-gray-800 dark:text-white truncate">{{ $pending->name }}</p>
-                                                    <p class="text-xs text-gray-500 dark:text-gray-400">Quiere unirse • {{ $pending->pivot->role ?? 'Miembro' }}</p>
+                                                    <p
+                                                        class="text-sm font-semibold text-gray-800 dark:text-white truncate">
+                                                        {{ $pending->name }}</p>
+                                                    <p class="text-xs text-gray-500 dark:text-gray-400">Quiere unirse •
+                                                        {{ $pending->pivot->role ?? 'Miembro' }}</p>
                                                 </div>
-                                                <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                                <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24"
+                                                    stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2" d="M9 5l7 7-7 7" />
                                                 </svg>
                                             </div>
                                         </a>
@@ -188,28 +284,39 @@
 
                                 {{-- Proyectos Asignados para Evaluar (Jueces) --}}
                                 @if ($pendingEvaluations->count() > 0)
-                                    <div class="px-4 py-2 bg-amber-50 dark:bg-amber-900/20 border-b border-amber-100 dark:border-amber-800">
-                                        <p class="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider flex items-center gap-1">
-                                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
+                                    <div
+                                        class="px-4 py-2 bg-amber-50 dark:bg-amber-900/20 border-b border-amber-100 dark:border-amber-800">
+                                        <p
+                                            class="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider flex items-center gap-1">
+                                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24"
+                                                stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
                                             </svg>
                                             Proyectos por Evaluar
                                         </p>
                                     </div>
                                     @foreach ($pendingEvaluations as $project)
-                                        <div class="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 border-b border-gray-100 dark:border-gray-700 transition">
+                                        <div
+                                            class="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 border-b border-gray-100 dark:border-gray-700 transition">
                                             <div class="flex items-center gap-3">
                                                 <div class="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg">
-                                                    <svg class="w-4 h-4 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                                                    <svg class="w-4 h-4 text-amber-600 dark:text-amber-400"
+                                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
                                                     </svg>
                                                 </div>
                                                 <div class="flex-1 min-w-0">
-                                                    <p class="text-sm font-semibold text-gray-800 dark:text-white truncate">{{ $project->name }}</p>
-                                                    <p class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ $project->team->name ?? 'Sin equipo' }}</p>
+                                                    <p
+                                                        class="text-sm font-semibold text-gray-800 dark:text-white truncate">
+                                                        {{ $project->name }}</p>
+                                                    <p class="text-xs text-gray-500 dark:text-gray-400 truncate">
+                                                        {{ $project->team->name ?? 'Sin equipo' }}</p>
                                                 </div>
-                                                <a href="{{ route('projects.show', $project) }}" 
-                                                   class="px-3 py-1.5 text-xs font-bold bg-amber-600 hover:bg-amber-500 text-white rounded-lg text-center transition">
+                                                <a href="{{ route('projects.show', $project) }}"
+                                                    class="px-3 py-1.5 text-xs font-bold bg-amber-600 hover:bg-amber-500 text-white rounded-lg text-center transition">
                                                     Ver
                                                 </a>
                                             </div>
@@ -219,15 +326,76 @@
 
                                 {{-- Notificaciones de Premios Ganados --}}
                                 @if ($unreadNotifications->count() > 0)
-                                    <div class="px-4 py-2 bg-yellow-50 dark:bg-yellow-900/20 border-b border-yellow-100 dark:border-yellow-800">
-                                        <p class="text-xs font-bold text-yellow-600 dark:text-yellow-400 uppercase tracking-wider flex items-center gap-1">
-                                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+                                    <div
+                                        class="px-4 py-2 bg-yellow-50 dark:bg-yellow-900/20 border-b border-yellow-100 dark:border-yellow-800">
+                                        <p
+                                            class="text-xs font-bold text-yellow-600 dark:text-yellow-400 uppercase tracking-wider flex items-center gap-1">
+                                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24"
+                                                stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
                                             </svg>
                                             ¡Premios Ganados!
                                         </p>
                                     </div>
                                     @foreach ($unreadNotifications as $notification)
+                                        {{-- Invitaciones a Equipos --}}
+                                        @if (isset($notification->data['team_id']) && isset($notification->data['accept_url']))
+                                            <div
+                                                class="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 border-b border-gray-100 dark:border-gray-700 transition">
+                                                <div class="flex items-start gap-3">
+
+                                                    <div class="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                                                        <svg class="w-4 h-4 text-blue-600 dark:text-blue-400"
+                                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2"
+                                                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                                        </svg>
+                                                    </div>
+
+                                                    <div class="flex-1 min-w-0">
+                                                        <p class="text-sm font-semibold text-gray-800 dark:text-white">
+                                                            {{ $notification->data['message'] }}
+                                                        </p>
+
+                                                        <div class="flex gap-2 mt-2">
+
+                                                            <form action="{{ $notification->data['accept_url'] }}"
+                                                                method="POST">
+                                                                @csrf
+                                                                <input type="hidden" name="notification"
+                                                                    value="{{ $notification->id }}">
+
+                                                                <button type="submit"
+                                                                    class="px-3 py-1 text-xs font-bold bg-green-600 hover:bg-green-500 text-white rounded-lg transition">
+                                                                    Aceptar
+                                                                </button>
+                                                            </form>
+
+
+                                                            <form action="{{ $notification->data['reject_url'] }}"
+                                                                method="POST">
+                                                                @csrf
+                                                                <input type="hidden" name="notification"
+                                                                    value="{{ $notification->id }}">
+
+                                                                <button type="submit"
+                                                                    class="px-3 py-1 text-xs font-bold bg-red-600 hover:bg-red-500 text-white rounded-lg transition">
+                                                                    Rechazar
+                                                                </button>
+                                                            </form>
+
+
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {{-- IMPORTANTE: No seguimos procesando esta notificación como premio --}}
+                                            @continue
+                                        @endif
+
                                         @php
                                             $medals = [
                                                 '1er Lugar' => '🥇',
@@ -243,8 +411,8 @@
                                             $medal = $medals[$category] ?? '🏆';
                                         @endphp
                                         <a href="{{ route('public.event-winners', $notification->data['event_id'] ?? 0) }}"
-                                           onclick="fetch('{{ route('notifications.markAsRead', $notification->id) }}', {method: 'POST', headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'}})"
-                                           class="block px-4 py-3 hover:bg-yellow-50 dark:hover:bg-yellow-900/10 border-b border-gray-100 dark:border-gray-700 transition bg-yellow-50/50 dark:bg-yellow-900/5">
+                                            onclick="fetch('{{ route('notifications.markAsRead', $notification->id) }}', {method: 'POST', headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'}})"
+                                            class="block px-4 py-3 hover:bg-yellow-50 dark:hover:bg-yellow-900/10 border-b border-gray-100 dark:border-gray-700 transition bg-yellow-50/50 dark:bg-yellow-900/5">
                                             <div class="flex items-center gap-3">
                                                 <div class="text-3xl">{{ $medal }}</div>
                                                 <div class="flex-1 min-w-0">
@@ -252,14 +420,17 @@
                                                         {{ $notification->data['award_category'] ?? 'Premio' }}
                                                     </p>
                                                     <p class="text-xs text-gray-500 dark:text-gray-400 truncate">
-                                                        {{ $notification->data['team_name'] ?? 'Tu equipo' }} • {{ $notification->data['event_name'] ?? '' }}
+                                                        {{ $notification->data['team_name'] ?? 'Tu equipo' }} •
+                                                        {{ $notification->data['event_name'] ?? '' }}
                                                     </p>
                                                     <p class="text-xs text-yellow-600 dark:text-yellow-400 mt-0.5">
                                                         {{ $notification->created_at->diffForHumans() }}
                                                     </p>
                                                 </div>
-                                                <svg class="w-4 h-4 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                                <svg class="w-4 h-4 text-yellow-500" fill="none"
+                                                    viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2" d="M9 5l7 7-7 7" />
                                                 </svg>
                                             </div>
                                         </a>
@@ -268,8 +439,10 @@
                             @else
                                 <div class="px-4 py-8 text-center">
                                     <div class="inline-flex p-3 bg-gray-100 dark:bg-gray-700 rounded-full mb-3">
-                                        <svg class="w-6 h-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V4a2 2 0 10-4 0v1.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                                        <svg class="w-6 h-6 text-gray-400" fill="none" viewBox="0 0 24 24"
+                                            stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V4a2 2 0 10-4 0v1.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                                         </svg>
                                     </div>
                                     <p class="text-sm text-gray-500 dark:text-gray-400">No hay notificaciones</p>

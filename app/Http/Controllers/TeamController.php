@@ -2,302 +2,199 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Event;
 use App\Models\Team;
+use App\Models\Event;
 use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use App\Notifications\TeamInvitationNotification;
+use App\Notifications\TeamJoinRequestNotification;
 
 class TeamController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Crear equipo
      */
     public function index()
     {
-        // Admin/Staff ven todos los equipos
-        if (Auth::user()->can('teams.view')) {
-            $teams = Team::with(['event', 'leader'])
-                ->orderBy('created_at', 'desc')
-                ->paginate(12);
-        } else {
-            // Estudiantes solo ven equipos donde son miembros
-            $teams = Team::with(['event', 'leader'])
-                ->whereHas('members', function($q) {
-                    $q->where('user_id', Auth::id());
-                })
-                ->orderBy('created_at', 'desc')
-                ->paginate(12);
-        }
+        // Mostrar todos los equipos para todos los usuarios
+        $teams = Team::with(['event', 'members', 'leader', 'advisor'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
 
         return view('teams.index', compact('teams'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create(Request $request)
-    {
-        // 1. Validar ID del evento
-        if (! $request->has('event_id')) {
-            return redirect()->route('events.index')->with('error', 'Falta el evento.');
-        }
-        
-        $event = Event::findOrFail($request->query('event_id'));
 
-        // 2. Validar si está activo
-        if (! $event->is_active) {
-            return redirect()->route('events.show', $event)->with('error', 'Evento cerrado.');
-        }
 
-        // --- 3. NUEVA VALIDACIÓN DE INTEGRIDAD ---
-        // Verificar si el usuario YA pertenece a un equipo en este evento
-        $alreadyInTeam = $event->teams()->whereHas('members', function($q) {
-            $q->where('user_id', Auth::id());
-        })->exists();
-
-        if ($alreadyInTeam) {
-            // Si ya tiene equipo, lo pateamos fuera con error
-            return redirect()->route('events.show', $event)
-                ->with('error', 'Error: Ya estás registrado en un equipo para este evento.');
-        }
-
-        // ¡ESTA LÍNEA ES CRUCIAL!
-        return view('teams.create', compact('event'));
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        // 1. Validación Actualizada
         $request->validate([
             'name' => 'required|string|max:50',
             'event_id' => 'required|exists:events,id',
-            'leader_role' => 'required|string', // Nuevo: Rol del líder
+            'leader_role' => 'required|string',
             'members' => 'array|max:4',
-            'member_roles' => 'array', // Nuevo: Roles de los miembros
+            'member_roles' => 'array',
             'members.*' => 'nullable|email|distinct',
-            'advisor_id' => 'required|exists:users,id', // Nuevo: Asesor
+            'advisor_id' => 'required|exists:users,id',
         ]);
 
+        // Validar correos
+        $correosInvalidos = [];
+        foreach (array_filter($request->members ?? []) as $email) {
+            if (!User::where('email', $email)->exists()) {
+                $correosInvalidos[] = $email;
+            }
+        }
+        if ($correosInvalidos) {
+            throw ValidationException::withMessages([
+                'members' => 'Correos no válidos: ' . implode(', ', $correosInvalidos)
+            ]);
+        }
+
         return DB::transaction(function () use ($request) {
+
             $event = Event::findOrFail($request->event_id);
 
-            // Regla de Negocio: ¿El usuario ya es líder o miembro de otro equipo en este evento?
-            // (Esta consulta verifica si el ID del usuario ya está en la tabla pivote para este evento)
-            $existingEntry = DB::table('team_user')
+            // Verificar si ya pertenece a un equipo del evento
+            $exists = DB::table('team_user')
                 ->join('teams', 'team_user.team_id', '=', 'teams.id')
                 ->where('teams.event_id', $event->id)
                 ->where('team_user.user_id', Auth::id())
                 ->exists();
 
-            if ($existingEntry) {
+            if ($exists) {
                 throw ValidationException::withMessages([
-                    'event_id' => 'Ya estás registrado en un equipo para este evento.'
+                    'event_id' => 'Ya estás en un equipo de este evento.'
                 ]);
             }
 
-            // Crear Equipo
+            // Crear equipo
             $team = Team::create([
                 'name' => $request->name,
                 'event_id' => $event->id,
                 'leader_id' => Auth::id(),
-                'advisor_id' => $request->advisor_id, // <--- GUARDAMOS AQUÍ
+                'advisor_id' => $request->advisor_id,
                 'advisor_status' => 'pending'
             ]);
 
-            // Guardar al LIDER con su Rol
+            // LÍDER
             $team->members()->attach(Auth::id(), [
                 'is_accepted' => true,
-                'role' => $request->leader_role // <--- AQUÍ SE GUARDA
+                'requested_by_user' => false,
+                'role' => $request->leader_role
             ]);
 
-            // Procesar Miembros
-            $memberEmails = $request->members ?? [];
-            $memberRoles = $request->member_roles ?? [];
-
-            foreach ($memberEmails as $index => $email) {
-                if (empty($email)) continue;
+            // MIEMBROS INVITADOS
+            foreach (($request->members ?? []) as $index => $email) {
+                if (!$email)
+                    continue;
 
                 $user = User::where('email', $email)->first();
-                if (!$user) {
-                    throw ValidationException::withMessages(['members' => "El correo $email no existe."]);
-                }
+                if (!$user || $user->id === Auth::id())
+                    continue;
 
-                if ($user->id === Auth::id()) continue;
+                $role = $request->member_roles[$index] ?? 'Miembro';
 
-                // Guardar Miembro con su Rol correspondiente (por índice)
-                $role = $memberRoles[$index] ?? 'Colaborador'; // Default
-                
                 $team->members()->attach($user->id, [
-                    'is_accepted' => true,
-                    'role' => $role // <--- AQUÍ SE GUARDA
+                    'is_accepted' => false,
+                    'requested_by_user' => false,
+                    'role' => $role
                 ]);
+
+                // Notificación de invitación
+                $user->notify(new TeamInvitationNotification($team));
             }
 
-            return redirect()->route('events.show', $event)->with('success', 'Equipo registrado con roles.');
+            return redirect()->route('events.show', $event)
+                ->with('success', 'Equipo creado exitosamente.');
         });
     }
 
     /**
-     * Display the specified resource.
+     * Mostrar equipo
      */
     public function show(Team $team)
     {
-        // Cargar relaciones necesarias para la vista
-        $team->load(['members', 'event', 'project', 'leader', 'advisor']);
-        
-        return view('teams.show', compact('team'));
+        $team->load(['event', 'members', 'leader', 'advisor', 'project']);
+        $event = $team->event;
+        return view('teams.show', compact('team', 'event'));
+    }
+
+    public function create(Request $request)
+    {
+        $event = Event::find($request->event_id);
+        abort_unless($event, 404);
+        return view('teams.create', compact('event'));
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Enviar solicitud para UNIRSE a un equipo
      */
-    public function edit(Team $team)
+    public function requestJoin(Request $request, Team $team)
     {
-        // Admin/Staff pueden editar cualquier equipo, el líder puede editar su equipo
-        $isLeader = Auth::id() === $team->leader_id;
-        
-        if (!Auth::user()->can('teams.edit') && !$isLeader) {
-            abort(403);
-        }
+        $user = Auth::user();
 
-        $events = Event::orderBy('name')->get();
-        return view('teams.edit', compact('team', 'events', 'isLeader'));
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Team $team)
-    {
-        // Admin/Staff pueden actualizar cualquier equipo, el líder puede actualizar su equipo
-        $isLeader = Auth::id() === $team->leader_id;
-        
-        if (!Auth::user()->can('teams.edit') && !$isLeader) {
-            abort(403);
-        }
-
-        // El líder solo puede cambiar nombre y líder, no el evento
-        if ($isLeader && !Auth::user()->can('teams.edit')) {
-            $validated = $request->validate([
-                'name' => 'required|string|max:255',
-                'leader_id' => 'required|exists:users,id',
-            ]);
-        } else {
-            $validated = $request->validate([
-                'name' => 'required|string|max:255',
-                'event_id' => 'required|exists:events,id',
-                'leader_id' => 'required|exists:users,id',
-            ]);
-        }
-
-        // Verificar que el líder sea un miembro del equipo
-        if (!$team->members()->where('user_id', $validated['leader_id'])->exists()) {
-            return back()->withErrors(['leader_id' => 'El líder seleccionado debe ser miembro del equipo.']);
-        }
-
-        $team->update($validated);
-
-        return redirect()->route('teams.show', $team)->with('success', 'Equipo actualizado correctamente.');
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Team $team)
-    {
-        // Seguridad: Solo admin o el líder pueden borrar
-        if (!Auth::user()->hasRole('admin') && Auth::id() !== $team->leader_id) {
-            abort(403);
-        }
-        $team->delete(); // El cascadeOnDelete de la BD borrará miembros y proyectos
-        return back()->with('success', 'Equipo eliminado correctamente.');
-    }
-
-    public function join(Team $team, Request $request)
-    {
         $request->validate([
             'role' => 'required|string'
         ]);
-        
-        // 0. Validar si el equipo ya entregó proyecto (no se pueden unir más miembros)
-        if ($team->project) {
-            return back()->with('error', 'Este equipo ya entregó su proyecto. No se pueden agregar más integrantes.');
-        }
-        
-        // 1. Validar si el equipo ya está lleno (Max 5)
-        if ($team->members()->count() >= 5) {
-            return back()->with('error', 'Este equipo ya está lleno.');
-        }
 
-        // 2. Validar si el usuario YA está inscrito en ESTE evento (en cualquier equipo)
-        $alreadyRegistered = DB::table('team_user')
-            ->join('teams', 'team_user.team_id', '=', 'teams.id')
-            ->where('teams.event_id', $team->event_id)
-            ->where('team_user.user_id', Auth::id())
-            ->exists();
+        // Verificar si ya existe relación
+        $existing = $team->members()->where('user_id', $user->id)->first();
+        if ($existing) {
+            if ($existing->pivot->is_accepted)
+                return back()->with('error', 'Ya estás en este equipo.');
 
-        if ($alreadyRegistered) {
-            return back()->with('error', 'Ya perteneces a un equipo en este evento.');
+            if ($existing->pivot->requested_by_user)
+                return back()->with('error', 'Ya enviaste una solicitud.');
+
+            return back()->with('error', 'Tienes una invitación pendiente.');
         }
 
-        // 3. Unir al usuario
-        // 'is_accepted' => true para que entre directo. 
-        // Si quisieras aprobación del líder, pondrías false.
-        $team->members()->attach(Auth::id(), [
+        // Crear solicitud
+        $team->members()->attach($user->id, [
             'is_accepted' => false,
-            'role' => $request->role // <--- Guardamos el rol elegido
+            'requested_by_user' => true,
+            'role' => $request->role
         ]);
 
-        return back()->with('success', 'Solicitud enviada. Espera a que el líder te acepte.');
+        // Notificar líder
+        $team->leader->notify(new TeamJoinRequestNotification($team, $user));
+
+        return back()->with('success', 'Solicitud enviada.');
     }
 
-    public function acceptMember(Team $team, User $user)
+    /**
+     * Aceptar solicitud o invitación (LÍDER o invitado)
+     */
+    public function accept(Team $team, User $user, Request $request)
     {
-        // Seguridad: Solo el líder puede aceptar
-        if (Auth::id() !== $team->leader_id) {
-            abort(403, 'No eres el líder de este equipo.');
+        if ($request->notification) {
+            Auth::user()->notifications()->where('id', $request->notification)->update(['read_at' => now()]);
         }
 
-        // Actualizar pivote
-        $team->members()->updateExistingPivot($user->id, ['is_accepted' => true]);
+        $team->members()->updateExistingPivot($user->id, [
+            'is_accepted' => true
+        ]);
 
-        return back()->with('success', 'Miembro aceptado en el equipo.');
+        return back()->with('success', 'Miembro aceptado.');
     }
 
-    public function rejectMember(Team $team, User $user)
+
+    /**
+     * Rechazar solicitud o invitación
+     */
+    public function reject(Team $team, User $user, Request $request)
     {
-        // Seguridad: Solo el líder puede rechazar
-        if (Auth::id() !== $team->leader_id) {
-            abort(403);
+        if ($request->notification) {
+            Auth::user()->notifications()->where('id', $request->notification)->update(['read_at' => now()]);
         }
 
-        // Borrar relación (pivote)
         $team->members()->detach($user->id);
 
         return back()->with('success', 'Solicitud rechazada.');
     }
 
-    public function respondAdvisory(Request $request, Team $team, $status)
-    {
-        if (Auth::id() !== $team->advisor_id) abort(403);
-        
-        // Validar que el status sea válido
-        if (!in_array($status, ['accepted', 'rejected', 'pending'])) {
-            return back()->with('error', 'Estado de asesoría no válido.');
-        }
-        
-        $team->update(['advisor_status' => $status]);
-        
-        $message = $status === 'accepted' 
-            ? '¡Has aceptado ser asesor de este equipo!' 
-            : 'Has rechazado la solicitud de asesoría.';
-            
-        return back()->with('success', $message);
-    }
 }
