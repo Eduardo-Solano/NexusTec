@@ -79,6 +79,12 @@
                                 Ver Calendario
                             </a>
                         </div>
+                        <div class="mt-3 sm:mt-0 sm:ml-3">
+                            <a href="{{ route('public.winners') }}"
+                                class="w-full flex items-center justify-center px-8 py-3 border border-white/30 text-base font-medium rounded-md text-white hover:bg-white/10 md:py-4 md:text-lg md:px-10 transition hover:scale-105">
+                                🏆 Ganadores
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>

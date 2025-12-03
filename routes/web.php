@@ -12,6 +12,7 @@ use App\Http\Controllers\JudgeController;
 use App\Http\Controllers\EvaluationController;
 use App\Http\Controllers\CriterionController;
 use App\Http\Controllers\AwardController;
+use App\Http\Controllers\PublicController;
 use App\Models\Event;
 
 Route::get('/', function () {
@@ -35,6 +36,10 @@ Route::get('/calendar', function () {
 
   return view('public.calendar', compact('events'));
 })->name('public.calendar');
+
+// Rutas públicas de ganadores
+Route::get('/winners', [PublicController::class, 'winners'])->name('public.winners');
+Route::get('/winners/{event}', [PublicController::class, 'eventWinners'])->name('public.event-winners');
 
 Route::middleware('auth')->group(function () {
 

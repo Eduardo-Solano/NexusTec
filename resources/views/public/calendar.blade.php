@@ -15,9 +15,14 @@
                         <img src="{{ asset('img/logo-ito.png') }}" class="h-8 w-auto bg-white rounded-full p-0.5" alt="Logo">
                         NexusTec
                     </a>
-                    <a href="{{ route('login') }}" class="text-sm font-medium text-white hover:text-ito-orange transition">
-                        Iniciar Sesión &rarr;
-                    </a>
+                    <div class="flex items-center gap-4">
+                        <a href="{{ route('public.winners') }}" class="text-sm font-medium text-white/80 hover:text-ito-orange transition">
+                            🏆 Ganadores
+                        </a>
+                        <a href="{{ route('login') }}" class="text-sm font-medium text-white hover:text-ito-orange transition">
+                            Iniciar Sesión &rarr;
+                        </a>
+                    </div>
                 </div>
             </div>
         </nav>

@@ -13,6 +13,16 @@
                 </p>
             </div>
             <div class="flex items-center gap-3">
+                @if(!$event->is_active)
+                    <a href="{{ route('public.event-winners', $event) }}" 
+                       target="_blank"
+                       class="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-lg transition">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                        </svg>
+                        Vista Pública
+                    </a>
+                @endif
                 <a href="{{ route('events.rankings', $event) }}" 
                    class="inline-flex items-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-500 text-white rounded-lg transition">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
