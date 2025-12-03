@@ -149,10 +149,9 @@ class TeamController extends Controller
     public function show(Team $team)
     {
         // Cargar relaciones necesarias para la vista
-        $team->load(['members', 'event', 'project', 'leader']);
+        $team->load(['members', 'event', 'project', 'leader', 'advisor']);
         
         return view('teams.show', compact('team'));
-        
     }
 
     /**
@@ -225,6 +224,12 @@ class TeamController extends Controller
         $request->validate([
             'role' => 'required|string'
         ]);
+        
+        // 0. Validar si el equipo ya entregó proyecto (no se pueden unir más miembros)
+        if ($team->project) {
+            return back()->with('error', 'Este equipo ya entregó su proyecto. No se pueden agregar más integrantes.');
+        }
+        
         // 1. Validar si el equipo ya está lleno (Max 5)
         if ($team->members()->count() >= 5) {
             return back()->with('error', 'Este equipo ya está lleno.');
@@ -282,7 +287,17 @@ class TeamController extends Controller
     {
         if (Auth::id() !== $team->advisor_id) abort(403);
         
+        // Validar que el status sea válido
+        if (!in_array($status, ['accepted', 'rejected', 'pending'])) {
+            return back()->with('error', 'Estado de asesoría no válido.');
+        }
+        
         $team->update(['advisor_status' => $status]);
-        return back()->with('success', 'Solicitud de asesoría actualizada.');
+        
+        $message = $status === 'accepted' 
+            ? '¡Has aceptado ser asesor de este equipo!' 
+            : 'Has rechazado la solicitud de asesoría.';
+            
+        return back()->with('success', $message);
     }
 }

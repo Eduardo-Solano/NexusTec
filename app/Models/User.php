@@ -79,4 +79,18 @@ class User extends Authenticatable
     {
         $this->notify(new ResetPasswordNotification($token));
     }
+
+    // Proyectos asignados para evaluar (como juez)
+    public function assignedProjects()
+    {
+        return $this->belongsToMany(Project::class, 'judge_project', 'judge_id', 'project_id')
+            ->withPivot('assigned_at', 'is_completed')
+            ->withTimestamps();
+    }
+
+    // Evaluaciones realizadas (como juez)
+    public function evaluations()
+    {
+        return $this->hasMany(Evaluation::class, 'judge_id');
+    }
 }

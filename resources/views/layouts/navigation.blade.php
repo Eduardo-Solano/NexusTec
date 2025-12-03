@@ -63,7 +63,7 @@
                 <!-- Notification Bell -->
                 <div class="relative">
                     @php
-                        $totalNotifications = ($pendingMembers->count() ?? 0) + ($pendingAdvisories->count() ?? 0);
+                        $totalNotifications = ($pendingMembers->count() ?? 0) + ($pendingAdvisories->count() ?? 0) + ($pendingEvaluations->count() ?? 0);
                     @endphp
                     <button @click="notificationsOpen = !notificationsOpen"
                         class="relative text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-gray-100 me-4">
@@ -173,6 +173,37 @@
                                                 </svg>
                                             </div>
                                         </a>
+                                    @endforeach
+                                @endif
+
+                                {{-- Proyectos Asignados para Evaluar (Jueces) --}}
+                                @if ($pendingEvaluations->count() > 0)
+                                    <div class="px-4 py-2 bg-amber-50 dark:bg-amber-900/20 border-b border-amber-100 dark:border-amber-800">
+                                        <p class="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider flex items-center gap-1">
+                                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
+                                            </svg>
+                                            Proyectos por Evaluar
+                                        </p>
+                                    </div>
+                                    @foreach ($pendingEvaluations as $project)
+                                        <div class="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 border-b border-gray-100 dark:border-gray-700 transition">
+                                            <div class="flex items-center gap-3">
+                                                <div class="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg">
+                                                    <svg class="w-4 h-4 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                                                    </svg>
+                                                </div>
+                                                <div class="flex-1 min-w-0">
+                                                    <p class="text-sm font-semibold text-gray-800 dark:text-white truncate">{{ $project->name }}</p>
+                                                    <p class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ $project->team->name ?? 'Sin equipo' }}</p>
+                                                </div>
+                                                <a href="{{ route('projects.show', $project) }}" 
+                                                   class="px-3 py-1.5 text-xs font-bold bg-amber-600 hover:bg-amber-500 text-white rounded-lg text-center transition">
+                                                    Ver
+                                                </a>
+                                            </div>
+                                        </div>
                                     @endforeach
                                 @endif
                             @else

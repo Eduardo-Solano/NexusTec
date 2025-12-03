@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Project;
 use App\Models\Team;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -51,8 +52,7 @@ class ProjectController extends Controller
             'team_id' => 'required|exists:teams,id',
             'name' => 'required|string|max:100',
             'description' => 'required|string|max:1000',
-            'repository_url' => 'required|url', // Validamos que sea un link real
-            'advisor_id' => 'required|exists:users,id',
+            'repository_url' => 'required|url',
         ]);
 
         $team = Team::findOrFail($request->team_id);
@@ -76,16 +76,9 @@ class ProjectController extends Controller
             'team_id' => $team->id,
         ]);
 
-        // Actualizar el equipo con el asesor seleccionado
-        $team->update([
-            'advisor_id' => $request->advisor_id,
-            'advisor_status' => 'pending',
-        ]);
-
         // Redirigir al evento con éxito
         return redirect()->route('events.show', $team->event_id)
-            ->with('success', '¡Proyecto entregado exitosamente! Se ha enviado la solicitud de asesoría. 🚀');
-    
+            ->with('success', '¡Proyecto entregado exitosamente! 🚀');
     }
 
     /**
@@ -93,10 +86,20 @@ class ProjectController extends Controller
      */
     public function show(Project $project)
     {
-        // Cargar relaciones para mostrar info del equipo
-        $project->load('team.members', 'team.leader');
+        // Cargar relaciones para mostrar info del equipo, asesor y jueces asignados
+        $project->load(['team.members', 'team.leader', 'team.event', 'team.advisor', 'judges.judgeProfile', 'evaluations']);
         
-        return view('projects.show', compact('project'));
+        // Obtener jueces disponibles para asignar (que no estén ya asignados a este proyecto)
+        $availableJudges = [];
+        if (Auth::user() && Auth::user()->can('projects.edit')) {
+            $assignedJudgeIds = $project->judges->pluck('id')->toArray();
+            $availableJudges = User::role('judge')
+                ->whereNotIn('id', $assignedJudgeIds)
+                ->with('judgeProfile.specialty')
+                ->get();
+        }
+        
+        return view('projects.show', compact('project', 'availableJudges'));
     }
 
     /**
@@ -121,5 +124,61 @@ class ProjectController extends Controller
     public function destroy(Project $project)
     {
         //
+    }
+
+    /**
+     * Asignar un juez a un proyecto
+     */
+    public function assignJudge(Request $request, Project $project)
+    {
+        // Verificar permisos
+        if (!Auth::user()->can('projects.edit')) {
+            abort(403);
+        }
+
+        $request->validate([
+            'judge_id' => 'required|exists:users,id'
+        ]);
+
+        // Verificar que el usuario sea juez
+        $judge = User::findOrFail($request->judge_id);
+        if (!$judge->hasRole('judge')) {
+            return back()->with('error', 'El usuario seleccionado no es un juez.');
+        }
+
+        // Verificar que no esté ya asignado
+        if ($project->judges()->where('judge_id', $judge->id)->exists()) {
+            return back()->with('error', 'Este juez ya está asignado al proyecto.');
+        }
+
+        // Asignar juez
+        $project->judges()->attach($judge->id, [
+            'assigned_at' => now(),
+            'is_completed' => false
+        ]);
+
+        return back()->with('success', "Juez {$judge->name} asignado correctamente.");
+    }
+
+    /**
+     * Remover un juez de un proyecto
+     */
+    public function removeJudge(Project $project, User $judge)
+    {
+        // Verificar permisos
+        if (!Auth::user()->can('projects.edit')) {
+            abort(403);
+        }
+
+        // Verificar si ya evaluó (no permitir remover si ya hay evaluaciones)
+        $hasEvaluations = $project->evaluations()->where('judge_id', $judge->id)->exists();
+        if ($hasEvaluations) {
+            return back()->with('error', 'No se puede remover un juez que ya ha evaluado el proyecto.');
+        }
+
+        // Remover asignación
+        $project->judges()->detach($judge->id);
+
+        return back()->with('success', "Juez {$judge->name} removido del proyecto.");
     }
 }

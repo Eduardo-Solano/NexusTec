@@ -34,6 +34,71 @@
                         </div>
                     </div>
 
+                    {{-- Sección del Asesor --}}
+                    <div class="bg-gray-800 border border-gray-700 rounded-2xl p-6 shadow-lg">
+                        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Asesor Asignado</h3>
+                        
+                        @if($team->advisor)
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="w-12 h-12 rounded-full flex items-center justify-center font-bold text-sm bg-purple-600 text-white shadow-lg shadow-purple-500/30">
+                                    {{ substr($team->advisor->name, 0, 1) }}
+                                </div>
+                                <div>
+                                    <p class="text-white font-bold text-sm">{{ $team->advisor->name }}</p>
+                                    <p class="text-xs text-gray-500">{{ $team->advisor->email }}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                @if($team->advisor_status === 'accepted')
+                                    <span class="inline-flex items-center gap-1 text-xs bg-green-500/20 text-green-400 px-3 py-1 rounded-full border border-green-500/30">
+                                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                        Aceptado
+                                    </span>
+                                @elseif($team->advisor_status === 'rejected')
+                                    <span class="inline-flex items-center gap-1 text-xs bg-red-500/20 text-red-400 px-3 py-1 rounded-full border border-red-500/30">
+                                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                                        Rechazado
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center gap-1 text-xs bg-yellow-500/20 text-yellow-400 px-3 py-1 rounded-full border border-yellow-500/30">
+                                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg>
+                                        Pendiente
+                                    </span>
+                                @endif
+                            </div>
+                            
+                            {{-- Botones para que el asesor responda --}}
+                            @if(auth()->id() === $team->advisor_id && $team->advisor_status === 'pending')
+                                <div class="mt-4 flex gap-2">
+                                    <form action="{{ route('teams.advisor.response', [$team, 'accepted']) }}" method="POST" class="flex-1">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button type="submit" class="w-full py-2 bg-green-600 hover:bg-green-700 text-white text-xs font-bold uppercase rounded-lg transition">
+                                            Aceptar
+                                        </button>
+                                    </form>
+                                    <form action="{{ route('teams.advisor.response', [$team, 'rejected']) }}" method="POST" class="flex-1">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button type="submit" class="w-full py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold uppercase rounded-lg transition">
+                                            Rechazar
+                                        </button>
+                                    </form>
+                                </div>
+                            @endif
+                        @else
+                            <div class="flex items-center gap-3">
+                                <div class="p-2 bg-gray-700/50 text-gray-400 rounded-lg border border-gray-600">
+                                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                                </div>
+                                <div>
+                                    <p class="text-gray-400 font-bold text-sm">Sin asesor</p>
+                                    <p class="text-xs text-gray-500">No se ha asignado un asesor</p>
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+
                     <div class="bg-gray-800 border border-gray-700 rounded-2xl p-6 shadow-lg">
                         <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Estado del Proyecto</h3>
                         

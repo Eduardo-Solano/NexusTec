@@ -82,18 +82,30 @@ class EventController extends Controller
     public function show(Event $event)
     {
        // Cargamos los equipos
-        $event->load(['teams.leader', 'teams.members']);
+        $event->load(['teams.leader', 'teams.members', 'teams.project']);
         
         $userHasTeam = false;
+        $myTeam = null;
+        $teamToAdvise = null;
         
-        // CORRECCIÓN AQUÍ: Usamos Auth::check() y Auth::id()
         if (Auth::check()) {
-            $userHasTeam = $event->teams()->whereHas('members', function($query) {
-                $query->where('user_id', Auth::id());
-            })->exists();
+            // Verificar si el usuario es miembro de un equipo en este evento
+            $myTeam = $event->teams()->whereHas('members', function($query) {
+                $query->where('user_id', Auth::id())->where('is_accepted', true);
+            })->with(['members', 'leader', 'project'])->first();
+            
+            $userHasTeam = $myTeam !== null;
+            
+            // Verificar si el usuario es asesor de algún equipo en este evento
+            if (Auth::user()->hasRole('advisor')) {
+                $teamToAdvise = $event->teams()
+                    ->where('advisor_id', Auth::id())
+                    ->with(['members', 'leader', 'project'])
+                    ->first();
+            }
         }
         
-        return view('events.show', compact('event', 'userHasTeam'));
+        return view('events.show', compact('event', 'userHasTeam', 'myTeam', 'teamToAdvise'));
     }
 
     /**

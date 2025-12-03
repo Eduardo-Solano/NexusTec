@@ -21,9 +21,16 @@ class EvaluationController extends Controller
             return back()->with('error', 'Proyecto no especificado.');
         }
 
-        $project = Project::findOrFail($request->project_id);
+        $project = Project::with(['team.event.criteria'])->findOrFail($request->project_id);
 
-        // 2. Seguridad: ¿Ya lo calificó este juez?
+        // 2. Seguridad: Verificar que el juez esté asignado a este proyecto
+        $isAssigned = $project->judges()->where('judge_id', Auth::id())->exists();
+        if (!$isAssigned) {
+            return redirect()->route('projects.show', $project)
+                ->with('error', 'No estás asignado para evaluar este proyecto.');
+        }
+
+        // 3. Seguridad: ¿Ya lo calificó este juez?
         $alreadyGraded = Evaluation::where('project_id', $project->id)
                                    ->where('judge_id', Auth::id())
                                    ->exists();
@@ -33,7 +40,7 @@ class EvaluationController extends Controller
                 ->with('error', 'Ya has evaluado este proyecto.');
         }
 
-        // 3. Cargar los Criterios de Evaluación (La Rúbrica)
+        // 4. Cargar los Criterios de Evaluación (La Rúbrica)
         $criteria = $project->team->event->criteria;
         if ($criteria->isEmpty()) {
             return back()->with('error', 'Este evento no tiene criterios de evaluación definidos.');
@@ -54,7 +61,24 @@ class EvaluationController extends Controller
             'feedback' => 'nullable|string'
         ]);
 
-        DB::transaction(function () use ($request) {
+        $project = Project::findOrFail($request->project_id);
+
+        // Seguridad: Verificar que el juez esté asignado a este proyecto
+        $isAssigned = $project->judges()->where('judge_id', Auth::id())->exists();
+        if (!$isAssigned) {
+            return back()->with('error', 'No estás autorizado para evaluar este proyecto.');
+        }
+
+        // Verificar que no haya evaluado antes
+        $alreadyGraded = Evaluation::where('project_id', $project->id)
+                                   ->where('judge_id', Auth::id())
+                                   ->exists();
+        if ($alreadyGraded) {
+            return redirect()->route('projects.show', $project)
+                ->with('error', 'Ya has evaluado este proyecto.');
+        }
+
+        DB::transaction(function () use ($request, $project) {
             
             // Guardamos una fila por cada criterio evaluado
             foreach ($request->scores as $criterionId => $score) {
@@ -66,10 +90,15 @@ class EvaluationController extends Controller
                     'feedback' => $request->feedback
                 ]);
             }
+
+            // Marcar como completado en la tabla pivot judge_project
+            $project->judges()->updateExistingPivot(Auth::id(), [
+                'is_completed' => true
+            ]);
         });
 
         return redirect()->route('projects.show', $request->project_id)
-            ->with('success', '¡Evaluación registrada correctamente!');
+            ->with('success', '¡Evaluación registrada correctamente! 🎉');
     }
     /**
      * Display the specified resource.

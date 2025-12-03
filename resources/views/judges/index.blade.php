@@ -17,15 +17,21 @@
                 <table class="w-full whitespace-nowrap">
                     <thead class="bg-gray-900/50">
                         <tr>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase w-1/3">Nombre</th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase w-1/4">Empresa</th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase w-1/4">Especialidad
-                            </th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase">Nombre</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase">Empresa</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase">Especialidad</th>
+                            <th class="px-6 py-4 text-center text-xs font-bold text-gray-400 uppercase">Asignados</th>
+                            <th class="px-6 py-4 text-center text-xs font-bold text-gray-400 uppercase">Evaluados</th>
                             <th class="px-6 py-4 text-right text-xs font-bold text-gray-400 uppercase">Acciones</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-700">
                         @foreach ($judges as $judge)
+                            @php
+                                $assignedCount = $judge->assignedProjects()->count();
+                                $completedCount = $judge->assignedProjects()->wherePivot('is_completed', true)->count();
+                                $pendingCount = $assignedCount - $completedCount;
+                            @endphp
                             <tr class="hover:bg-gray-700/30 transition">
                                 <td class="px-6 py-4">
                                     <div class="flex items-center">
@@ -44,6 +50,24 @@
                                 </td>
                                 <td class="px-6 py-4 text-sm font-mono text-gray-400">
                                     {{ $judge->judgeProfile->specialty->name ?? 'N/A' }}
+                                </td>
+                                <td class="px-6 py-4 text-center">
+                                    <span class="inline-flex items-center justify-center min-w-[2rem] px-2 py-1 text-xs font-bold rounded-full {{ $assignedCount > 0 ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' : 'bg-gray-700 text-gray-500' }}">
+                                        {{ $assignedCount }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-center">
+                                    <div class="flex items-center justify-center gap-1">
+                                        <span class="inline-flex items-center justify-center min-w-[2rem] px-2 py-1 text-xs font-bold rounded-full bg-green-500/10 text-green-400 border border-green-500/20">
+                                            {{ $completedCount }}
+                                        </span>
+                                        @if($pendingCount > 0)
+                                            <span class="text-gray-600">/</span>
+                                            <span class="inline-flex items-center justify-center min-w-[2rem] px-2 py-1 text-xs font-bold rounded-full bg-yellow-500/10 text-yellow-400 border border-yellow-500/20" title="Pendientes">
+                                                {{ $pendingCount }}
+                                            </span>
+                                        @endif
+                                    </div>
                                 </td>
                                 <td class="px-6 py-4 text-right">
                                     <div class="flex justify-end gap-2">

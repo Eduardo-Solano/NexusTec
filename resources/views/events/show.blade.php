@@ -92,6 +92,117 @@
                     </div>
                 </div>
 
+                {{-- SECCIÓN: Mi Equipo / Equipo a Asesorar --}}
+                @if($myTeam || $teamToAdvise)
+                    <div class="space-y-6">
+                        {{-- Tarjeta: Mi Equipo (Estudiante) --}}
+                        @if($myTeam)
+                            <div class="bg-gradient-to-r from-blue-900/40 to-gray-800 border-2 border-blue-500/30 rounded-2xl p-6 shadow-xl">
+                                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                                    <div class="flex items-center gap-4">
+                                        <div class="w-14 h-14 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center">
+                                            <svg class="w-7 h-7 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs text-blue-400 font-bold uppercase tracking-widest mb-1">Mi Equipo</p>
+                                            <h3 class="text-2xl font-bold text-white">{{ $myTeam->name }}</h3>
+                                            <div class="flex items-center gap-3 mt-1">
+                                                <span class="text-xs text-gray-400">{{ $myTeam->members->count() }}/5 miembros</span>
+                                                @if($myTeam->project)
+                                                    <span class="text-xs text-green-400 flex items-center gap-1">
+                                                        <span class="w-1.5 h-1.5 rounded-full bg-green-400"></span>
+                                                        Proyecto entregado
+                                                    </span>
+                                                @else
+                                                    <span class="text-xs text-yellow-400 flex items-center gap-1">
+                                                        <span class="w-1.5 h-1.5 rounded-full bg-yellow-400"></span>
+                                                        Proyecto pendiente
+                                                    </span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="flex flex-wrap gap-3">
+                                        <a href="{{ route('teams.show', $myTeam) }}" 
+                                           class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm rounded-xl transition-all duration-300 shadow-lg hover:shadow-blue-500/30">
+                                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                            </svg>
+                                            Ver Mi Equipo
+                                        </a>
+                                        @can('teams.edit')
+                                            <a href="{{ route('teams.edit', $myTeam) }}" 
+                                               class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gray-700 hover:bg-gray-600 text-white font-bold text-sm rounded-xl transition-all duration-300 border border-gray-600">
+                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                                </svg>
+                                                Editar Equipo
+                                            </a>
+                                        @endcan
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+
+                        {{-- Tarjeta: Equipo a Asesorar (Docente) --}}
+                        @if($teamToAdvise)
+                            <div class="bg-gradient-to-r from-purple-900/40 to-gray-800 border-2 border-purple-500/30 rounded-2xl p-6 shadow-xl">
+                                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                                    <div class="flex items-center gap-4">
+                                        <div class="w-14 h-14 rounded-xl bg-purple-600/20 border border-purple-500/30 flex items-center justify-center">
+                                            <svg class="w-7 h-7 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs text-purple-400 font-bold uppercase tracking-widest mb-1">Equipo que Asesoro</p>
+                                            <h3 class="text-2xl font-bold text-white">{{ $teamToAdvise->name }}</h3>
+                                            <div class="flex items-center gap-3 mt-1">
+                                                <span class="text-xs text-gray-400">Líder: {{ $teamToAdvise->leader->name ?? 'Sin líder' }}</span>
+                                                @if($teamToAdvise->project)
+                                                    <span class="text-xs text-green-400 flex items-center gap-1">
+                                                        <span class="w-1.5 h-1.5 rounded-full bg-green-400"></span>
+                                                        Proyecto entregado
+                                                    </span>
+                                                @else
+                                                    <span class="text-xs text-yellow-400 flex items-center gap-1">
+                                                        <span class="w-1.5 h-1.5 rounded-full bg-yellow-400"></span>
+                                                        Proyecto pendiente
+                                                    </span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="flex flex-wrap gap-3">
+                                        <a href="{{ route('teams.show', $teamToAdvise) }}" 
+                                           class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-500 text-white font-bold text-sm rounded-xl transition-all duration-300 shadow-lg hover:shadow-purple-500/30">
+                                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                            </svg>
+                                            Ver Equipo Asesorado
+                                        </a>
+                                        @can('teams.edit')
+                                            <a href="{{ route('teams.edit', $teamToAdvise) }}" 
+                                               class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gray-700 hover:bg-gray-600 text-white font-bold text-sm rounded-xl transition-all duration-300 border border-gray-600">
+                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                                </svg>
+                                                Editar Equipo
+                                            </a>
+                                        @endcan
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+                @endif
+
                 <div>
                     <div class="flex items-end justify-between mb-8 border-b border-gray-800 pb-4">
                         <div>
@@ -112,9 +223,20 @@
                                         </svg>
                                     </div>
                                     
-                                    <span class="text-[10px] font-bold text-gray-400 bg-black/40 px-2 py-1 rounded border border-gray-600">
-                                        {{ $team->members->count() }}/5
-                                    </span>
+                                    <div class="flex items-center gap-2">
+                                        @can('teams.edit')
+                                            <a href="{{ route('teams.edit', $team) }}" 
+                                               class="p-1.5 bg-gray-700 hover:bg-blue-600 text-gray-400 hover:text-white rounded-lg border border-gray-600 hover:border-blue-500 transition" 
+                                               title="Editar Equipo">
+                                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                                </svg>
+                                            </a>
+                                        @endcan
+                                        <span class="text-[10px] font-bold text-gray-400 bg-black/40 px-2 py-1 rounded border border-gray-600">
+                                            {{ $team->members->count() }}/5
+                                        </span>
+                                    </div>
                                 </div>
 
                                 <h4 class="text-lg font-bold text-white mb-4 truncate group-hover:text-ito-orange transition">

@@ -56,6 +56,9 @@ Route::middleware('auth')->group(function () {
   Route::post('/teams/{team}/join', [TeamController::class, 'join'])->name('teams.join');
   // Rutas para la gestión de proyectos
   Route::resource('projects', ProjectController::class);
+  // Rutas para asignación de jueces a proyectos
+  Route::post('/projects/{project}/assign-judge', [ProjectController::class, 'assignJudge'])->name('projects.assign-judge');
+  Route::delete('/projects/{project}/remove-judge/{judge}', [ProjectController::class, 'removeJudge'])->name('projects.remove-judge');
   Route::post('/teams/{team}/accept/{user}', [TeamController::class, 'acceptMember'])->name('teams.accept');
   Route::post('/teams/{team}/reject/{user}', [TeamController::class, 'rejectMember'])->name('teams.reject');
   Route::patch('/teams/{team}/advisor/{status}', [TeamController::class, 'respondAdvisory'])
