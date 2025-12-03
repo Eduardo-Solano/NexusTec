@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\TeamController;
 use App\Http\Controllers\ProjectController;
@@ -77,6 +78,21 @@ Route::middleware('auth')->group(function () {
 
   // Rutas para gestión de premios (admin y staff)
   Route::resource('awards', AwardController::class)->middleware('role:admin|staff');
+
+  // Ruta para marcar notificaciones como leídas
+  Route::post('/notifications/{notification}/read', function ($notificationId) {
+    $notification = Auth::user()->notifications()->find($notificationId);
+    if ($notification) {
+      $notification->markAsRead();
+    }
+    return response()->json(['success' => true]);
+  })->name('notifications.markAsRead');
+
+  // Ruta para marcar todas las notificaciones como leídas
+  Route::post('/notifications/read-all', function () {
+    Auth::user()->unreadNotifications->markAsRead();
+    return back()->with('success', 'Todas las notificaciones marcadas como leídas.');
+  })->name('notifications.markAllAsRead');
 
   // Rutas exclusivas de administrador
   Route::group(['middleware' => ['role:admin']], function () {

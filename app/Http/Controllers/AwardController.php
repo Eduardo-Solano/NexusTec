@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Award;
 use App\Models\Event;
 use App\Models\Team;
+use App\Notifications\AwardWonNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Notification;
 
 class AwardController extends Controller
 {
@@ -83,7 +85,7 @@ class AwardController extends Controller
             ? $validated['name'] 
             : $validated['category'];
 
-        Award::create([
+        $award = Award::create([
             'event_id' => $validated['event_id'],
             'team_id' => $validated['team_id'],
             'name' => $awardName,
@@ -91,8 +93,17 @@ class AwardController extends Controller
             'awarded_at' => now(),
         ]);
 
+        // Cargar relaciones necesarias para la notificación
+        $award->load(['team.members', 'team.leader', 'team.project', 'event']);
+
+        // Notificar a todos los miembros del equipo (incluyendo al líder)
+        $teamMembers = $award->team->members;
+        
+        // Enviar notificación a cada miembro
+        Notification::send($teamMembers, new AwardWonNotification($award));
+
         return redirect()->route('awards.index', ['event_id' => $validated['event_id']])
-            ->with('success', '¡Premio asignado exitosamente! 🏆');
+            ->with('success', '¡Premio asignado exitosamente! 🏆 Se notificó a los ' . $teamMembers->count() . ' integrantes del equipo.');
     }
 
     /**

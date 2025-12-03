@@ -63,7 +63,7 @@
                 <!-- Notification Bell -->
                 <div class="relative">
                     @php
-                        $totalNotifications = ($pendingMembers->count() ?? 0) + ($pendingAdvisories->count() ?? 0) + ($pendingEvaluations->count() ?? 0);
+                        $totalNotifications = ($pendingMembers->count() ?? 0) + ($pendingAdvisories->count() ?? 0) + ($pendingEvaluations->count() ?? 0) + ($unreadNotifications->count() ?? 0);
                     @endphp
                     <button @click="notificationsOpen = !notificationsOpen"
                         class="relative text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-gray-100 me-4">
@@ -94,11 +94,21 @@
                         <div class="px-4 py-3 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
                             <div class="flex items-center justify-between">
                                 <h3 class="text-sm font-bold text-gray-800 dark:text-white">Notificaciones</h3>
-                                @if($totalNotifications > 0)
-                                    <span class="px-2 py-0.5 text-xs font-bold bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-full">
-                                        {{ $totalNotifications }} {{ $totalNotifications == 1 ? 'nueva' : 'nuevas' }}
-                                    </span>
-                                @endif
+                                <div class="flex items-center gap-2">
+                                    @if($unreadNotifications->count() > 0)
+                                        <form action="{{ route('notifications.markAllAsRead') }}" method="POST" class="inline">
+                                            @csrf
+                                            <button type="submit" class="text-xs text-blue-600 dark:text-blue-400 hover:underline">
+                                                Marcar leídas
+                                            </button>
+                                        </form>
+                                    @endif
+                                    @if($totalNotifications > 0)
+                                        <span class="px-2 py-0.5 text-xs font-bold bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-full">
+                                            {{ $totalNotifications }}
+                                        </span>
+                                    @endif
+                                </div>
                             </div>
                         </div>
 
@@ -204,6 +214,55 @@
                                                 </a>
                                             </div>
                                         </div>
+                                    @endforeach
+                                @endif
+
+                                {{-- Notificaciones de Premios Ganados --}}
+                                @if ($unreadNotifications->count() > 0)
+                                    <div class="px-4 py-2 bg-yellow-50 dark:bg-yellow-900/20 border-b border-yellow-100 dark:border-yellow-800">
+                                        <p class="text-xs font-bold text-yellow-600 dark:text-yellow-400 uppercase tracking-wider flex items-center gap-1">
+                                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+                                            </svg>
+                                            ¡Premios Ganados!
+                                        </p>
+                                    </div>
+                                    @foreach ($unreadNotifications as $notification)
+                                        @php
+                                            $medals = [
+                                                '1er Lugar' => '🥇',
+                                                '2do Lugar' => '🥈',
+                                                '3er Lugar' => '🥉',
+                                                'Mención Honorífica' => '🏅',
+                                                'Mejor Innovación' => '💡',
+                                                'Mejor Diseño' => '🎨',
+                                                'Mejor Presentación' => '🎤',
+                                                'Premio del Público' => '👥',
+                                            ];
+                                            $category = $notification->data['award_category'] ?? '';
+                                            $medal = $medals[$category] ?? '🏆';
+                                        @endphp
+                                        <a href="{{ route('public.event-winners', $notification->data['event_id'] ?? 0) }}"
+                                           onclick="fetch('{{ route('notifications.markAsRead', $notification->id) }}', {method: 'POST', headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'}})"
+                                           class="block px-4 py-3 hover:bg-yellow-50 dark:hover:bg-yellow-900/10 border-b border-gray-100 dark:border-gray-700 transition bg-yellow-50/50 dark:bg-yellow-900/5">
+                                            <div class="flex items-center gap-3">
+                                                <div class="text-3xl">{{ $medal }}</div>
+                                                <div class="flex-1 min-w-0">
+                                                    <p class="text-sm font-bold text-gray-800 dark:text-white">
+                                                        {{ $notification->data['award_category'] ?? 'Premio' }}
+                                                    </p>
+                                                    <p class="text-xs text-gray-500 dark:text-gray-400 truncate">
+                                                        {{ $notification->data['team_name'] ?? 'Tu equipo' }} • {{ $notification->data['event_name'] ?? '' }}
+                                                    </p>
+                                                    <p class="text-xs text-yellow-600 dark:text-yellow-400 mt-0.5">
+                                                        {{ $notification->created_at->diffForHumans() }}
+                                                    </p>
+                                                </div>
+                                                <svg class="w-4 h-4 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                                </svg>
+                                            </div>
+                                        </a>
                                     @endforeach
                                 @endif
                             @else

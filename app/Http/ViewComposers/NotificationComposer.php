@@ -14,6 +14,7 @@ class NotificationComposer
         $pendingMembers = collect();
         $pendingAdvisories = collect();
         $pendingEvaluations = collect();
+        $unreadNotifications = collect();
 
         if (Auth::check()) {
             $user = Auth::user();
@@ -43,10 +44,14 @@ class NotificationComposer
                     ->with(['team.event'])
                     ->get();
             }
+
+            // Obtener notificaciones no leídas de la base de datos (premios, etc.)
+            $unreadNotifications = $user->unreadNotifications()->latest()->take(10)->get();
         }
 
         $view->with('pendingMembers', $pendingMembers);
         $view->with('pendingAdvisories', $pendingAdvisories);
         $view->with('pendingEvaluations', $pendingEvaluations);
+        $view->with('unreadNotifications', $unreadNotifications);
     }
 }
