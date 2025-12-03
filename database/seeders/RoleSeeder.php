@@ -16,10 +16,14 @@ class RoleSeeder extends Seeder
 
         // 2. Definir los "Módulos" del sistema
         $modules = [
-            'users',      // Usuarios
+            'users',      // Usuarios (gestión general)
+            'students',   // Estudiantes
+            'staff',      // Docentes/Organizadores
+            'judges',     // Jueces
             'events',     // Eventos
             'teams',      // Equipos
             'projects',   // Proyectos
+            'criteria',   // Criterios de evaluación
             'awards',     // Premios
         ];
 
@@ -41,8 +45,14 @@ class RoleSeeder extends Seeder
         // 5. Permisos Especiales (Acciones que no son CRUD normal)
         $specialPermissions = [
             'projects.grade',       // Calificar proyectos
+            'projects.deliver',     // Entregar proyectos (estudiantes)
             'events.publish',       // Publicar eventos (cerrar convocatoria)
+            'events.join',          // Unirse a eventos (estudiantes)
+            'teams.join',           // Unirse a equipos (estudiantes)
+            'teams.lead',           // Liderar equipos (estudiantes)
+            'teams.advise',         // Asesorar equipos (docentes)
             'dashboard.view',       // Ver panel principal
+            'dashboard.stats',      // Ver estadísticas del dashboard
             'reports.download',     // Descargar diplomas/constancias
         ];
 
@@ -51,51 +61,77 @@ class RoleSeeder extends Seeder
         }
 
         // =================================================================
-        // ASIGNACIÓN DE ROLES (Aquí definimos quién hace qué)
+        // ASIGNACIÓN DE ROLES
         // =================================================================
 
         // A) STUDENT (Estudiante)
-        // El estudiante casi no necesita permisos explícitos, su lógica es "owner-based"
-        // (Solo edita SU equipo). Pero le damos permiso de ver.
         $roleStudent = Role::firstOrCreate(['name' => 'student']);
-        $roleStudent->givePermissionTo([
+        $roleStudent->syncPermissions([
+            'dashboard.view',
             'events.view',
+            'events.join',
+            'teams.view',
+            'teams.create',
+            'teams.join',
+            'teams.lead',
             'projects.view',
-            'teams.create', // Puede registrar su equipo
-            'dashboard.view'
+            'projects.deliver',
         ]);
 
         // B) JUDGE (Juez)
         $roleJudge = Role::firstOrCreate(['name' => 'judge']);
-        $roleJudge->givePermissionTo([
+        $roleJudge->syncPermissions([
             'dashboard.view',
             'events.view',
+            'teams.view',
             'projects.view',
-            'projects.grade', // ¡Vital!
+            'projects.grade',
         ]);
 
-        // C) STAFF (Organizador)
-        // Puede gestionar eventos y equipos, pero NO borrar usuarios ni tocar configuraciones
-        $roleStaff = Role::firstOrCreate(['name' => 'staff']);
-        $roleStaff->givePermissionTo([
-            'dashboard.view',
-            'events.view', 'events.create', 'events.edit', // Puede gestionar eventos
-            'teams.view', 'teams.edit',                     // Puede moderar equipos
-            'projects.view',
-            'reports.download',
-            'events.publish'
-        ]);
-
-        // D) ADVISOR (Asesor)
+        // C) ADVISOR (Docente/Asesor)
         $roleAdvisor = Role::firstOrCreate(['name' => 'advisor']);
-        $roleAdvisor->givePermissionTo([
+        $roleAdvisor->syncPermissions([
             'dashboard.view',
+            'events.view',
+            'teams.view',
+            'teams.advise',
             'projects.view',
-            // El asesor podría ver calificaciones pero no editar
         ]);
 
-        // E) ADMIN (Dios)
+        // D) STAFF (Organizador)
+        $roleStaff = Role::firstOrCreate(['name' => 'staff']);
+        $roleStaff->syncPermissions([
+            'dashboard.view',
+            'dashboard.stats',
+            // Eventos - gestión completa
+            'events.view',
+            'events.create',
+            'events.edit',
+            'events.delete',
+            'events.publish',
+            // Equipos - gestión completa
+            'teams.view',
+            'teams.edit',
+            'teams.delete',
+            // Proyectos - ver y editar
+            'projects.view',
+            'projects.edit',
+            // Criterios - gestión completa
+            'criteria.view',
+            'criteria.create',
+            'criteria.edit',
+            'criteria.delete',
+            // Premios - gestión completa
+            'awards.view',
+            'awards.create',
+            'awards.edit',
+            'awards.delete',
+            // Reportes
+            'reports.download',
+        ]);
+
+        // E) ADMIN (Administrador Total)
         $roleAdmin = Role::firstOrCreate(['name' => 'admin']);
-        $roleAdmin->givePermissionTo(Permission::all());
+        $roleAdmin->syncPermissions(Permission::all());
     }
 }

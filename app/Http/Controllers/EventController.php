@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Event;
+use App\Models\Criterion;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -38,8 +39,8 @@ class EventController extends Controller
      */
     public function create()
     {
-        //
-        return view('events.create');
+        $criteria = Criterion::all(); // Traemos todos los criterios del catálogo
+        return view('events.create', compact('criteria'));
     }
 
     /**
@@ -55,10 +56,12 @@ class EventController extends Controller
             'start_date' => 'required|date',
             // Regla 'after': La fecha fin debe ser POSTERIOR a la fecha inicio
             'end_date' => 'required|date|after:start_date', 
+            'criteria' => 'required|array|min:1', // Debe elegir al menos uno
+            'criteria.*' => 'exists:criteria,id', // Que el ID exista
         ]);
 
         // 2. Crear el Evento
-        Event::create([
+        $event = Event::create([
             'name' => $validated['name'],
             'description' => $validated['description'],
             'start_date' => $validated['start_date'],
@@ -66,6 +69,8 @@ class EventController extends Controller
             'is_active' => true, // Por defecto nace activo
         ]);
 
+        // MAGIA ELOQUENT: Guardar relación Muchos a Muchos
+        $event->criteria()->sync($validated['criteria']);
         // 3. Redireccionar con Mensaje de Éxito
         return redirect()->route('events.index')
             ->with('success', 'Evento creado exitosamente.');
@@ -96,8 +101,10 @@ class EventController extends Controller
      */
     public function edit(Event $event)
     {
-        //
-        return view('events.edit', compact('event'));
+        $criteria = Criterion::all();
+        // Cargamos los criterios que este evento YA tiene asignados
+        $event->load('criteria'); 
+        return view('events.edit', compact('event', 'criteria'));
     }
 
     /**
@@ -113,6 +120,7 @@ class EventController extends Controller
             'start_date' => 'required|date',
             'end_date' => 'required|date|after:start_date',
             // El checkbox si no se marca no se envía, así que lo manejamos abajo
+            'criteria' => 'required|array|min:1', // Debe elegir al menos uno
         ]);
 
         // 2. Actualizar
@@ -125,6 +133,8 @@ class EventController extends Controller
             'is_active' => $request->has('is_active'), 
         ]);
 
+        // Actualizar criterios (Muchos a Muchos)
+        $event->criteria()->sync($validated['criteria']);
         // 3. Redireccionar
         return redirect()->route('events.index')
             ->with('success', 'Evento actualizado correctamente.');

@@ -42,6 +42,7 @@ class StaffProfileController extends Controller
             'email' => ['required', 'string', 'email', 'max:255', 'unique:'.User::class],
             'employee_number' => ['required', 'string', 'unique:staff_profiles'],
             'department' => ['required', 'string'],
+            'staff_type' => ['required', 'in:advisor,staff,both'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
 
@@ -54,8 +55,13 @@ class StaffProfileController extends Controller
                 'is_active' => true,
             ]);
 
-            // 2. Asignar Roles (Staff y Advisor)
-            $user->assignRole(['staff', 'advisor']);
+            // 2. Asignar Roles según el tipo seleccionado
+            $roles = match($request->staff_type) {
+                'advisor' => ['advisor'],
+                'staff' => ['staff'],
+                'both' => ['staff', 'advisor'],
+            };
+            $user->assignRole($roles);
 
             // 3. Crear Perfil
             StaffProfile::create([
@@ -65,7 +71,13 @@ class StaffProfileController extends Controller
             ]);
         });
 
-        return redirect()->route('staff.index')->with('success', 'Docente registrado correctamente.');
+        $typeLabel = match($request->staff_type) {
+            'advisor' => 'Docente',
+            'staff' => 'Organizador',
+            'both' => 'Docente/Organizador',
+        };
+
+        return redirect()->route('staff.index')->with('success', "$typeLabel registrado correctamente.");
     
     }
 
@@ -98,6 +110,7 @@ class StaffProfileController extends Controller
             'email' => ['required', 'email', 'max:255', 'unique:users,email,' . $staff->id],
             'employee_number' => ['required', 'string'], // Podrías validar unique en staff_profiles ignorando ID
             'department' => ['required', 'string'],
+            'staff_type' => ['required', 'in:advisor,staff,both'],
         ]);
 
         DB::transaction(function () use ($request, $staff) {
@@ -114,7 +127,20 @@ class StaffProfileController extends Controller
                 ]);
             }
 
-            // 3. Actualizar Perfil (StaffProfile)
+            // 3. Actualizar Roles según el tipo seleccionado
+            // Primero quitamos los roles anteriores de staff/advisor
+            $staff->removeRole('staff');
+            $staff->removeRole('advisor');
+            
+            // Asignar nuevos roles
+            $roles = match($request->staff_type) {
+                'advisor' => ['advisor'],
+                'staff' => ['staff'],
+                'both' => ['staff', 'advisor'],
+            };
+            $staff->assignRole($roles);
+
+            // 4. Actualizar Perfil (StaffProfile)
             // updateOrCreate es útil por si el perfil fue borrado manualmente o no existía
             $staff->staffProfile()->updateOrCreate(
                 ['user_id' => $staff->id],

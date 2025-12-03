@@ -20,4 +20,10 @@ class Criterion extends Model
     public function evaluations() {
         return $this->hasMany(Evaluation::class);
     }
+
+    // --- Relaciones de N:M ---
+    public function events()
+    {
+        return $this->belongsToMany(Event::class, 'event_criterion');
+    }
 }

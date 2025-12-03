@@ -9,6 +9,8 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\StaffProfileController;
 use App\Http\Controllers\StudentProfileController;
 use App\Http\Controllers\JudgeController;
+use App\Http\Controllers\EvaluationController;
+use App\Http\Controllers\CriterionController;
 use App\Models\Event;
 
 Route::get('/', function () {
@@ -48,16 +50,25 @@ Route::middleware('auth')->group(function () {
   Route::resource('events', EventController::class);
   // Rutas para la gestión de equipos
   Route::resource('teams', TeamController::class);
+  // Rutas para la gestión de evaluaciones
+  Route::resource('evaluations', EvaluationController::class)->only(['create', 'store']);
   // NUEVA RUTA: Unirse a equipo existente
   Route::post('/teams/{team}/join', [TeamController::class, 'join'])->name('teams.join');
   // Rutas para la gestión de proyectos
   Route::resource('projects', ProjectController::class);
   Route::post('/teams/{team}/accept/{user}', [TeamController::class, 'acceptMember'])->name('teams.accept');
   Route::post('/teams/{team}/reject/{user}', [TeamController::class, 'rejectMember'])->name('teams.reject');
-  Route::patch('/projects/{project}/advisor/{status}', [ProjectController::class, 'respondAdvisory'])
-    ->name('projects.advisor.response');
+  Route::patch('/teams/{team}/advisor/{status}', [TeamController::class, 'respondAdvisory'])
+    ->name('teams.advisor.response');
+
+  // Rutas para gestión de criterios (admin y staff/organizadores)
+  Route::resource('criteria', CriterionController::class)->middleware('permission:criteria.view');
+
+  // Rutas exclusivas de administrador
   Route::group(['middleware' => ['role:admin']], function () {
+    // Rutas para gestión de personal (admin)
     Route::resource('staff', StaffProfileController::class);
+    // Rutas para gestión de estudiantes (admin)
     Route::resource('students', StudentProfileController::class);
     // Rutas para gestión de jueces (admin)
     Route::resource('judges', JudgeController::class);

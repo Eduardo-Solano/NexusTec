@@ -28,16 +28,16 @@ class DashboardController extends Controller
                 'recent_teams' => Team::with(['event', 'leader', 'members'])->latest()->take(5)->get(),
             ];
 
-            // LÓGICA NUEVA: Solicitudes de Asesoría Pendientes
-            $data['pending_advisories'] = Project::where('advisor_id', $user->id)
-                                                 ->where('advisor_status', 'pending')
-                                                 ->with('team')
-                                                 ->get();
+            // Asesorías pendientes (solo para advisors)
+            $data['pending_advisories'] = Team::where('advisor_id', $user->id)
+                                            ->where('advisor_status', 'pending')
+                                            ->with('event') // Cargamos el evento para mostrar contexto
+                                            ->get();
             
-            // Proyectos ya aceptados
-            $data['my_projects'] = Project::where('advisor_id', $user->id)
-                                          ->where('advisor_status', 'accepted')
-                                          ->count();
+            // 2. PROYECTOS ASESORADOS (Equipos aceptados)
+            $data['my_projects'] = Team::where('advisor_id', $user->id)
+                ->where('advisor_status', 'accepted')
+                ->count();
 
             // Datos para gráficas - Equipos por día (últimos 14 días)
             $data['teams_by_day'] = Team::selectRaw('DATE(created_at) as date, COUNT(*) as count')

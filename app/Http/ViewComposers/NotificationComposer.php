@@ -4,12 +4,14 @@ namespace App\Http\ViewComposers;
 
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Team;
 
 class NotificationComposer
 {
     public function compose(View $view)
     {
         $pendingMembers = collect();
+        $pendingAdvisories = collect();
 
         if (Auth::check()) {
             $user = Auth::user();
@@ -23,8 +25,17 @@ class NotificationComposer
                     $team->members()->wherePivot('is_accepted', false)->get()
                 );
             }
+
+            // Obtener solicitudes de asesoría pendientes (para docentes/advisors)
+            if ($user->hasAnyRole(['admin', 'staff', 'advisor'])) {
+                $pendingAdvisories = Team::where('advisor_id', $user->id)
+                    ->where('advisor_status', 'pending')
+                    ->with('event')
+                    ->get();
+            }
         }
 
         $view->with('pendingMembers', $pendingMembers);
+        $view->with('pendingAdvisories', $pendingAdvisories);
     }
 }

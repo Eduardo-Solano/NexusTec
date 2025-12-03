@@ -72,7 +72,23 @@
                                 <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
                                 Detalles del Equipo
                             </h3>
-                            <span class="bg-gray-900 text-gray-300 text-xs px-3 py-1 rounded-full border border-gray-600">{{ $team->members->count() }} / 5</span>
+                            <div class="flex items-center gap-3">
+                                <span class="bg-gray-900 text-gray-300 text-xs px-3 py-1 rounded-full border border-gray-600">{{ $team->members->count() }} / 5</span>
+                                
+                                @can('teams.edit')
+                                    <a href="{{ route('teams.edit', $team) }}" 
+                                       class="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg transition">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                                        Editar
+                                    </a>
+                                @elseif(auth()->id() === $team->leader_id)
+                                    <a href="{{ route('teams.edit', $team) }}" 
+                                       class="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg transition">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                                        Editar mi Equipo
+                                    </a>
+                                @endcan
+                            </div>
                         </div>
 
                         <div class="divide-y divide-gray-700">

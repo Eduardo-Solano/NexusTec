@@ -50,6 +50,43 @@
                         </div>
                     </div>
 
+                    {{-- Tipo de Staff --}}
+                    <div>
+                        <x-input-label :value="__('Tipo de Personal')" class="text-white mb-3" />
+                        <div class="grid grid-cols-3 gap-3">
+                            <label class="relative cursor-pointer">
+                                <input type="radio" name="staff_type" value="advisor" class="peer sr-only" {{ old('staff_type', 'advisor') == 'advisor' ? 'checked' : '' }}>
+                                <div class="p-4 bg-gray-900 border-2 border-gray-600 rounded-xl text-center transition peer-checked:border-blue-500 peer-checked:bg-blue-500/10 hover:border-gray-500">
+                                    <div class="text-2xl mb-2">👨‍🏫</div>
+                                    <p class="text-white font-bold text-sm">Docente</p>
+                                    <p class="text-gray-500 text-xs mt-1">Solo asesoría</p>
+                                </div>
+                            </label>
+                            <label class="relative cursor-pointer">
+                                <input type="radio" name="staff_type" value="staff" class="peer sr-only" {{ old('staff_type') == 'staff' ? 'checked' : '' }}>
+                                <div class="p-4 bg-gray-900 border-2 border-gray-600 rounded-xl text-center transition peer-checked:border-purple-500 peer-checked:bg-purple-500/10 hover:border-gray-500">
+                                    <div class="text-2xl mb-2">🎯</div>
+                                    <p class="text-white font-bold text-sm">Organizador</p>
+                                    <p class="text-gray-500 text-xs mt-1">Gestión de eventos</p>
+                                </div>
+                            </label>
+                            <label class="relative cursor-pointer">
+                                <input type="radio" name="staff_type" value="both" class="peer sr-only" {{ old('staff_type') == 'both' ? 'checked' : '' }}>
+                                <div class="p-4 bg-gray-900 border-2 border-gray-600 rounded-xl text-center transition peer-checked:border-ito-orange peer-checked:bg-ito-orange/10 hover:border-gray-500">
+                                    <div class="text-2xl mb-2">⭐</div>
+                                    <p class="text-white font-bold text-sm">Ambos</p>
+                                    <p class="text-gray-500 text-xs mt-1">Todos los permisos</p>
+                                </div>
+                            </label>
+                        </div>
+                        @error('staff_type')<p class="text-red-400 text-sm mt-2">{{ $message }}</p>@enderror
+                        <p class="text-gray-500 text-xs mt-3">
+                            <strong>Docente:</strong> Puede asesorar equipos y ver proyectos asignados.<br>
+                            <strong>Organizador:</strong> Puede crear y gestionar eventos, equipos y criterios.<br>
+                            <strong>Ambos:</strong> Tiene todos los permisos de docente y organizador.
+                        </p>
+                    </div>
+
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <x-input-label for="password" :value="__('Contraseña')" class="text-white" />

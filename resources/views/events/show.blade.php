@@ -41,7 +41,7 @@
                                     {{ $event->description }}
                                 </p>
 
-                                @role('student')
+                                @can('events.join')
                                     @if($event->is_active)
                                         <div class="mt-10">
                                             @if($userHasTeam)
@@ -67,7 +67,7 @@
                                             @endif
                                         </div>
                                     @endif
-                                @endrole
+                                @endcan
                             </div>
 
                             <div class="lg:col-span-4 flex flex-col gap-4">
@@ -197,8 +197,8 @@
                                     @endif
                                 </div>
 
-                                @role('student')
-                                    <div class="mt-auto pt-4 border-t border-gray-700/50">
+                                @can('teams.join')
+                                    <div class="mt-auto pt-4 border-t border-gray-700/50">>
                                         
                                         @php
                                             // Buscamos si el usuario actual está en la lista de miembros
@@ -215,10 +215,17 @@
                                                         <a href="{{ route('projects.show', $team->project) }}" class="w-full py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-bold uppercase rounded text-center transition">
                                                             VER PROYECTO
                                                         </a>
-                                                    @else
+                                                    @elseif($team->leader_id === Auth::id())
                                                         <a href="{{ route('projects.create', ['team_id' => $team->id]) }}" class="w-full py-1.5 bg-purple-600 hover:bg-purple-500 text-white text-[10px] font-bold uppercase rounded text-center transition">
                                                             ENTREGAR
                                                         </a>
+                                                    @else
+                                                        <div class="w-full py-1.5 bg-gray-700/50 border border-gray-600 text-gray-400 text-[10px] font-bold uppercase rounded text-center flex items-center justify-center gap-1">
+                                                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                                            </svg>
+                                                            SOLO LÍDER
+                                                        </div>
                                                     @endif
                                                 </div>
 
@@ -257,7 +264,7 @@
                                             </form>
                                         @endif
                                     </div>
-                                @endrole
+                                @endcan
                             </div>
 
                         @empty
