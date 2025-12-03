@@ -60,8 +60,13 @@ class Event extends Model
     public function teams() {
         return $this->hasMany(Team::class);
     }
-
+    // Relación con premios
     public function awards() {
         return $this->hasMany(Award::class);
+    }
+    // --- Relaciones de N:M ---
+    public function criteria()
+    {
+        return $this->belongsToMany(Criterion::class, 'event_criterion');
     }
 }

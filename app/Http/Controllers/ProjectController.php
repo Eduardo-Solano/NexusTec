@@ -29,9 +29,9 @@ class ProjectController extends Controller
 
         $team = Team::findOrFail($request->query('team_id'));
 
-        // 2. Seguridad: Solo un miembro del equipo puede subir el proyecto
-        if (!$team->members->contains(Auth::id())) {
-            abort(403, 'No tienes permiso para gestionar este equipo.');
+        // 2. Seguridad: Solo el LÍDER del equipo puede subir el proyecto
+        if ($team->leader_id !== Auth::id()) {
+            abort(403, 'Solo el líder del equipo puede entregar el proyecto.');
         }
 
         // 3. Seguridad: Si ya entregaron, redirigir a ver el proyecto (evitar duplicados)
@@ -57,18 +57,34 @@ class ProjectController extends Controller
 
         $team = Team::findOrFail($request->team_id);
 
+        // Seguridad: Solo el LÍDER del equipo puede entregar el proyecto
+        if ($team->leader_id !== Auth::id()) {
+            abort(403, 'Solo el líder del equipo puede entregar el proyecto.');
+        }
+
+        // Seguridad: Si ya entregaron, evitar duplicados
+        if ($team->project) {
+            return redirect()->route('projects.show', $team->project)
+                ->with('info', 'El proyecto ya fue entregado anteriormente.');
+        }
+
         // Crear el proyecto
         Project::create([
             'name' => $request->name,
             'description' => $request->description,
             'repository_url' => $request->repository_url,
             'team_id' => $team->id,
+        ]);
+
+        // Actualizar el equipo con el asesor seleccionado
+        $team->update([
             'advisor_id' => $request->advisor_id,
+            'advisor_status' => 'pending',
         ]);
 
         // Redirigir al evento con éxito
         return redirect()->route('events.show', $team->event_id)
-            ->with('success', '¡Proyecto entregado exitosamente! 🚀');
+            ->with('success', '¡Proyecto entregado exitosamente! Se ha enviado la solicitud de asesoría. 🚀');
     
     }
 
@@ -105,23 +121,5 @@ class ProjectController extends Controller
     public function destroy(Project $project)
     {
         //
-    }
-
-    public function respondAdvisory(Request $request, Project $project, $status)
-    {
-        // Seguridad: Solo el asesor asignado puede responder
-        if (Auth::id() !== $project->advisor_id) {
-            abort(403);
-        }
-
-        // Validar estado
-        if (!in_array($status, ['accepted', 'rejected'])) {
-            abort(400);
-        }
-
-        $project->update(['advisor_status' => $status]);
-
-        $msg = $status === 'accepted' ? 'Has aceptado la asesoría.' : 'Has rechazado la solicitud.';
-        return back()->with('success', $msg);
     }
 }

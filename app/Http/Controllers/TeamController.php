@@ -17,13 +17,20 @@ class TeamController extends Controller
      */
     public function index()
     {
-        // Solo para Admin/Staff (Seguridad básica)
-        if (!Auth::user()->hasAnyRole(['admin', 'staff'])) {
-            abort(403);
+        // Admin/Staff ven todos los equipos
+        if (Auth::user()->can('teams.view')) {
+            $teams = Team::with(['event', 'leader'])
+                ->orderBy('created_at', 'desc')
+                ->paginate(12);
+        } else {
+            // Estudiantes solo ven equipos donde son miembros
+            $teams = Team::with(['event', 'leader'])
+                ->whereHas('members', function($q) {
+                    $q->where('user_id', Auth::id());
+                })
+                ->orderBy('created_at', 'desc')
+                ->paginate(12);
         }
-        $teams = Team::with(['event', 'leader'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(12);
 
         return view('teams.index', compact('teams'));
     }
@@ -74,6 +81,7 @@ class TeamController extends Controller
             'members' => 'array|max:4',
             'member_roles' => 'array', // Nuevo: Roles de los miembros
             'members.*' => 'nullable|email|distinct',
+            'advisor_id' => 'required|exists:users,id', // Nuevo: Asesor
         ]);
 
         return DB::transaction(function () use ($request) {
@@ -98,6 +106,8 @@ class TeamController extends Controller
                 'name' => $request->name,
                 'event_id' => $event->id,
                 'leader_id' => Auth::id(),
+                'advisor_id' => $request->advisor_id, // <--- GUARDAMOS AQUÍ
+                'advisor_status' => 'pending'
             ]);
 
             // Guardar al LIDER con su Rol
@@ -150,8 +160,15 @@ class TeamController extends Controller
      */
     public function edit(Team $team)
     {
-        //
+        // Admin/Staff pueden editar cualquier equipo, el líder puede editar su equipo
+        $isLeader = Auth::id() === $team->leader_id;
         
+        if (!Auth::user()->can('teams.edit') && !$isLeader) {
+            abort(403);
+        }
+
+        $events = Event::orderBy('name')->get();
+        return view('teams.edit', compact('team', 'events', 'isLeader'));
     }
 
     /**
@@ -159,7 +176,35 @@ class TeamController extends Controller
      */
     public function update(Request $request, Team $team)
     {
-        //
+        // Admin/Staff pueden actualizar cualquier equipo, el líder puede actualizar su equipo
+        $isLeader = Auth::id() === $team->leader_id;
+        
+        if (!Auth::user()->can('teams.edit') && !$isLeader) {
+            abort(403);
+        }
+
+        // El líder solo puede cambiar nombre y líder, no el evento
+        if ($isLeader && !Auth::user()->can('teams.edit')) {
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'leader_id' => 'required|exists:users,id',
+            ]);
+        } else {
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'event_id' => 'required|exists:events,id',
+                'leader_id' => 'required|exists:users,id',
+            ]);
+        }
+
+        // Verificar que el líder sea un miembro del equipo
+        if (!$team->members()->where('user_id', $validated['leader_id'])->exists()) {
+            return back()->withErrors(['leader_id' => 'El líder seleccionado debe ser miembro del equipo.']);
+        }
+
+        $team->update($validated);
+
+        return redirect()->route('teams.show', $team)->with('success', 'Equipo actualizado correctamente.');
     }
 
     /**
@@ -231,5 +276,13 @@ class TeamController extends Controller
         $team->members()->detach($user->id);
 
         return back()->with('success', 'Solicitud rechazada.');
+    }
+
+    public function respondAdvisory(Request $request, Team $team, $status)
+    {
+        if (Auth::id() !== $team->advisor_id) abort(403);
+        
+        $team->update(['advisor_status' => $status]);
+        return back()->with('success', 'Solicitud de asesoría actualizada.');
     }
 }

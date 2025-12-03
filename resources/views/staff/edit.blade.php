@@ -103,6 +103,42 @@
                                     </div>
                                 </div>
 
+                                {{-- Tipo de Staff --}}
+                                <div class="space-y-3">
+                                    <x-input-label :value="__('Tipo de Personal')" class="text-white font-bold text-xs uppercase tracking-wide" />
+                                    @php
+                                        $hasStaff = $staff->hasRole('staff');
+                                        $hasAdvisor = $staff->hasRole('advisor');
+                                        $currentType = ($hasStaff && $hasAdvisor) ? 'both' : ($hasStaff ? 'staff' : 'advisor');
+                                    @endphp
+                                    <div class="grid grid-cols-3 gap-3">
+                                        <label class="relative cursor-pointer">
+                                            <input type="radio" name="staff_type" value="advisor" class="peer sr-only" {{ old('staff_type', $currentType) == 'advisor' ? 'checked' : '' }}>
+                                            <div class="p-4 bg-gray-900 border-2 border-gray-600 rounded-xl text-center transition peer-checked:border-blue-500 peer-checked:bg-blue-500/10 hover:border-gray-500">
+                                                <div class="text-2xl mb-2">👨‍🏫</div>
+                                                <p class="text-white font-bold text-sm">Docente</p>
+                                                <p class="text-gray-500 text-xs mt-1">Solo asesoría</p>
+                                            </div>
+                                        </label>
+                                        <label class="relative cursor-pointer">
+                                            <input type="radio" name="staff_type" value="staff" class="peer sr-only" {{ old('staff_type', $currentType) == 'staff' ? 'checked' : '' }}>
+                                            <div class="p-4 bg-gray-900 border-2 border-gray-600 rounded-xl text-center transition peer-checked:border-purple-500 peer-checked:bg-purple-500/10 hover:border-gray-500">
+                                                <div class="text-2xl mb-2">🎯</div>
+                                                <p class="text-white font-bold text-sm">Organizador</p>
+                                                <p class="text-gray-500 text-xs mt-1">Gestión de eventos</p>
+                                            </div>
+                                        </label>
+                                        <label class="relative cursor-pointer">
+                                            <input type="radio" name="staff_type" value="both" class="peer sr-only" {{ old('staff_type', $currentType) == 'both' ? 'checked' : '' }}>
+                                            <div class="p-4 bg-gray-900 border-2 border-gray-600 rounded-xl text-center transition peer-checked:border-ito-orange peer-checked:bg-ito-orange/10 hover:border-gray-500">
+                                                <div class="text-2xl mb-2">⭐</div>
+                                                <p class="text-white font-bold text-sm">Ambos</p>
+                                                <p class="text-gray-500 text-xs mt-1">Todos los permisos</p>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+
                                 <div class="bg-red-900/10 border border-red-500/20 rounded-xl p-4 flex items-center justify-between hover:bg-red-900/20 transition">
                                     <div class="flex items-center gap-3">
                                         <div class="p-2 bg-red-500/10 rounded-lg text-red-500">

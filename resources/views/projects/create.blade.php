@@ -66,41 +66,6 @@
                             <x-input-error :messages="$errors->get('description')" class="mt-2" />
                         </div>
 
-                        <div class="mt-10 pt-8 border-t border-gray-700/50">
-                            <div class="flex items-center justify-between mb-6">
-                                <div>
-                                    <h3 class="text-lg font-bold text-white flex items-center gap-2">
-                                        <div class="p-1.5 bg-blue-500/20 rounded-lg text-blue-400">
-                                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-                                        </div>
-                                        Asesor Académico
-                                    </h3>
-                                    <p class="text-gray-500 text-xs mt-1 ml-1">Selecciona al docente que supervisará este proyecto.</p>
-                                </div>
-                                <span class="text-[10px] font-bold tracking-wider text-blue-400 bg-blue-900/30 px-3 py-1 rounded-full border border-blue-500/30">REQUERIDO</span>
-                            </div>
-
-                            <div class="relative group">
-                                <select name="advisor_id" id="advisor_id" required
-                                    style="color-scheme: dark;"
-                                    class="block w-full pl-5 pr-12 py-4 bg-gray-900 border border-gray-600 text-white rounded-xl focus:border-blue-500 focus:ring-blue-500 appearance-none text-base transition shadow-sm hover:border-gray-500 cursor-pointer">
-                                    <option value="" disabled selected class="bg-gray-900 text-gray-500">
-                                        Click para seleccionar docente...
-                                    </option>
-                                    
-                                    @foreach(\App\Models\User::role(['advisor', 'staff'])->get() as $advisor)
-                                        <option value="{{ $advisor->id }}" class="bg-gray-900 text-gray-200 py-2">
-                                            {{ $advisor->name }} &mdash; {{ $advisor->staffProfile->department ?? 'Docente' }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                
-                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-5 text-gray-400 group-hover:text-white transition">
-                                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-                                </div>
-                            </div>
-                        </div>
-
                         <div class="flex items-center justify-between mt-12 pt-6 border-t border-gray-700">
                             <a href="{{ route('events.show', $team->event_id) }}" class="text-sm font-bold text-gray-500 hover:text-white transition flex items-center gap-2 group">
                                 <svg class="w-4 h-4 group-hover:-translate-x-1 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
