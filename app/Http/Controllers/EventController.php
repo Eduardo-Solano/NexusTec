@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Event;
 use App\Models\Criterion;
+use App\Models\Project;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class EventController extends Controller
 {
@@ -162,5 +164,95 @@ class EventController extends Controller
 
         return redirect()->route('events.index')
             ->with('success', 'Evento eliminado del sistema.');
+    }
+
+    /**
+     * Mostrar Rankings/Resultados del evento
+     */
+    public function rankings(Event $event)
+    {
+        // Validación de acceso: Staff/Admin siempre, otros solo si evento cerrado
+        $user = Auth::user();
+        $canAccess = $user->hasAnyRole(['admin', 'staff']) || !$event->is_active;
+        
+        if (!$canAccess) {
+            return redirect()->route('events.show', $event)
+                ->with('error', 'Los rankings estarán disponibles cuando finalice el evento.');
+        }
+
+        // Cargar criterios del evento
+        $event->load('criteria');
+        $criteria = $event->criteria;
+
+        // Obtener todos los proyectos del evento con sus evaluaciones
+        $projects = Project::whereHas('team', function($query) use ($event) {
+                $query->where('event_id', $event->id);
+            })
+            ->with([
+                'team.leader',
+                'team.members',
+                'evaluations.criterion',
+                'evaluations.judge',
+                'judges'
+            ])
+            ->get();
+
+        // Calcular estadísticas para cada proyecto
+        $projectsWithStats = $projects->map(function($project) use ($criteria) {
+            // Obtener todas las evaluaciones del proyecto
+            $evaluations = $project->evaluations;
+            
+            // Jueces que han evaluado
+            $judgesCompleted = $project->judges()->wherePivot('is_completed', true)->count();
+            $judgesTotal = $project->judges()->count();
+            
+            // Calcular puntaje por criterio (promedio de todos los jueces)
+            $scoresByCriterion = [];
+            foreach ($criteria as $criterion) {
+                $criterionEvaluations = $evaluations->where('criterion_id', $criterion->id);
+                $scoresByCriterion[$criterion->id] = [
+                    'name' => $criterion->name,
+                    'max_points' => $criterion->max_points,
+                    'average' => $criterionEvaluations->count() > 0 
+                        ? round($criterionEvaluations->avg('score'), 2) 
+                        : null,
+                    'count' => $criterionEvaluations->count(),
+                ];
+            }
+            
+            // Puntaje total (suma de promedios por criterio)
+            $totalScore = collect($scoresByCriterion)->sum('average') ?? 0;
+            
+            // Puntaje máximo posible
+            $maxPossible = $criteria->sum('max_points');
+            
+            // Porcentaje
+            $percentage = $maxPossible > 0 ? round(($totalScore / $maxPossible) * 100, 1) : 0;
+
+            return [
+                'project' => $project,
+                'team' => $project->team,
+                'scores_by_criterion' => $scoresByCriterion,
+                'total_score' => $totalScore,
+                'max_possible' => $maxPossible,
+                'percentage' => $percentage,
+                'judges_completed' => $judgesCompleted,
+                'judges_total' => $judgesTotal,
+                'is_fully_evaluated' => $judgesTotal > 0 && $judgesCompleted === $judgesTotal,
+            ];
+        });
+
+        // Ordenar por puntaje total (descendente)
+        $rankedProjects = $projectsWithStats->sortByDesc('total_score')->values();
+
+        // Estadísticas generales del evento
+        $stats = [
+            'total_projects' => $projects->count(),
+            'fully_evaluated' => $projectsWithStats->where('is_fully_evaluated', true)->count(),
+            'pending_evaluation' => $projectsWithStats->where('is_fully_evaluated', false)->count(),
+            'average_score' => $rankedProjects->avg('percentage'),
+        ];
+
+        return view('events.rankings', compact('event', 'rankedProjects', 'criteria', 'stats'));
     }
 }

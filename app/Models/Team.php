@@ -42,4 +42,10 @@ class Team extends Model
     {
         return $this->belongsTo(User::class, 'advisor_id');
     }
+
+    // Premios obtenidos
+    public function awards()
+    {
+        return $this->hasMany(Award::class);
+    }
 }

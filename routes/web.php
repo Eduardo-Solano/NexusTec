@@ -11,6 +11,7 @@ use App\Http\Controllers\StudentProfileController;
 use App\Http\Controllers\JudgeController;
 use App\Http\Controllers\EvaluationController;
 use App\Http\Controllers\CriterionController;
+use App\Http\Controllers\AwardController;
 use App\Models\Event;
 
 Route::get('/', function () {
@@ -48,6 +49,8 @@ Route::middleware('auth')->group(function () {
   Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
   // Rutas para la gestión de eventos
   Route::resource('events', EventController::class);
+  // Ruta para ver rankings/resultados de un evento
+  Route::get('/events/{event}/rankings', [EventController::class, 'rankings'])->name('events.rankings');
   // Rutas para la gestión de equipos
   Route::resource('teams', TeamController::class);
   // Rutas para la gestión de evaluaciones
@@ -66,6 +69,9 @@ Route::middleware('auth')->group(function () {
 
   // Rutas para gestión de criterios (admin y staff/organizadores)
   Route::resource('criteria', CriterionController::class)->middleware('permission:criteria.view');
+
+  // Rutas para gestión de premios (admin y staff)
+  Route::resource('awards', AwardController::class)->middleware('role:admin|staff');
 
   // Rutas exclusivas de administrador
   Route::group(['middleware' => ['role:admin']], function () {

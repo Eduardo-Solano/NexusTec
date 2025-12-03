@@ -19,6 +19,13 @@ Route::middleware('guest')->group(function () {
 
     Route::post('register', [RegisteredUserController::class, 'store']);
 
+    // Rutas para verificación de registro
+    Route::get('register/verify', [RegisteredUserController::class, 'showVerifyForm'])
+        ->name('register.verify');
+
+    Route::post('register/verify', [RegisteredUserController::class, 'verifyAndRegister'])
+        ->name('register.verify.submit');
+
     Route::get('login', [AuthenticatedSessionController::class, 'create'])
         ->name('login');
 
@@ -66,13 +73,28 @@ Route::get('forgot-password/verify', function (Request $request) {
 
 
 // ---------------------------------------------------------------------
-// RUTA 2: Recibe el token y lo manda a cambiar contraseña
-// Esta es la ruta que busca tu formulario HTML: 'password.reset.verify'
+// RUTA 2: Verifica el código de 8 caracteres y redirige a cambiar contraseña
 // ---------------------------------------------------------------------
-Route::get('forgot-password/check-token', function (Request $request) {
-    // Redirige pasando el token real que pegaste y el email
+Route::post('forgot-password/check-token', function (Request $request) {
+    $request->validate([
+        'email' => ['required', 'email'],
+        'code' => ['required', 'string', 'size:8'],
+    ]);
+
+    // Buscar el código en la base de datos
+    $record = \Illuminate\Support\Facades\DB::table('password_reset_codes')
+        ->where('email', $request->email)
+        ->where('code', strtoupper($request->code))
+        ->where('expires_at', '>', now())
+        ->first();
+
+    if (!$record) {
+        return back()->withErrors(['code' => 'El código es inválido o ha expirado.']);
+    }
+
+    // Código válido - redirigir a la vista de nueva contraseña
     return redirect()->route('password.reset', [
-        'token' => $request->token, 
+        'token' => $request->code,
         'email' => $request->email
     ]);
 })->name('password.reset.verify');

@@ -16,12 +16,34 @@
 
                     <div class="relative p-8 md:p-12">
                         <div class="flex justify-between items-start mb-8">
-                            <a href="{{ route('events.index') }}" class="flex items-center text-sm font-bold text-gray-400 hover:text-white transition group">
-                                <div class="w-8 h-8 rounded-full bg-black/50 border border-gray-600 flex items-center justify-center mr-2 group-hover:border-ito-orange transition">
-                                    &larr;
-                                </div>
-                                Volver
-                            </a>
+                            <div class="flex items-center gap-3">
+                                <a href="{{ route('events.index') }}" class="flex items-center text-sm font-bold text-gray-400 hover:text-white transition group">
+                                    <div class="w-8 h-8 rounded-full bg-black/50 border border-gray-600 flex items-center justify-center mr-2 group-hover:border-ito-orange transition">
+                                        &larr;
+                                    </div>
+                                    Volver
+                                </a>
+                                
+                                {{-- Botón Rankings: Visible para staff/admin siempre, para otros solo si evento cerrado --}}
+                                @php
+                                    $canSeeRankings = Auth::user()->hasAnyRole(['admin', 'staff']) || !$event->is_active;
+                                @endphp
+                                
+                                @if($canSeeRankings)
+                                    <a href="{{ route('events.rankings', $event) }}" 
+                                       class="flex items-center text-sm font-bold text-yellow-400 hover:text-yellow-300 transition group">
+                                        <div class="w-8 h-8 rounded-full bg-yellow-500/20 border border-yellow-500/50 flex items-center justify-center mr-2 group-hover:bg-yellow-500/30 transition">
+                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                                            </svg>
+                                        </div>
+                                        Rankings
+                                        @if($event->is_active)
+                                            <span class="ml-1 text-[10px] bg-yellow-500/30 px-1.5 py-0.5 rounded text-yellow-300">(Preview)</span>
+                                        @endif
+                                    </a>
+                                @endif
+                            </div>
                             
                             <div class="px-4 py-1.5 rounded-full border {{ $event->is_active ? 'bg-green-500/10 border-green-500/50 text-green-400' : 'bg-red-500/10 border-red-500/50 text-red-400' }} backdrop-blur-md shadow-[0_0_15px_rgba(0,0,0,0.5)]">
                                 <span class="flex items-center text-xs font-black uppercase tracking-widest gap-2">

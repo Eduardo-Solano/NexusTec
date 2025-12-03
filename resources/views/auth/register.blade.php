@@ -27,15 +27,6 @@
                 <x-input-error :messages="$errors->get('name')" class="mt-2" />
             </div>
 
-            {{-- Email --}}
-            <div>
-                <x-input-label for="email" :value="__('Correo Electrónico')" class="text-gray-300" />
-                <x-text-input id="email"
-                    class="block mt-1 w-full bg-gray-900 border-gray-600 text-gray-200 focus:border-orange-500 focus:ring-orange-500 rounded-lg"
-                    type="email" name="email" :value="old('email')" required />
-                <x-input-error :messages="$errors->get('email')" class="mt-2" />
-            </div>
-
             {{-- Teléfono --}}
             <div>
                 <x-input-label for="phone" :value="__('Teléfono')" class="text-gray-300" />
@@ -61,8 +52,21 @@
                 <x-text-input id="control_number"
                     class="block mt-1 w-full bg-gray-900 border-gray-600 text-gray-200 focus:border-orange-500 focus:ring-orange-500 rounded-lg"
                     type="text" name="control_number" :value="old('control_number')" required 
-                    placeholder="Ej: 19161234" />
+                    maxlength="10"
+                    placeholder="Ej: 19161234, L1916123"
+                    oninput="updateEmail(this.value)" />
+                <p class="mt-1 text-xs text-gray-500">Puede incluir 0-2 letras al inicio + dígitos</p>
                 <x-input-error :messages="$errors->get('control_number')" class="mt-2" />
+            </div>
+
+            {{-- Email (generado automáticamente) --}}
+            <div>
+                <x-input-label for="email" :value="__('Correo Institucional')" class="text-gray-300" />
+                <x-text-input id="email"
+                    class="block mt-1 w-full bg-gray-800 border-gray-600 text-gray-400 rounded-lg cursor-not-allowed"
+                    type="email" name="email" :value="old('email')" required readonly />
+                <p class="mt-1 text-xs text-gray-500">Se genera automáticamente: número_control@itoaxaca.edu.mx</p>
+                <x-input-error :messages="$errors->get('email')" class="mt-2" />
             </div>
 
             {{-- Carrera --}}
@@ -168,6 +172,38 @@
                     eyeSlashIcon.classList.add('hidden');
                 }
             }
+
+            // Función para actualizar el email basado en el número de control
+            function updateEmail(controlNumber) {
+                const emailField = document.getElementById('email');
+                // Permitir letras al inicio (máx 2) + números (máx 8), total máximo 10
+                controlNumber = controlNumber.toUpperCase().replace(/[^A-Z0-9]/g, '').substring(0, 10);
+                
+                // Validar formato: 0-2 letras seguidas de números
+                const match = controlNumber.match(/^([A-Z]{0,2})(\d*)$/);
+                if (match) {
+                    const letters = match[1] || '';
+                    const numbers = match[2] || '';
+                    controlNumber = letters + numbers;
+                }
+                
+                document.getElementById('control_number').value = controlNumber;
+                
+                // Generar email si tiene al menos 8 caracteres válidos
+                if (controlNumber.length >= 8) {
+                    emailField.value = controlNumber.toLowerCase() + '@itoaxaca.edu.mx';
+                } else {
+                    emailField.value = '';
+                }
+            }
+
+            // Inicializar email si hay valor previo en control_number
+            document.addEventListener('DOMContentLoaded', function() {
+                const controlNumber = document.getElementById('control_number').value;
+                if (controlNumber) {
+                    updateEmail(controlNumber);
+                }
+            });
         </script>
 
         <div class="flex items-center justify-between mt-6">
@@ -176,7 +212,7 @@
             </a>
             <button type="submit"
                 class="bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition transform hover:scale-105">
-                {{ __('Crear Cuenta') }}
+                {{ __('Verificar Correo') }}
             </button>
         </div>
     </form>
@@ -186,6 +222,9 @@
         <p class="text-gray-400 text-xs text-center">
             <span class="text-orange-400 font-bold">Nota:</span> El registro de jueces y personal administrativo 
             es gestionado exclusivamente por los organizadores del evento.
+        </p>
+        <p class="text-gray-500 text-xs text-center mt-2">
+            Se enviará un código de verificación a tu correo institucional.
         </p>
     </div>
 </x-guest-layout>
