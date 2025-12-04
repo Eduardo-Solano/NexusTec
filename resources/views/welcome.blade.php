@@ -106,7 +106,8 @@
                         @php
                             $totalEvents = \App\Models\Event::count();
                             $totalTeams = \App\Models\Team::count();
-                            $totalStudents = \App\Models\User::role('student')->count();
+                            // Cuenta estudiantes de forma segura sin depender del rol
+                            $totalStudents = \App\Models\StudentProfile::count();
                         @endphp
                         <div>
                             <p class="text-3xl font-black text-white">{{ $totalEvents }}+</p>
