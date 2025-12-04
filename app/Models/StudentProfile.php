@@ -18,11 +18,13 @@ class StudentProfile extends Model
     ];
 
     // --- Relaciones de 1:1 ---
-    public function user() {
+    public function user()
+    {
         return $this->belongsTo(User::class);
     }
 
-    public function career() {
+    public function career()
+    {
         return $this->belongsTo(Career::class);
     }
 }
