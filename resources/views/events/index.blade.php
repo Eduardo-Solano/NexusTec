@@ -30,6 +30,73 @@
                 </div>
             @endif
 
+            <!-- Barra de Búsqueda y Filtros -->
+            <div class="mb-6 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
+                <form method="GET" action="{{ route('events.index') }}" class="flex flex-col md:flex-row gap-4">
+                    <!-- Búsqueda por texto -->
+                    <div class="flex-1">
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            </div>
+                            <input type="text" name="search" value="{{ request('search') }}" 
+                                placeholder="Buscar por nombre o descripción..."
+                                class="block w-full pl-10 pr-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-ito-orange focus:border-ito-orange transition">
+                        </div>
+                    </div>
+
+                    <!-- Filtro por estado -->
+                    <div class="w-full md:w-48">
+                        <select name="status" 
+                            class="block w-full py-2.5 px-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-ito-orange focus:border-ito-orange transition">
+                            <option value="">📋 Todos los estados</option>
+                            <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>🟢 Activos</option>
+                            <option value="finished" {{ request('status') === 'finished' ? 'selected' : '' }}>🔴 Finalizados</option>
+                        </select>
+                    </div>
+
+                    <!-- Botones -->
+                    <div class="flex gap-2">
+                        <button type="submit" 
+                            class="px-4 py-2.5 bg-tecnm-blue hover:bg-blue-700 text-white font-bold rounded-lg transition flex items-center gap-2">
+                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                            </svg>
+                            Filtrar
+                        </button>
+                        @if(request('search') || request('status'))
+                            <a href="{{ route('events.index') }}" 
+                                class="px-4 py-2.5 bg-gray-500 hover:bg-gray-600 text-white font-bold rounded-lg transition flex items-center gap-2">
+                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                                Limpiar
+                            </a>
+                        @endif
+                    </div>
+                </form>
+
+                <!-- Indicador de filtros activos -->
+                @if(request('search') || request('status'))
+                    <div class="mt-3 flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                        <span class="font-medium">Filtros activos:</span>
+                        @if(request('search'))
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                                Búsqueda: "{{ request('search') }}"
+                            </span>
+                        @endif
+                        @if(request('status'))
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
+                                Estado: {{ request('status') === 'active' ? 'Activos' : 'Finalizados' }}
+                            </span>
+                        @endif
+                        <span class="text-gray-500">— {{ $events->total() }} resultado(s)</span>
+                    </div>
+                @endif
+            </div>
+
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 @forelse ($events as $event)
                     <div

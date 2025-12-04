@@ -13,6 +13,76 @@
                 </a>
             </div>
 
+            <!-- Barra de Búsqueda y Filtros -->
+            <div class="mb-6 bg-gray-800 p-4 rounded-xl shadow-lg border border-gray-700">
+                <form method="GET" action="{{ route('judges.index') }}" class="flex flex-col md:flex-row gap-4">
+                    <!-- Búsqueda por texto -->
+                    <div class="flex-1">
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <svg class="h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            </div>
+                            <input type="text" name="search" value="{{ request('search') }}" 
+                                placeholder="Buscar por nombre, email o empresa..."
+                                class="block w-full pl-10 pr-3 py-2.5 border border-gray-600 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:ring-2 focus:ring-ito-orange focus:border-ito-orange transition">
+                        </div>
+                    </div>
+
+                    <!-- Filtro por especialidad -->
+                    <div class="w-full md:w-56">
+                        <select name="specialty_id" 
+                            class="block w-full py-2.5 px-3 border border-gray-600 rounded-lg bg-gray-700 text-white focus:ring-2 focus:ring-ito-orange focus:border-ito-orange transition">
+                            <option value="">🔬 Todas las especialidades</option>
+                            @foreach($specialties as $specialty)
+                                <option value="{{ $specialty->id }}" {{ request('specialty_id') == $specialty->id ? 'selected' : '' }}>
+                                    {{ $specialty->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <!-- Botones -->
+                    <div class="flex gap-2">
+                        <button type="submit" 
+                            class="px-4 py-2.5 bg-tecnm-blue hover:bg-blue-700 text-white font-bold rounded-lg transition flex items-center gap-2">
+                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                            </svg>
+                            Filtrar
+                        </button>
+                        @if(request('search') || request('specialty_id'))
+                            <a href="{{ route('judges.index') }}" 
+                                class="px-4 py-2.5 bg-gray-600 hover:bg-gray-500 text-white font-bold rounded-lg transition flex items-center gap-2">
+                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                                Limpiar
+                            </a>
+                        @endif
+                    </div>
+                </form>
+
+                <!-- Indicador de filtros activos -->
+                @if(request('search') || request('specialty_id'))
+                    <div class="mt-3 flex flex-wrap items-center gap-2 text-sm text-gray-400">
+                        <span class="font-medium">Filtros activos:</span>
+                        @if(request('search'))
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-900 text-blue-200">
+                                Búsqueda: "{{ request('search') }}"
+                            </span>
+                        @endif
+                        @if(request('specialty_id'))
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-900 text-purple-200">
+                                Especialidad: {{ $specialties->find(request('specialty_id'))->name ?? 'N/A' }}
+                            </span>
+                        @endif
+                        <span class="text-gray-500">— {{ $judges->total() }} resultado(s)</span>
+                    </div>
+                @endif
+            </div>
+
             <div class="bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg border border-gray-700">
                 <table class="w-full whitespace-nowrap">
                     <thead class="bg-gray-900/50">
@@ -26,7 +96,7 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-700">
-                        @foreach ($judges as $judge)
+                        @forelse ($judges as $judge)
                             @php
                                 $assignedCount = $judge->assignedProjects()->count();
                                 $completedCount = $judge->assignedProjects()->wherePivot('is_completed', true)->count();
@@ -89,7 +159,21 @@
                                     </div>
                                 </td>
                             </tr>
-                        @endforeach
+                        @empty
+                            <tr>
+                                <td colspan="6" class="px-6 py-12 text-center">
+                                    <div class="flex flex-col items-center">
+                                        <svg class="h-12 w-12 text-gray-600 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                        </svg>
+                                        <p class="text-gray-400 font-medium">No se encontraron jueces</p>
+                                        @if(request('search') || request('specialty_id'))
+                                            <p class="text-gray-500 text-sm mt-1">Intenta modificar los filtros de búsqueda</p>
+                                        @endif
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
                 <div class="px-6 py-3 border-t border-gray-700 bg-gray-900/30">

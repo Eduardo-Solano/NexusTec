@@ -17,14 +17,32 @@ class TeamController extends Controller
     /**
      * Crear equipo
      */
-    public function index()
+    public function index(Request $request)
     {
-        // Mostrar todos los equipos para todos los usuarios
-        $teams = Team::with(['event', 'members', 'leader', 'advisor'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
+        // Obtener lista de eventos para el filtro
+        $events = \App\Models\Event::orderBy('name')->get();
 
-        return view('teams.index', compact('teams'));
+        $query = Team::with(['event', 'members', 'leader', 'advisor']);
+
+        // Filtro por búsqueda (nombre del equipo o líder)
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhereHas('leader', function ($q) use ($search) {
+                      $q->where('name', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        // Filtro por evento
+        if ($request->filled('event_id')) {
+            $query->where('event_id', $request->event_id);
+        }
+
+        $teams = $query->orderBy('created_at', 'desc')->paginate(10)->withQueryString();
+
+        return view('teams.index', compact('teams', 'events'));
     }
 
 
