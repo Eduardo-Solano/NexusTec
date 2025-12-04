@@ -62,10 +62,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     /* EVENTOS - Todos pueden ver, solo admin/staff pueden gestionar */
-    Route::get('/events', [EventController::class, 'index'])->name('events.index');
-    Route::get('/events/{event}', [EventController::class, 'show'])->name('events.show');
-    Route::get('/events/{event}/rankings', [EventController::class, 'rankings'])->name('events.rankings');
-    
     Route::middleware(['role:admin|staff'])->group(function () {
         Route::get('/events/create', [EventController::class, 'create'])->name('events.create');
         Route::post('/events', [EventController::class, 'store'])->name('events.store');
@@ -74,6 +70,10 @@ Route::middleware('auth')->group(function () {
         Route::patch('/events/{event}', [EventController::class, 'update']);
         Route::delete('/events/{event}', [EventController::class, 'destroy'])->name('events.destroy');
     });
+    
+    Route::get('/events', [EventController::class, 'index'])->name('events.index');
+    Route::get('/events/{event}', [EventController::class, 'show'])->name('events.show');
+    Route::get('/events/{event}/rankings', [EventController::class, 'rankings'])->name('events.rankings');
 
     /* EXPORTACIONES - Solo admin/staff */
     Route::middleware(['role:admin|staff'])->group(function () {
@@ -85,9 +85,6 @@ Route::middleware('auth')->group(function () {
     });
 
     /* EQUIPOS - Todos pueden ver, estudiantes pueden crear/unirse */
-    Route::get('/teams', [TeamController::class, 'index'])->name('teams.index');
-    Route::get('/teams/{team}', [TeamController::class, 'show'])->name('teams.show');
-    
     Route::middleware(['role:student'])->group(function () {
         Route::get('/teams/create', [TeamController::class, 'create'])->name('teams.create');
         Route::post('/teams', [TeamController::class, 'store'])->name('teams.store');
@@ -105,10 +102,10 @@ Route::middleware('auth')->group(function () {
         Route::delete('/teams/{team}', [TeamController::class, 'destroy'])->name('teams.destroy');
     });
 
+    Route::get('/teams', [TeamController::class, 'index'])->name('teams.index');
+    Route::get('/teams/{team}', [TeamController::class, 'show'])->name('teams.show');
+
     /* PROYECTOS - Todos pueden ver, estudiantes entregan, admin/staff gestionan */
-    Route::get('/projects', [ProjectController::class, 'index'])->name('projects.index');
-    Route::get('/projects/{project}', [ProjectController::class, 'show'])->name('projects.show');
-    
     Route::middleware(['role:student'])->group(function () {
         Route::get('/projects/create', [ProjectController::class, 'create'])->name('projects.create');
         Route::post('/projects', [ProjectController::class, 'store'])->name('projects.store');
@@ -125,6 +122,9 @@ Route::middleware('auth')->group(function () {
         Route::post('/projects/{project}/assign-judge', [ProjectController::class, 'assignJudge'])->name('projects.assign-judge');
         Route::delete('/projects/{project}/remove-judge/{judge}', [ProjectController::class, 'removeJudge'])->name('projects.remove-judge');
     });
+
+    Route::get('/projects', [ProjectController::class, 'index'])->name('projects.index');
+    Route::get('/projects/{project}', [ProjectController::class, 'show'])->name('projects.show');
 
     /* EVALUACIONES - Solo jueces */
     Route::middleware(['role:judge'])->group(function () {
