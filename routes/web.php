@@ -16,6 +16,9 @@ use App\Http\Controllers\AwardController;
 use App\Http\Controllers\PublicController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\ActivityLogController;
+use App\Http\Controllers\CareerController;
+use App\Http\Controllers\SpecialtyController;
+use App\Http\Controllers\ReportController;
 use App\Models\Event;
 
 // Página de inicio
@@ -123,6 +126,19 @@ Route::middleware('auth')->group(function () {
         Route::resource('staff', StaffProfileController::class);
         Route::resource('students', StudentProfileController::class);
         Route::resource('judges', JudgeController::class);
+
+        /* GESTIÓN DE CARRERAS */
+        Route::resource('careers', CareerController::class);
+
+        /* GESTIÓN DE ESPECIALIDADES */
+        Route::resource('specialties', SpecialtyController::class);
+
+        /* REPORTES Y ESTADÍSTICAS */
+        Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+        Route::get('/reports/by-event', [ReportController::class, 'byEvent'])->name('reports.by-event');
+        Route::get('/reports/by-career', [ReportController::class, 'byCareer'])->name('reports.by-career');
+        Route::get('/reports/by-period', [ReportController::class, 'byPeriod'])->name('reports.by-period');
+        Route::get('/reports/export-participants', [ReportController::class, 'exportParticipants'])->name('reports.export-participants');
 
         /* HISTORIAL DE ACTIVIDADES */
         Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
