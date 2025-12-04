@@ -29,6 +29,13 @@
                         </x-nav-link>
                     </div>
                 @endcan
+                @can('projects.view')
+                    <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                        <x-nav-link :href="route('projects.index')" :active="request()->routeIs('projects.*')">
+                            {{ __('Proyectos') }}
+                        </x-nav-link>
+                    </div>
+                @endcan
                 @can('criteria.view')
                     <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                         <x-nav-link :href="route('criteria.index')" :active="request()->routeIs('criteria.*')">
@@ -543,6 +550,33 @@
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
+            
+            {{-- Eventos - Todos pueden ver --}}
+            <x-responsive-nav-link :href="route('events.index')" :active="request()->routeIs('events.*')">
+                {{ __('Eventos') }}
+            </x-responsive-nav-link>
+            
+            {{-- Equipos - Todos los autenticados pueden ver --}}
+            @can('teams.view')
+                <x-responsive-nav-link :href="route('teams.index')" :active="request()->routeIs('teams.*')">
+                    {{ __('Equipos') }}
+                </x-responsive-nav-link>
+            @endcan
+            
+            {{-- Proyectos - Todos pueden ver --}}
+            @can('projects.view')
+                <x-responsive-nav-link :href="route('projects.index')" :active="request()->routeIs('projects.*')">
+                    {{ __('Proyectos') }}
+                </x-responsive-nav-link>
+            @endcan
+            
+            {{-- Criterios - Solo admin/staff --}}
+            @can('criteria.view')
+                <x-responsive-nav-link :href="route('criteria.index')" :active="request()->routeIs('criteria.*')">
+                    {{ __('Criterios') }}
+                </x-responsive-nav-link>
+            @endcan
+            
             @can('staff.view')
                 <x-responsive-nav-link :href="route('staff.index')" :active="request()->routeIs('staff.*')">
                     {{ __('Docentes') }}
