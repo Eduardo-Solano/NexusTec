@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Award;
 use App\Models\Event;
 use App\Models\Team;
+use App\Models\ActivityLog;
 use App\Notifications\AwardWonNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -101,6 +102,15 @@ class AwardController extends Controller
         
         // Enviar notificación a cada miembro
         Notification::send($teamMembers, new AwardWonNotification($award));
+
+        // Registrar actividad
+        ActivityLog::log('awarded', "Premio '{$awardName}' asignado al equipo '{$award->team->name}'", $award, [
+            'event_id' => $event->id,
+            'event_name' => $event->name,
+            'team_id' => $award->team_id,
+            'team_name' => $award->team->name,
+            'category' => $awardName,
+        ]);
 
         return redirect()->route('awards.index', ['event_id' => $validated['event_id']])
             ->with('success', '¡Premio asignado exitosamente! 🏆 Se notificó a los ' . $teamMembers->count() . ' integrantes del equipo.');

@@ -15,11 +15,35 @@ class StudentProfileController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        // Obtener solo usuarios con rol 'student'
-        $students = User::role('student')->with('studentProfile.career')->paginate(15);
-        return view('students.index', compact('students'));
+        // Obtener carreras para el filtro
+        $careers = Career::orderBy('name')->get();
+
+        $query = User::role('student')->with('studentProfile.career');
+
+        // Filtro por búsqueda (nombre, email o número de control)
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhereHas('studentProfile', function ($q) use ($search) {
+                      $q->where('control_number', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        // Filtro por carrera
+        if ($request->filled('career_id')) {
+            $query->whereHas('studentProfile', function ($q) use ($request) {
+                $q->where('career_id', $request->career_id);
+            });
+        }
+
+        $students = $query->paginate(15)->withQueryString();
+
+        return view('students.index', compact('students', 'careers'));
     }
 
     /**

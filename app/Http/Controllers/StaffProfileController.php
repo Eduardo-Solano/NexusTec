@@ -16,10 +16,38 @@ class StaffProfileController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        // Filtramos usuarios que tengan el rol 'staff' o 'advisor'
-        $staffMembers = User::role(['staff', 'advisor'])->with('staffProfile')->paginate(10);
+        $query = User::role(['staff', 'advisor'])->with('staffProfile');
+
+        // Filtro por búsqueda (nombre, email o número de empleado)
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhereHas('staffProfile', function ($q) use ($search) {
+                      $q->where('employee_number', 'like', "%{$search}%")
+                        ->orWhere('department', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        // Filtro por tipo de rol
+        if ($request->filled('role_type')) {
+            if ($request->role_type === 'staff') {
+                $query->role('staff');
+            } elseif ($request->role_type === 'advisor') {
+                $query->role('advisor')->whereDoesntHave('roles', function ($q) {
+                    $q->where('name', 'staff');
+                });
+            } elseif ($request->role_type === 'both') {
+                $query->role('staff')->role('advisor');
+            }
+        }
+
+        $staffMembers = $query->paginate(10)->withQueryString();
+
         return view('staff.index', compact('staffMembers'));
     }
 

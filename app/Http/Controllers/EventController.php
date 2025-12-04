@@ -14,24 +14,32 @@ class EventController extends Controller
     /**
      * Display a listing of the resource.
      */
-
-    // Opcional: Constructor para proteger todo el controlador con Spatie
-    /*
-    public function __construct()
-    {
-        $this->middleware('permission:events.view')->only('index');
-        $this->middleware('permission:events.create')->only(['create', 'store']);
-        // etc...
-    }
-    */
-
-    public function index()
+    public function index(Request $request)
     {
         // Obtener todos los eventos con sus equipos asociados ordenados por fecha de inicio descendente.
-        // Usamos 'paginate(10)' para que si hay 100 eventos, no explote la pantalla
-        $events = Event::withCount('teams') // Eager loading (optimización)
-            ->orderBy('start_date', 'desc')
-            ->paginate(9);
+        // Usamos 'paginate(9)' para que si hay 100 eventos, no explote la pantalla
+        $query = Event::withCount('teams');
+
+        // Filtro por búsqueda (nombre o descripción)
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        // Filtro por estado (activo/finalizado)
+        if ($request->filled('status')) {
+            $today = now();
+            if ($request->status === 'active') {
+                $query->where('end_date', '>=', $today);
+            } elseif ($request->status === 'finished') {
+                $query->where('end_date', '<', $today);
+            }
+        }
+
+        $events = $query->orderBy('start_date', 'desc')->paginate(9)->withQueryString();
 
         return view('events.index', compact('events'));
     }

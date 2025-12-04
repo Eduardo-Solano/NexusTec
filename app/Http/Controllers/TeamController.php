@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Team;
 use App\Models\Event;
 use App\Models\User;
+use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -17,14 +18,32 @@ class TeamController extends Controller
     /**
      * Crear equipo
      */
-    public function index()
+    public function index(Request $request)
     {
-        // Mostrar todos los equipos para todos los usuarios
-        $teams = Team::with(['event', 'members', 'leader', 'advisor'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
+        // Obtener lista de eventos para el filtro
+        $events = \App\Models\Event::orderBy('name')->get();
 
-        return view('teams.index', compact('teams'));
+        $query = Team::with(['event', 'members', 'leader', 'advisor']);
+
+        // Filtro por búsqueda (nombre del equipo o líder)
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhereHas('leader', function ($q) use ($search) {
+                      $q->where('name', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        // Filtro por evento
+        if ($request->filled('event_id')) {
+            $query->where('event_id', $request->event_id);
+        }
+
+        $teams = $query->orderBy('created_at', 'desc')->paginate(10)->withQueryString();
+
+        return view('teams.index', compact('teams', 'events'));
     }
 
 
@@ -107,6 +126,13 @@ class TeamController extends Controller
                 // Notificación de invitación
                 $user->notify(new TeamInvitationNotification($team));
             }
+
+            // Registrar actividad
+            ActivityLog::log('created', "Equipo '{$team->name}' creado para el evento '{$event->name}'", $team, [
+                'event_id' => $event->id,
+                'event_name' => $event->name,
+                'members_invited' => count(array_filter($request->members ?? [])),
+            ]);
 
             return redirect()->route('events.show', $event)
                 ->with('success', 'Equipo creado exitosamente.');
@@ -195,6 +221,62 @@ class TeamController extends Controller
         $team->members()->detach($user->id);
 
         return back()->with('success', 'Solicitud rechazada.');
+    }
+
+    /**
+     * Aceptar invitación (cuando el usuario actual es el invitado)
+     */
+    public function acceptInvitation(Team $team, $notification = null)
+    {
+        $user = Auth::user();
+
+        // Marcar notificación como leída
+        if ($notification) {
+            $user->notifications()->where('id', $notification)->update(['read_at' => now()]);
+        }
+
+        // Verificar que el usuario tiene una invitación pendiente
+        $member = $team->members()->where('user_id', $user->id)->first();
+
+        if (!$member) {
+            return back()->with('error', 'No tienes una invitación pendiente para este equipo.');
+        }
+
+        if ($member->pivot->is_accepted) {
+            return back()->with('success', 'Ya eres miembro de este equipo.');
+        }
+
+        // Aceptar invitación
+        $team->members()->updateExistingPivot($user->id, [
+            'is_accepted' => true
+        ]);
+
+        return back()->with('success', '¡Te has unido al equipo exitosamente!');
+    }
+
+    /**
+     * Rechazar invitación (cuando el usuario actual es el invitado)
+     */
+    public function rejectInvitation(Team $team, $notification = null)
+    {
+        $user = Auth::user();
+
+        // Marcar notificación como leída
+        if ($notification) {
+            $user->notifications()->where('id', $notification)->update(['read_at' => now()]);
+        }
+
+        // Verificar que el usuario tiene una invitación pendiente
+        $member = $team->members()->where('user_id', $user->id)->first();
+
+        if (!$member) {
+            return back()->with('error', 'No tienes una invitación pendiente para este equipo.');
+        }
+
+        // Rechazar invitación (remover de la tabla pivot)
+        $team->members()->detach($user->id);
+
+        return back()->with('success', 'Invitación rechazada.');
     }
 
 }

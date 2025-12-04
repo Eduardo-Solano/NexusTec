@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Project;
 use App\Models\Team;
 use App\Models\User;
+use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -69,11 +70,18 @@ class ProjectController extends Controller
         }
 
         // Crear el proyecto
-        Project::create([
+        $project = Project::create([
             'name' => $request->name,
             'description' => $request->description,
             'repository_url' => $request->repository_url,
             'team_id' => $team->id,
+        ]);
+
+        // Registrar actividad
+        ActivityLog::log('submitted', "Proyecto '{$project->name}' entregado por el equipo '{$team->name}'", $project, [
+            'team_id' => $team->id,
+            'team_name' => $team->name,
+            'event_id' => $team->event_id,
         ]);
 
         // Redirigir al evento con éxito

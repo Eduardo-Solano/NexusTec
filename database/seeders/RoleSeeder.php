@@ -131,7 +131,60 @@ class RoleSeeder extends Seeder
         ]);
 
         // E) ADMIN (Administrador Total)
+        // El admin tiene permisos administrativos, NO permisos de participante
         $roleAdmin = Role::firstOrCreate(['name' => 'admin']);
-        $roleAdmin->syncPermissions(Permission::all());
+        $roleAdmin->syncPermissions([
+            // Dashboard
+            'dashboard.view',
+            'dashboard.stats',
+            // Usuarios - gestión completa
+            'users.view',
+            'users.create',
+            'users.edit',
+            'users.delete',
+            // Estudiantes - gestión completa
+            'students.view',
+            'students.create',
+            'students.edit',
+            'students.delete',
+            // Staff - gestión completa
+            'staff.view',
+            'staff.create',
+            'staff.edit',
+            'staff.delete',
+            // Jueces - gestión completa
+            'judges.view',
+            'judges.create',
+            'judges.edit',
+            'judges.delete',
+            // Eventos - gestión completa
+            'events.view',
+            'events.create',
+            'events.edit',
+            'events.delete',
+            'events.publish',
+            // Equipos - gestión completa (pero NO unirse)
+            'teams.view',
+            'teams.create',
+            'teams.edit',
+            'teams.delete',
+            // Proyectos - gestión completa (pero NO entregar)
+            'projects.view',
+            'projects.create',
+            'projects.edit',
+            'projects.delete',
+            // Criterios - gestión completa
+            'criteria.view',
+            'criteria.create',
+            'criteria.edit',
+            'criteria.delete',
+            // Premios - gestión completa
+            'awards.view',
+            'awards.create',
+            'awards.edit',
+            'awards.delete',
+            // Reportes
+            'reports.download',
+        ]);
     }
 }

@@ -15,10 +15,35 @@ class JudgeController extends Controller
     /**
      * Display a listing of the judges.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $judges = User::role('judge')->with('judgeProfile')->paginate(10);
-        return view('judges.index', compact('judges'));
+        // Obtener especialidades para el filtro
+        $specialties = Specialty::orderBy('name')->get();
+
+        $query = User::role('judge')->with(['judgeProfile.specialty', 'assignedProjects']);
+
+        // Filtro por búsqueda (nombre, email o empresa)
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhereHas('judgeProfile', function ($q) use ($search) {
+                      $q->where('company', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        // Filtro por especialidad
+        if ($request->filled('specialty_id')) {
+            $query->whereHas('judgeProfile', function ($q) use ($request) {
+                $q->where('specialty_id', $request->specialty_id);
+            });
+        }
+
+        $judges = $query->paginate(10)->withQueryString();
+
+        return view('judges.index', compact('judges', 'specialties'));
     }
 
     /**
