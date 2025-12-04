@@ -517,7 +517,6 @@
                                 </div>
                             </div>
                         @endif
-                @endif
                 @endcan
 
             {{-- ========== SECCIÓN ESTUDIANTES ========== --}}
