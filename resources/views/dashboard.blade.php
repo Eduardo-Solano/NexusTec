@@ -517,10 +517,11 @@
                                 </div>
                             </div>
                         @endif
-                    </div>
+                @endif
                 @endcan
 
-            @can('events.join')
+            {{-- ========== SECCIÓN ESTUDIANTES ========== --}}
+            @role('student')
                 <div class="grid lg:grid-cols-3 gap-8">
                     <div class="lg:col-span-2 space-y-6">
                         <h3 class="text-xl font-bold text-white">Tu Actividad</h3>
@@ -709,7 +710,7 @@
                         </div>
                     </div>
                 </div>
-            @endcan
+            @endrole
 
         </div>
     </div>

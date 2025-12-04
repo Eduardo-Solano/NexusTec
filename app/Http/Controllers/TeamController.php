@@ -15,6 +15,14 @@ use App\Notifications\TeamJoinRequestNotification;
 
 class TeamController extends Controller
 {
+    public function __construct()
+    {
+        // Solo estudiantes pueden crear equipos, unirse y gestionar solicitudes
+        $this->middleware('permission:teams.create')->only(['create', 'store']);
+        $this->middleware('permission:teams.join')->only(['requestJoin']);
+        $this->middleware('permission:teams.lead')->only(['accept', 'reject']);
+    }
+
     /**
      * Crear equipo
      */
