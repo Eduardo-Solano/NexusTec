@@ -2,13 +2,42 @@
     <div class="min-h-screen bg-[#0f172a] py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             
-            <div class="mb-8">
+            <div class="mb-8 flex items-center justify-between">
                 <a href="{{ route('events.show', $project->team->event_id) }}" class="inline-flex items-center text-gray-400 hover:text-white transition group">
                     <div class="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center mr-3 border border-gray-700 group-hover:border-ito-orange">
                         <svg class="w-4 h-4 group-hover:text-ito-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
                     </div>
                     <span class="text-sm font-medium">Volver al Evento</span>
                 </a>
+
+                {{-- Botones de Editar/Eliminar (solo si tiene permiso y no ha sido evaluado) --}}
+                @php
+                    $isLeader = $project->team->leader_id === Auth::id();
+                    $isAdminOrStaff = Auth::user()->hasAnyRole(['admin', 'staff']);
+                    $canModify = ($isLeader || $isAdminOrStaff) && !$project->evaluations()->exists();
+                    $hasEvaluations = $project->evaluations()->exists();
+                @endphp
+
+                @if($isLeader || $isAdminOrStaff)
+                    <div class="flex items-center gap-3">
+                        @if($canModify)
+                            <a href="{{ route('projects.edit', $project) }}" 
+                               class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold rounded-lg transition">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                </svg>
+                                Editar
+                            </a>
+                        @else
+                            <span class="inline-flex items-center gap-2 px-4 py-2 bg-gray-700 text-gray-400 text-sm font-bold rounded-lg cursor-not-allowed" title="No se puede editar porque ya fue evaluado">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                </svg>
+                                Bloqueado
+                            </span>
+                        @endif
+                    </div>
+                @endif
             </div>
 
             {{-- Mensajes Flash --}}
@@ -20,6 +49,26 @@
             @if(session('error'))
                 <div class="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm">
                     {{ session('error') }}
+                </div>
+            @endif
+            @if(session('info'))
+                <div class="mb-6 p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl text-blue-400 text-sm">
+                    {{ session('info') }}
+                </div>
+            @endif
+
+            {{-- Banner de Estado de Evaluación --}}
+            @if($hasEvaluations && ($isLeader || $isAdminOrStaff))
+                <div class="mb-6 p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl flex items-center gap-4">
+                    <div class="p-2 bg-amber-500/20 rounded-lg">
+                        <svg class="w-6 h-6 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-amber-300 font-bold text-sm">Proyecto en Evaluación</p>
+                        <p class="text-amber-400/70 text-xs">Este proyecto ya ha recibido evaluaciones. La edición y eliminación están bloqueadas para proteger la integridad de las calificaciones.</p>
+                    </div>
                 </div>
             @endif
 

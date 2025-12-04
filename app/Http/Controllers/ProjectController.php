@@ -107,7 +107,25 @@ class ProjectController extends Controller
      */
     public function edit(Project $project)
     {
-        //
+        // Cargar relaciones necesarias
+        $project->load(['team.leader', 'team.event', 'evaluations']);
+        
+        // Verificar permisos: Solo líder del equipo o admin/staff
+        $user = Auth::user();
+        $isLeader = $project->team->leader_id === $user->id;
+        $isAdminOrStaff = $user->hasAnyRole(['admin', 'staff']);
+        
+        if (!$isLeader && !$isAdminOrStaff) {
+            abort(403, 'No tienes permiso para editar este proyecto.');
+        }
+        
+        // Verificar integridad: NO permitir editar si ya tiene evaluaciones
+        if ($project->evaluations()->exists()) {
+            return redirect()->route('projects.show', $project)
+                ->with('error', 'No se puede editar un proyecto que ya ha sido evaluado. Esto protege la integridad de las calificaciones.');
+        }
+        
+        return view('projects.edit', compact('project'));
     }
 
     /**
@@ -115,7 +133,31 @@ class ProjectController extends Controller
      */
     public function update(Request $request, Project $project)
     {
-        //
+        // Verificar permisos: Solo líder del equipo o admin/staff
+        $user = Auth::user();
+        $isLeader = $project->team->leader_id === $user->id;
+        $isAdminOrStaff = $user->hasAnyRole(['admin', 'staff']);
+        
+        if (!$isLeader && !$isAdminOrStaff) {
+            abort(403, 'No tienes permiso para editar este proyecto.');
+        }
+        
+        // Verificar integridad: NO permitir editar si ya tiene evaluaciones
+        if ($project->evaluations()->exists()) {
+            return redirect()->route('projects.show', $project)
+                ->with('error', 'No se puede editar un proyecto que ya ha sido evaluado.');
+        }
+        
+        $validated = $request->validate([
+            'name' => 'required|string|max:100',
+            'description' => 'required|string|max:1000',
+            'repository_url' => 'required|url',
+        ]);
+        
+        $project->update($validated);
+        
+        return redirect()->route('projects.show', $project)
+            ->with('success', 'Proyecto actualizado correctamente.');
     }
 
     /**
@@ -123,7 +165,36 @@ class ProjectController extends Controller
      */
     public function destroy(Project $project)
     {
-        //
+        // Verificar permisos: Solo líder del equipo o admin/staff
+        $user = Auth::user();
+        $isLeader = $project->team->leader_id === $user->id;
+        $isAdminOrStaff = $user->hasAnyRole(['admin', 'staff']);
+        
+        if (!$isLeader && !$isAdminOrStaff) {
+            abort(403, 'No tienes permiso para eliminar este proyecto.');
+        }
+        
+        // Verificar integridad: NO permitir eliminar si tiene evaluaciones
+        if ($project->evaluations()->exists()) {
+            return back()->with('error', 'No se puede eliminar un proyecto que ya ha sido evaluado. Esto protege la integridad de los datos históricos.');
+        }
+        
+        // Verificar integridad: NO permitir eliminar si el equipo tiene premios
+        if ($project->team->awards()->exists()) {
+            return back()->with('error', 'No se puede eliminar un proyecto cuyo equipo ha recibido premios.');
+        }
+        
+        $eventId = $project->team->event_id;
+        $projectName = $project->name;
+        
+        // Primero remover jueces asignados (limpieza de tabla pivot)
+        $project->judges()->detach();
+        
+        // Eliminar el proyecto
+        $project->delete();
+        
+        return redirect()->route('events.show', $eventId)
+            ->with('success', "Proyecto \"{$projectName}\" eliminado correctamente.");
     }
 
     /**
