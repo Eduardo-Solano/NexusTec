@@ -12,6 +12,12 @@ use Illuminate\Support\Facades\DB;   // <--- VITAL
 
 class EvaluationController extends Controller
 {
+    public function __construct()
+    {
+        // Solo jueces pueden evaluar proyectos
+        $this->middleware('permission:projects.grade');
+    }
+
     /**
      * Muestra la Rúbrica de Evaluación.
      */

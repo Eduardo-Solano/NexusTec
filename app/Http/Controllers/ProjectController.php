@@ -11,6 +11,19 @@ use Illuminate\Support\Facades\Auth;
 
 class ProjectController extends Controller
 {
+    public function __construct()
+    {
+        // Todos los autenticados pueden ver proyectos
+        $this->middleware('permission:projects.view')->only(['index', 'show']);
+        // Solo estudiantes (líder) pueden crear/entregar proyectos
+        $this->middleware('permission:projects.deliver')->only(['create', 'store']);
+        // El líder o admin/staff pueden editar
+        $this->middleware('permission:projects.edit|projects.deliver')->only(['edit', 'update']);
+        // Solo admin/staff pueden eliminar y gestionar jueces
+        $this->middleware('permission:projects.delete')->only(['destroy']);
+        $this->middleware('permission:projects.edit')->only(['assignJudge', 'removeJudge']);
+    }
+
     /**
      * Display a listing of the resource.
      */

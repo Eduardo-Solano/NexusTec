@@ -11,20 +11,19 @@ use Illuminate\Support\Facades\DB;
 
 class EventController extends Controller
 {
+    public function __construct()
+    {
+        // Todos pueden ver eventos
+        $this->middleware('permission:events.view')->only(['index', 'show', 'rankings']);
+        // Solo admin/staff pueden crear/editar/eliminar
+        $this->middleware('permission:events.create')->only(['create', 'store']);
+        $this->middleware('permission:events.edit')->only(['edit', 'update']);
+        $this->middleware('permission:events.delete')->only(['destroy']);
+    }
+
     /**
      * Display a listing of the resource.
      */
-
-    // Opcional: Constructor para proteger todo el controlador con Spatie
-    /*
-    public function __construct()
-    {
-        $this->middleware('permission:events.view')->only('index');
-        $this->middleware('permission:events.create')->only(['create', 'store']);
-        // etc...
-    }
-    */
-
     public function index(Request $request)
     {
         // Obtener todos los eventos con sus equipos asociados ordenados por fecha de inicio descendente.

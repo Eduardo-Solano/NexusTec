@@ -231,4 +231,60 @@ class TeamController extends Controller
         return back()->with('success', 'Solicitud rechazada.');
     }
 
+    /**
+     * Aceptar invitación (cuando el usuario actual es el invitado)
+     */
+    public function acceptInvitation(Team $team, $notification = null)
+    {
+        $user = Auth::user();
+
+        // Marcar notificación como leída
+        if ($notification) {
+            $user->notifications()->where('id', $notification)->update(['read_at' => now()]);
+        }
+
+        // Verificar que el usuario tiene una invitación pendiente
+        $member = $team->members()->where('user_id', $user->id)->first();
+
+        if (!$member) {
+            return back()->with('error', 'No tienes una invitación pendiente para este equipo.');
+        }
+
+        if ($member->pivot->is_accepted) {
+            return back()->with('success', 'Ya eres miembro de este equipo.');
+        }
+
+        // Aceptar invitación
+        $team->members()->updateExistingPivot($user->id, [
+            'is_accepted' => true
+        ]);
+
+        return back()->with('success', '¡Te has unido al equipo exitosamente!');
+    }
+
+    /**
+     * Rechazar invitación (cuando el usuario actual es el invitado)
+     */
+    public function rejectInvitation(Team $team, $notification = null)
+    {
+        $user = Auth::user();
+
+        // Marcar notificación como leída
+        if ($notification) {
+            $user->notifications()->where('id', $notification)->update(['read_at' => now()]);
+        }
+
+        // Verificar que el usuario tiene una invitación pendiente
+        $member = $team->members()->where('user_id', $user->id)->first();
+
+        if (!$member) {
+            return back()->with('error', 'No tienes una invitación pendiente para este equipo.');
+        }
+
+        // Rechazar invitación (remover de la tabla pivot)
+        $team->members()->detach($user->id);
+
+        return back()->with('success', 'Invitación rechazada.');
+    }
+
 }

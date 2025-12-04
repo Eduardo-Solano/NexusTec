@@ -102,10 +102,10 @@ Route::middleware('auth')->group(function () {
         ->name('teams.advisor.response');
 
     /* CRITERIOS */
-    Route::resource('criteria', CriterionController::class)->middleware('permission:criteria.view');
+    Route::resource('criteria', CriterionController::class);
 
     /* PREMIOS */
-    Route::resource('awards', AwardController::class)->middleware('role:admin|staff');
+    Route::resource('awards', AwardController::class);
 
     /* NOTIFICACIONES */
     Route::post('/notifications/{notification}/read', function ($notificationId) {

@@ -15,6 +15,12 @@ use Illuminate\Support\Facades\Auth;
 
 class ExportController extends Controller
 {
+    public function __construct()
+    {
+        // Solo admin/staff pueden exportar reportes y diplomas
+        $this->middleware('permission:reports.download');
+    }
+
     /**
      * Obtener datos de rankings para exportación
      */
