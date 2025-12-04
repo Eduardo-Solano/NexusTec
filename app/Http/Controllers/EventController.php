@@ -11,16 +11,6 @@ use Illuminate\Support\Facades\DB;
 
 class EventController extends Controller
 {
-    public function __construct()
-    {
-        // Todos pueden ver eventos
-        $this->middleware('permission:events.view')->only(['index', 'show', 'rankings']);
-        // Solo admin/staff pueden crear/editar/eliminar
-        $this->middleware('permission:events.create')->only(['create', 'store']);
-        $this->middleware('permission:events.edit')->only(['edit', 'update']);
-        $this->middleware('permission:events.delete')->only(['destroy']);
-    }
-
     /**
      * Display a listing of the resource.
      */

@@ -7,15 +7,6 @@ use Illuminate\Http\Request;
 
 class CriterionController extends Controller
 {
-    public function __construct()
-    {
-        // Gestión de criterios solo para admin/staff
-        $this->middleware('permission:criteria.view')->only(['index', 'show']);
-        $this->middleware('permission:criteria.create')->only(['create', 'store']);
-        $this->middleware('permission:criteria.edit')->only(['edit', 'update']);
-        $this->middleware('permission:criteria.delete')->only(['destroy']);
-    }
-
     /**
      * Display a listing of the resource.
      */

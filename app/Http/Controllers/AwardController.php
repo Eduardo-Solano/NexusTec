@@ -13,15 +13,6 @@ use Illuminate\Support\Facades\Notification;
 
 class AwardController extends Controller
 {
-    public function __construct()
-    {
-        // Gestión de premios solo para admin/staff
-        $this->middleware('permission:awards.view')->only(['index', 'show']);
-        $this->middleware('permission:awards.create')->only(['create', 'store']);
-        $this->middleware('permission:awards.edit')->only(['edit', 'update']);
-        $this->middleware('permission:awards.delete')->only(['destroy']);
-    }
-
     /**
      * Display a listing of awards for an event.
      */
