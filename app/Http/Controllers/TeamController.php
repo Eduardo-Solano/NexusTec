@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Team;
 use App\Models\Event;
 use App\Models\User;
+use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -125,6 +126,13 @@ class TeamController extends Controller
                 // Notificación de invitación
                 $user->notify(new TeamInvitationNotification($team));
             }
+
+            // Registrar actividad
+            ActivityLog::log('created', "Equipo '{$team->name}' creado para el evento '{$event->name}'", $team, [
+                'event_id' => $event->id,
+                'event_name' => $event->name,
+                'members_invited' => count(array_filter($request->members ?? [])),
+            ]);
 
             return redirect()->route('events.show', $event)
                 ->with('success', 'Equipo creado exitosamente.');

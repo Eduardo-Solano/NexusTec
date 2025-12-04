@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Evaluation;
 use App\Models\Project;
 use App\Models\Criterion;
+use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth; // <--- VITAL
 use Illuminate\Support\Facades\DB;   // <--- VITAL
@@ -94,6 +95,15 @@ class EvaluationController extends Controller
             // Marcar como completado en la tabla pivot judge_project
             $project->judges()->updateExistingPivot(Auth::id(), [
                 'is_completed' => true
+            ]);
+
+            // Registrar actividad
+            $totalScore = array_sum($request->scores);
+            ActivityLog::log('evaluated', "Proyecto '{$project->name}' evaluado por " . Auth::user()->name, $project, [
+                'judge_id' => Auth::id(),
+                'judge_name' => Auth::user()->name,
+                'total_score' => $totalScore,
+                'criteria_count' => count($request->scores),
             ]);
         });
 

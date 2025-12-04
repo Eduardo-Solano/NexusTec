@@ -57,6 +57,13 @@
                         </x-nav-link>
                     </div>
                 @endcan
+                @role('admin')
+                    <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                        <x-nav-link :href="route('activity-logs.index')" :active="request()->routeIs('activity-logs.*')">
+                            {{ __('Actividad') }}
+                        </x-nav-link>
+                    </div>
+                @endrole
             </div>
 
             <!-- Settings Dropdown -->
@@ -526,6 +533,11 @@
                     {{ __('Jueces') }}
                 </x-responsive-nav-link>
             @endcan
+            @role('admin')
+                <x-responsive-nav-link :href="route('activity-logs.index')" :active="request()->routeIs('activity-logs.*')">
+                    {{ __('Historial de Actividad') }}
+                </x-responsive-nav-link>
+            @endrole
         </div>
 
         <!-- Responsive Settings Options -->

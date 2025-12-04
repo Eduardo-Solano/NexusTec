@@ -15,6 +15,7 @@ use App\Http\Controllers\CriterionController;
 use App\Http\Controllers\AwardController;
 use App\Http\Controllers\PublicController;
 use App\Http\Controllers\ExportController;
+use App\Http\Controllers\ActivityLogController;
 use App\Models\Event;
 
 // Página de inicio
@@ -123,6 +124,9 @@ Route::middleware('auth')->group(function () {
         Route::resource('students', StudentProfileController::class);
         Route::resource('judges', JudgeController::class);
 
+        /* HISTORIAL DE ACTIVIDADES */
+        Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
+        Route::get('/activity-logs/{activityLog}', [ActivityLogController::class, 'show'])->name('activity-logs.show');
     });
 });
 
