@@ -14,6 +14,7 @@ use App\Http\Controllers\EvaluationController;
 use App\Http\Controllers\CriterionController;
 use App\Http\Controllers\AwardController;
 use App\Http\Controllers\PublicController;
+use App\Http\Controllers\ExportController;
 use App\Models\Event;
 
 // Página de inicio
@@ -59,6 +60,10 @@ Route::middleware('auth')->group(function () {
     /* EVENTOS */
     Route::resource('events', EventController::class);
     Route::get('/events/{event}/rankings', [EventController::class, 'rankings'])->name('events.rankings');
+
+    /* EXPORTACIONES */
+    Route::get('/events/{event}/export/excel', [ExportController::class, 'rankingsExcel'])->name('export.rankings.excel');
+    Route::get('/events/{event}/export/pdf', [ExportController::class, 'rankingsPdf'])->name('export.rankings.pdf');
 
     /* EQUIPOS */
     Route::resource('teams', TeamController::class);

@@ -13,6 +13,27 @@
                 </p>
             </div>
             <div class="flex items-center gap-3">
+                @if(Auth::user()->hasAnyRole(['admin', 'staff']))
+                    {{-- Botones de Exportación --}}
+                    <div class="flex items-center gap-2">
+                        <a href="{{ route('export.rankings.excel', $event) }}" 
+                           class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg transition font-bold"
+                           title="Exportar a Excel">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                            Excel
+                        </a>
+                        <a href="{{ route('export.rankings.pdf', $event) }}" 
+                           class="inline-flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg transition font-bold"
+                           title="Exportar a PDF">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                            </svg>
+                            PDF
+                        </a>
+                    </div>
+                @endif
                 @if(!$event->is_active)
                     <a href="{{ route('public.event-winners', $event) }}" 
                        target="_blank"
