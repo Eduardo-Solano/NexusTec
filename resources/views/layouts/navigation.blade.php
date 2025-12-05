@@ -17,7 +17,7 @@
                 <!-- CAMBIO: De 'hidden sm:flex' a 'hidden xl:flex' para evitar saturación -->
                 <div class="hidden space-x-8 xl:-my-px xl:ms-10 xl:flex">
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                        {{ __('Dashboard') }}
+                        {{ __('Inicio') }}
                     </x-nav-link>
                     
                     <x-nav-link :href="route('events.index')" :active="request()->routeIs('events.*')">

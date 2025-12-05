@@ -246,359 +246,359 @@
                                             </a>
                                         </div>
                                     </div>
-                                @endforeach
+                            @endforeach
+                        </div>
+                    @else
+                        <div class="bg-gray-800 border border-gray-700 rounded-xl p-8 text-center">
+                            <div class="inline-flex p-4 bg-gray-700 rounded-full mb-4">
+                                <svg class="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                                </svg>
                             </div>
-                        @else
-                            <div class="bg-gray-800 border border-gray-700 rounded-xl p-8 text-center">
-                                <div class="inline-flex p-4 bg-gray-700 rounded-full mb-4">
-                                    <svg class="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                            <h4 class="text-white font-bold mb-1">Sin proyectos asignados</h4>
+                            <p class="text-gray-400 text-sm">Aún no te han asignado proyectos para evaluar.</p>
+                        </div>
+                    @endif
+                </div>
+            @endif
+
+            @can('dashboard.stats')
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="bg-gray-800 p-6 rounded-2xl border border-gray-700 shadow-lg">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-gray-400 text-xs font-bold uppercase">Estudiantes</h3>
+                            <span class="p-2 bg-blue-500/10 text-blue-400 rounded-lg"><svg class="w-5 h-5" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                                </svg></span>
+                        </div>
+                        <p class="text-3xl font-black text-white">{{ $data['total_students'] }}</p>
+                    </div>
+
+                    <div class="bg-gray-800 p-6 rounded-2xl border border-gray-700 shadow-lg">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-gray-400 text-xs font-bold uppercase">Eventos</h3>
+                            <span class="p-2 bg-green-500/10 text-green-400 rounded-lg"><svg class="w-5 h-5" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg></span>
+                        </div>
+                        <p class="text-3xl font-black text-white">{{ $data['active_events'] }}</p>
+                    </div>
+
+                    <div class="bg-gray-800 p-6 rounded-2xl border border-gray-700 shadow-lg">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-gray-400 text-xs font-bold uppercase">Equipos</h3>
+                            <span class="p-2 bg-purple-500/10 text-purple-400 rounded-lg"><svg class="w-5 h-5"
+                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                </svg></span>
+                        </div>
+                        <p class="text-3xl font-black text-white">{{ $data['total_teams'] }}</p>
+                    </div>
+
+                    <div class="bg-gray-800 p-6 rounded-2xl border border-gray-700 shadow-lg">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-gray-400 text-xs font-bold uppercase">Proyectos</h3>
+                            <span class="p-2 bg-orange-500/10 text-orange-400 rounded-lg"><svg class="w-5 h-5"
+                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg></span>
+                        </div>
+                        <p class="text-3xl font-black text-white">{{ $data['projects_delivered'] }}</p>
+                    </div>
+                </div>
+
+                {{-- ========== NUEVO: Progreso del Evento Activo ========== --}}
+                @if(isset($data['event_progress']))
+                    <div class="bg-gradient-to-br from-gray-800 via-gray-800 to-gray-900 border border-gray-700 rounded-2xl p-6 shadow-xl mt-8">
+                        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
+                            <div class="flex items-center gap-4">
+                                <div class="p-3 bg-gradient-to-br from-ito-orange/20 to-purple-500/20 rounded-xl">
+                                    <svg class="w-7 h-7 text-ito-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                                     </svg>
                                 </div>
-                                <h4 class="text-white font-bold mb-1">Sin proyectos asignados</h4>
-                                <p class="text-gray-400 text-sm">Aún no te han asignado proyectos para evaluar.</p>
+                                <div>
+                                    <h3 class="text-xl font-bold text-white">Progreso del Evento Activo</h3>
+                                    <p class="text-sm text-gray-400">{{ $data['event_progress']['event']->name }}</p>
+                                </div>
                             </div>
-                        @endif
+                            
+                            {{-- Countdown --}}
+                            @if($data['event_progress']['days_remaining'] > 0)
+                                <div class="flex items-center gap-2 px-4 py-2 bg-blue-500/10 border border-blue-500/20 rounded-xl">
+                                    <svg class="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                    <span class="text-blue-400 font-bold">{{ round($data['event_progress']['days_remaining']) }} días restantes</span>
+                                </div>
+                            @elseif($data['event_progress']['days_remaining'] == 0)
+                                <div class="flex items-center gap-2 px-4 py-2 bg-amber-500/10 border border-amber-500/20 rounded-xl animate-pulse">
+                                    <svg class="w-5 h-5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                    <span class="text-amber-400 font-bold">¡Último día!</span>
+                                </div>
+                            @else
+                                <div class="flex items-center gap-2 px-4 py-2 bg-red-500/10 border border-red-500/20 rounded-xl">
+                                    <svg class="w-5 h-5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                    <span class="text-red-400 font-bold">Evento Finalizado</span>
+                                </div>
+                            @endif
+                        </div>
+
+                        {{-- Progress Steps --}}
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                            {{-- Equipos Registrados --}}
+                            <div class="bg-gray-900/50 rounded-xl p-4 border border-gray-700">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-2xl">👥</span>
+                                    <span class="text-xs font-bold text-gray-500">PASO 1</span>
+                                </div>
+                                <p class="text-2xl font-black text-white">{{ $data['event_progress']['teams_count'] }}</p>
+                                <p class="text-xs text-gray-400">Equipos Inscritos</p>
+                                <div class="mt-2 h-1.5 bg-gray-700 rounded-full overflow-hidden">
+                                    <div class="h-full bg-blue-500 rounded-full" style="width: 100%"></div>
+                                </div>
+                            </div>
+
+                            {{-- Proyectos Entregados --}}
+                            <div class="bg-gray-900/50 rounded-xl p-4 border border-gray-700">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-2xl">📋</span>
+                                    <span class="text-xs font-bold text-gray-500">PASO 2</span>
+                                </div>
+                                <p class="text-2xl font-black text-white">{{ $data['event_progress']['projects_count'] }}</p>
+                                <p class="text-xs text-gray-400">Proyectos Entregados</p>
+                                <div class="mt-2 h-1.5 bg-gray-700 rounded-full overflow-hidden">
+                                    <div class="h-full bg-purple-500 rounded-full transition-all duration-500" style="width: {{ $data['event_progress']['projects_percent'] }}%"></div>
+                                </div>
+                                <p class="text-[10px] text-gray-500 mt-1">{{ $data['event_progress']['projects_percent'] }}% de equipos</p>
+                            </div>
+
+                            {{-- Evaluaciones --}}
+                            <div class="bg-gray-900/50 rounded-xl p-4 border border-gray-700">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-2xl">⚖️</span>
+                                    <span class="text-xs font-bold text-gray-500">PASO 3</span>
+                                </div>
+                                <p class="text-2xl font-black text-white">{{ $data['event_progress']['total_evaluations'] }}<span class="text-sm text-gray-500">/{{ $data['event_progress']['required_evaluations'] }}</span></p>
+                                <p class="text-xs text-gray-400">Evaluaciones Completadas</p>
+                                <div class="mt-2 h-1.5 bg-gray-700 rounded-full overflow-hidden">
+                                    @php
+                                        $evalPercent = $data['event_progress']['required_evaluations'] > 0 
+                                            ? round(($data['event_progress']['total_evaluations'] / $data['event_progress']['required_evaluations']) * 100) 
+                                            : 0;
+                                    @endphp
+                                    <div class="h-full bg-amber-500 rounded-full transition-all duration-500" style="width: {{ $evalPercent }}%"></div>
+                                </div>
+                                <p class="text-[10px] text-gray-500 mt-1">{{ $evalPercent }}% completado</p>
+                            </div>
+
+                            {{-- Premiaciones --}}
+                            <div class="bg-gray-900/50 rounded-xl p-4 border border-gray-700">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-2xl">🏆</span>
+                                    <span class="text-xs font-bold text-gray-500">PASO 4</span>
+                                </div>
+                                <p class="text-2xl font-black text-white">{{ $data['event_progress']['awards_count'] }}</p>
+                                <p class="text-xs text-gray-400">Premios Asignados</p>
+                                <div class="mt-2 h-1.5 bg-gray-700 rounded-full overflow-hidden">
+                                    @php
+                                        $awardsPercent = $data['event_progress']['evaluated_count'] > 0 && $data['event_progress']['awards_count'] > 0 ? 100 : 0;
+                                    @endphp
+                                    <div class="h-full bg-green-500 rounded-full transition-all duration-500" style="width: {{ $awardsPercent }}%"></div>
+                                </div>
+                                <p class="text-[10px] text-gray-500 mt-1">{{ $data['event_progress']['evaluated_count'] }} proyectos evaluados</p>
+                            </div>
+                        </div>
+
+                        {{-- Acciones Rápidas --}}
+                        <div class="flex flex-wrap gap-3 pt-4 border-t border-gray-700">
+                            <a href="{{ route('events.show', $data['event_progress']['event']) }}" 
+                                class="px-4 py-2 bg-ito-orange hover:bg-orange-600 text-white text-sm font-bold rounded-lg transition flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                </svg>
+                                Ver Evento
+                            </a>
+                            <a href="{{ route('events.rankings', $data['event_progress']['event']) }}" 
+                                class="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white text-sm font-bold rounded-lg transition flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                                </svg>
+                                Ver Rankings
+                            </a>
+                            <a href="{{ route('export.diplomas', $data['event_progress']['event']) }}" 
+                                class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white text-sm font-bold rounded-lg transition flex items-center gap-2 border border-gray-600">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                                Generar Diplomas
+                            </a>
+                        </div>
                     </div>
                 @endif
 
-                @can('dashboard.stats')
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        <div class="bg-gray-800 p-6 rounded-2xl border border-gray-700 shadow-lg">
-                            <div class="flex items-center justify-between mb-4">
-                                <h3 class="text-gray-400 text-xs font-bold uppercase">Estudiantes</h3>
-                                <span class="p-2 bg-blue-500/10 text-blue-400 rounded-lg"><svg class="w-5 h-5" fill="none"
-                                        viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                                    </svg></span>
+                {{-- Sección de Gráficas --}}
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+                    {{-- Gráfica de Equipos por Día --}}
+                    <div class="bg-gray-800 border border-gray-700 rounded-2xl p-6 shadow-lg">
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="flex items-center gap-3">
+                                <div class="p-2 bg-blue-500/10 rounded-lg">
+                                    <svg class="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-white">Equipos Registrados</h3>
+                                    <p class="text-xs text-gray-500">Últimos 14 días</p>
+                                </div>
                             </div>
-                            <p class="text-3xl font-black text-white">{{ $data['total_students'] }}</p>
                         </div>
-
-                        <div class="bg-gray-800 p-6 rounded-2xl border border-gray-700 shadow-lg">
-                            <div class="flex items-center justify-between mb-4">
-                                <h3 class="text-gray-400 text-xs font-bold uppercase">Eventos</h3>
-                                <span class="p-2 bg-green-500/10 text-green-400 rounded-lg"><svg class="w-5 h-5" fill="none"
-                                        viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                    </svg></span>
-                            </div>
-                            <p class="text-3xl font-black text-white">{{ $data['active_events'] }}</p>
-                        </div>
-
-                        <div class="bg-gray-800 p-6 rounded-2xl border border-gray-700 shadow-lg">
-                            <div class="flex items-center justify-between mb-4">
-                                <h3 class="text-gray-400 text-xs font-bold uppercase">Equipos</h3>
-                                <span class="p-2 bg-purple-500/10 text-purple-400 rounded-lg"><svg class="w-5 h-5"
-                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                                    </svg></span>
-                            </div>
-                            <p class="text-3xl font-black text-white">{{ $data['total_teams'] }}</p>
-                        </div>
-
-                        <div class="bg-gray-800 p-6 rounded-2xl border border-gray-700 shadow-lg">
-                            <div class="flex items-center justify-between mb-4">
-                                <h3 class="text-gray-400 text-xs font-bold uppercase">Proyectos</h3>
-                                <span class="p-2 bg-orange-500/10 text-orange-400 rounded-lg"><svg class="w-5 h-5"
-                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg></span>
-                            </div>
-                            <p class="text-3xl font-black text-white">{{ $data['projects_delivered'] }}</p>
+                        <div class="h-48">
+                            <canvas id="teamsChart"></canvas>
                         </div>
                     </div>
 
-                    {{-- ========== NUEVO: Progreso del Evento Activo ========== --}}
-                    @if(isset($data['event_progress']))
-                        <div class="bg-gradient-to-br from-gray-800 via-gray-800 to-gray-900 border border-gray-700 rounded-2xl p-6 shadow-xl mt-8">
-                            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
-                                <div class="flex items-center gap-4">
-                                    <div class="p-3 bg-gradient-to-br from-ito-orange/20 to-purple-500/20 rounded-xl">
-                                        <svg class="w-7 h-7 text-ito-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <h3 class="text-xl font-bold text-white">Progreso del Evento Activo</h3>
-                                        <p class="text-sm text-gray-400">{{ $data['event_progress']['event']->name }}</p>
-                                    </div>
+                    {{-- Gráfica de Estudiantes por Carrera --}}
+                    <div class="bg-gray-800 border border-gray-700 rounded-2xl p-6 shadow-lg">
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="flex items-center gap-3">
+                                <div class="p-2 bg-purple-500/10 rounded-lg">
+                                    <svg class="w-5 h-5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/>
+                                    </svg>
                                 </div>
-                                
-                                {{-- Countdown --}}
-                                @if($data['event_progress']['days_remaining'] > 0)
-                                    <div class="flex items-center gap-2 px-4 py-2 bg-blue-500/10 border border-blue-500/20 rounded-xl">
-                                        <svg class="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                        </svg>
-                                        <span class="text-blue-400 font-bold">{{ $data['event_progress']['days_remaining'] }} días restantes</span>
-                                    </div>
-                                @elseif($data['event_progress']['days_remaining'] == 0)
-                                    <div class="flex items-center gap-2 px-4 py-2 bg-amber-500/10 border border-amber-500/20 rounded-xl animate-pulse">
-                                        <svg class="w-5 h-5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                        </svg>
-                                        <span class="text-amber-400 font-bold">¡Último día!</span>
-                                    </div>
-                                @else
-                                    <div class="flex items-center gap-2 px-4 py-2 bg-red-500/10 border border-red-500/20 rounded-xl">
-                                        <svg class="w-5 h-5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                        </svg>
-                                        <span class="text-red-400 font-bold">Evento Finalizado</span>
-                                    </div>
-                                @endif
-                            </div>
-
-                            {{-- Progress Steps --}}
-                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                                {{-- Equipos Registrados --}}
-                                <div class="bg-gray-900/50 rounded-xl p-4 border border-gray-700">
-                                    <div class="flex items-center justify-between mb-2">
-                                        <span class="text-2xl">👥</span>
-                                        <span class="text-xs font-bold text-gray-500">PASO 1</span>
-                                    </div>
-                                    <p class="text-2xl font-black text-white">{{ $data['event_progress']['teams_count'] }}</p>
-                                    <p class="text-xs text-gray-400">Equipos Inscritos</p>
-                                    <div class="mt-2 h-1.5 bg-gray-700 rounded-full overflow-hidden">
-                                        <div class="h-full bg-blue-500 rounded-full" style="width: 100%"></div>
-                                    </div>
-                                </div>
-
-                                {{-- Proyectos Entregados --}}
-                                <div class="bg-gray-900/50 rounded-xl p-4 border border-gray-700">
-                                    <div class="flex items-center justify-between mb-2">
-                                        <span class="text-2xl">📋</span>
-                                        <span class="text-xs font-bold text-gray-500">PASO 2</span>
-                                    </div>
-                                    <p class="text-2xl font-black text-white">{{ $data['event_progress']['projects_count'] }}</p>
-                                    <p class="text-xs text-gray-400">Proyectos Entregados</p>
-                                    <div class="mt-2 h-1.5 bg-gray-700 rounded-full overflow-hidden">
-                                        <div class="h-full bg-purple-500 rounded-full transition-all duration-500" style="width: {{ $data['event_progress']['projects_percent'] }}%"></div>
-                                    </div>
-                                    <p class="text-[10px] text-gray-500 mt-1">{{ $data['event_progress']['projects_percent'] }}% de equipos</p>
-                                </div>
-
-                                {{-- Evaluaciones --}}
-                                <div class="bg-gray-900/50 rounded-xl p-4 border border-gray-700">
-                                    <div class="flex items-center justify-between mb-2">
-                                        <span class="text-2xl">⚖️</span>
-                                        <span class="text-xs font-bold text-gray-500">PASO 3</span>
-                                    </div>
-                                    <p class="text-2xl font-black text-white">{{ $data['event_progress']['total_evaluations'] }}<span class="text-sm text-gray-500">/{{ $data['event_progress']['required_evaluations'] }}</span></p>
-                                    <p class="text-xs text-gray-400">Evaluaciones Completadas</p>
-                                    <div class="mt-2 h-1.5 bg-gray-700 rounded-full overflow-hidden">
-                                        @php
-                                            $evalPercent = $data['event_progress']['required_evaluations'] > 0 
-                                                ? round(($data['event_progress']['total_evaluations'] / $data['event_progress']['required_evaluations']) * 100) 
-                                                : 0;
-                                        @endphp
-                                        <div class="h-full bg-amber-500 rounded-full transition-all duration-500" style="width: {{ $evalPercent }}%"></div>
-                                    </div>
-                                    <p class="text-[10px] text-gray-500 mt-1">{{ $evalPercent }}% completado</p>
-                                </div>
-
-                                {{-- Premiaciones --}}
-                                <div class="bg-gray-900/50 rounded-xl p-4 border border-gray-700">
-                                    <div class="flex items-center justify-between mb-2">
-                                        <span class="text-2xl">🏆</span>
-                                        <span class="text-xs font-bold text-gray-500">PASO 4</span>
-                                    </div>
-                                    <p class="text-2xl font-black text-white">{{ $data['event_progress']['awards_count'] }}</p>
-                                    <p class="text-xs text-gray-400">Premios Asignados</p>
-                                    <div class="mt-2 h-1.5 bg-gray-700 rounded-full overflow-hidden">
-                                        @php
-                                            $awardsPercent = $data['event_progress']['evaluated_count'] > 0 && $data['event_progress']['awards_count'] > 0 ? 100 : 0;
-                                        @endphp
-                                        <div class="h-full bg-green-500 rounded-full transition-all duration-500" style="width: {{ $awardsPercent }}%"></div>
-                                    </div>
-                                    <p class="text-[10px] text-gray-500 mt-1">{{ $data['event_progress']['evaluated_count'] }} proyectos evaluados</p>
+                                <div>
+                                    <h3 class="font-bold text-white">Estudiantes por Carrera</h3>
+                                    <p class="text-xs text-gray-500">Top 5 carreras</p>
                                 </div>
                             </div>
+                        </div>
+                        <div class="h-48">
+                            <canvas id="careersChart"></canvas>
+                        </div>
+                    </div>
 
-                            {{-- Acciones Rápidas --}}
-                            <div class="flex flex-wrap gap-3 pt-4 border-t border-gray-700">
-                                <a href="{{ route('events.show', $data['event_progress']['event']) }}" 
-                                    class="px-4 py-2 bg-ito-orange hover:bg-orange-600 text-white text-sm font-bold rounded-lg transition flex items-center gap-2">
-                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                    {{-- Gráfica de Equipos por Evento --}}
+                    <div class="bg-gray-800 border border-gray-700 rounded-2xl p-6 shadow-lg lg:col-span-2">
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="flex items-center gap-3">
+                                <div class="p-2 bg-green-500/10 rounded-lg">
+                                    <svg class="w-5 h-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                     </svg>
-                                    Ver Evento
-                                </a>
-                                <a href="{{ route('events.rankings', $data['event_progress']['event']) }}" 
-                                    class="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white text-sm font-bold rounded-lg transition flex items-center gap-2">
-                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-white">Participación por Evento</h3>
+                                    <p class="text-xs text-gray-500">Equipos inscritos en cada evento</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="h-64">
+                            <canvas id="eventsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gray-800 border border-gray-700 rounded-2xl overflow-hidden shadow-lg mt-8">
+                    <div class="px-6 py-5 border-b border-gray-700 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2 bg-purple-500/10 rounded-lg">
+                                <svg class="w-5 h-5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-white">Equipos Registrados Recientemente</h3>
+                                <p class="text-xs text-gray-500">Últimos equipos inscritos en eventos activos</p>
+                            </div>
+                        </div>
+                        <a href="{{ route('teams.index') }}" class="text-xs text-gray-400 hover:text-white transition flex items-center gap-1">
+                            Ver todos
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                        </a>
+                    </div>
+                    
+                    <div class="divide-y divide-gray-700/50">
+                        @forelse ($data['recent_teams'] as $team)
+                            <div class="px-6 py-4 hover:bg-gray-700/30 transition group">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-4">
+                                        {{-- Avatar del equipo --}}
+                                        <div class="relative">
+                                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                                                {{ strtoupper(substr($team->name, 0, 2)) }}
+                                            </div>
+                                            <span class="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-gray-800 rounded-full"></span>
+                                        </div>
+                                        
+                                        {{-- Info del equipo --}}
+                                        <div>
+                                            <div class="flex items-center gap-2">
+                                                <h4 class="font-bold text-white group-hover:text-purple-400 transition">{{ $team->name }}</h4>
+                                                <span class="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                                                    {{ $team->members->count() }}/5
+                                                </span>
+                                            </div>
+                                            <div class="flex items-center gap-2 mt-1">
+                                                <span class="text-xs text-gray-500">{{ $team->event->name }}</span>
+                                                <span class="text-gray-600">•</span>
+                                                <span class="text-xs text-gray-500">Líder: {{ $team->leader->name ?? 'N/A' }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    {{-- Fecha y acciones --}}
+                                    <div class="flex items-center gap-4">
+                                        <div class="text-right hidden sm:block">
+                                            <p class="text-xs text-gray-500">Registrado</p>
+                                            <p class="text-sm text-gray-400 font-mono">{{ $team->created_at->diffForHumans() }}</p>
+                                        </div>
+                                        <a href="{{ route('teams.show', $team) }}" 
+                                            class="p-2.5 bg-gray-700/50 hover:bg-ito-orange text-gray-400 hover:text-white rounded-xl transition group-hover:bg-ito-orange group-hover:text-white">
+                                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                            </svg>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        @empty
+                            <div class="px-6 py-12 text-center">
+                                <div class="inline-flex p-3 rounded-full bg-gray-700/50 mb-3">
+                                    <svg class="w-6 h-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
                                     </svg>
-                                    Ver Rankings
-                                </a>
-                                <a href="{{ route('export.diplomas', $data['event_progress']['event']) }}" 
-                                    class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white text-sm font-bold rounded-lg transition flex items-center gap-2 border border-gray-600">
-                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                    </svg>
-                                    Generar Diplomas
+                                </div>
+                                <p class="text-gray-500 text-sm">No hay equipos registrados recientemente</p>
+                            </div>
+                        @endforelse
+                    </div>
+                    
+                    @if(count($data['recent_teams']) > 0)
+                        <div class="px-6 py-4 bg-gray-900/30 border-t border-gray-700">
+                            <div class="flex items-center justify-between text-xs">
+                                <span class="text-gray-500">Mostrando {{ count($data['recent_teams']) }} equipos más recientes</span>
+                                <a href="{{ route('events.index') }}" class="text-ito-orange hover:text-orange-400 font-bold transition">
+                                    Ver todos los eventos →
                                 </a>
                             </div>
                         </div>
                     @endif
-
-                    {{-- Sección de Gráficas --}}
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
-                        {{-- Gráfica de Equipos por Día --}}
-                        <div class="bg-gray-800 border border-gray-700 rounded-2xl p-6 shadow-lg">
-                            <div class="flex items-center justify-between mb-6">
-                                <div class="flex items-center gap-3">
-                                    <div class="p-2 bg-blue-500/10 rounded-lg">
-                                        <svg class="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <h3 class="font-bold text-white">Equipos Registrados</h3>
-                                        <p class="text-xs text-gray-500">Últimos 14 días</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="h-48">
-                                <canvas id="teamsChart"></canvas>
-                            </div>
-                        </div>
-
-                        {{-- Gráfica de Estudiantes por Carrera --}}
-                        <div class="bg-gray-800 border border-gray-700 rounded-2xl p-6 shadow-lg">
-                            <div class="flex items-center justify-between mb-6">
-                                <div class="flex items-center gap-3">
-                                    <div class="p-2 bg-purple-500/10 rounded-lg">
-                                        <svg class="w-5 h-5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/>
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/>
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <h3 class="font-bold text-white">Estudiantes por Carrera</h3>
-                                        <p class="text-xs text-gray-500">Top 5 carreras</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="h-48">
-                                <canvas id="careersChart"></canvas>
-                            </div>
-                        </div>
-
-                        {{-- Gráfica de Equipos por Evento --}}
-                        <div class="bg-gray-800 border border-gray-700 rounded-2xl p-6 shadow-lg lg:col-span-2">
-                            <div class="flex items-center justify-between mb-6">
-                                <div class="flex items-center gap-3">
-                                    <div class="p-2 bg-green-500/10 rounded-lg">
-                                        <svg class="w-5 h-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <h3 class="font-bold text-white">Participación por Evento</h3>
-                                        <p class="text-xs text-gray-500">Equipos inscritos en cada evento</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="h-64">
-                                <canvas id="eventsChart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="bg-gray-800 border border-gray-700 rounded-2xl overflow-hidden shadow-lg mt-8">
-                        <div class="px-6 py-5 border-b border-gray-700 flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <div class="p-2 bg-purple-500/10 rounded-lg">
-                                    <svg class="w-5 h-5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
-                                    </svg>
-                                </div>
-                                <div>
-                                    <h3 class="font-bold text-white">Equipos Registrados Recientemente</h3>
-                                    <p class="text-xs text-gray-500">Últimos equipos inscritos en eventos activos</p>
-                                </div>
-                            </div>
-                            <a href="{{ route('teams.index') }}" class="text-xs text-gray-400 hover:text-white transition flex items-center gap-1">
-                                Ver todos
-                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                            </a>
-                        </div>
-                        
-                        <div class="divide-y divide-gray-700/50">
-                            @forelse ($data['recent_teams'] as $team)
-                                <div class="px-6 py-4 hover:bg-gray-700/30 transition group">
-                                    <div class="flex items-center justify-between">
-                                        <div class="flex items-center gap-4">
-                                            {{-- Avatar del equipo --}}
-                                            <div class="relative">
-                                                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center text-white font-bold text-lg shadow-lg">
-                                                    {{ strtoupper(substr($team->name, 0, 2)) }}
-                                                </div>
-                                                <span class="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-gray-800 rounded-full"></span>
-                                            </div>
-                                            
-                                            {{-- Info del equipo --}}
-                                            <div>
-                                                <div class="flex items-center gap-2">
-                                                    <h4 class="font-bold text-white group-hover:text-purple-400 transition">{{ $team->name }}</h4>
-                                                    <span class="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">
-                                                        {{ $team->members->count() }}/5
-                                                    </span>
-                                                </div>
-                                                <div class="flex items-center gap-2 mt-1">
-                                                    <span class="text-xs text-gray-500">{{ $team->event->name }}</span>
-                                                    <span class="text-gray-600">•</span>
-                                                    <span class="text-xs text-gray-500">Líder: {{ $team->leader->name ?? 'N/A' }}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        
-                                        {{-- Fecha y acciones --}}
-                                        <div class="flex items-center gap-4">
-                                            <div class="text-right hidden sm:block">
-                                                <p class="text-xs text-gray-500">Registrado</p>
-                                                <p class="text-sm text-gray-400 font-mono">{{ $team->created_at->diffForHumans() }}</p>
-                                            </div>
-                                            <a href="{{ route('teams.show', $team) }}" 
-                                                class="p-2.5 bg-gray-700/50 hover:bg-ito-orange text-gray-400 hover:text-white rounded-xl transition group-hover:bg-ito-orange group-hover:text-white">
-                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                                </svg>
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                            @empty
-                                <div class="px-6 py-12 text-center">
-                                    <div class="inline-flex p-3 rounded-full bg-gray-700/50 mb-3">
-                                        <svg class="w-6 h-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
-                                        </svg>
-                                    </div>
-                                    <p class="text-gray-500 text-sm">No hay equipos registrados recientemente</p>
-                                </div>
-                            @endforelse
-                        </div>
-                        
-                        @if(count($data['recent_teams']) > 0)
-                            <div class="px-6 py-4 bg-gray-900/30 border-t border-gray-700">
-                                <div class="flex items-center justify-between text-xs">
-                                    <span class="text-gray-500">Mostrando {{ count($data['recent_teams']) }} equipos más recientes</span>
-                                    <a href="{{ route('events.index') }}" class="text-ito-orange hover:text-orange-400 font-bold transition">
-                                        Ver todos los eventos →
-                                    </a>
-                                </div>
-                            </div>
-                        @endif
-                @endcan
+            @endcan
 
             {{-- ========== SECCIÓN ESTUDIANTES ========== --}}
             @role('student')
@@ -734,7 +734,7 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                             </svg>
                                             @if($data['team_progress']['days_remaining'] > 0)
-                                                <span class="font-bold {{ $data['team_progress']['days_remaining'] > 3 ? 'text-blue-400' : 'text-amber-400' }}">{{ $data['team_progress']['days_remaining'] }} días restantes para el evento</span>
+                                                <span class="font-bold {{ $data['team_progress']['days_remaining'] > 3 ? 'text-blue-400' : 'text-amber-400' }}">{{ round($data['team_progress']['days_remaining']) }} días restantes para el evento</span>
                                             @elseif($data['team_progress']['days_remaining'] == 0)
                                                 <span class="font-bold text-amber-400 animate-pulse">¡Último día del evento!</span>
                                             @else
