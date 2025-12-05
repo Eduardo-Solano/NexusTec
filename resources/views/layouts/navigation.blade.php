@@ -1,4 +1,4 @@
-<nav x-data="{ open: false, notificationsOpen: false }" class="sticky top-0 z-40 bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
+<nav x-data="{ open: false, notificationsOpen: false }" class="sticky top-0 z-40 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border-b border-gray-200/50 dark:border-gray-700/50 shadow-sm">
     
     <!-- PRIMARY NAVIGATION BAR -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

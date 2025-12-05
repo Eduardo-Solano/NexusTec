@@ -11,25 +11,25 @@
 
 <body class="antialiased bg-gray-50 text-gray-800">
 
-    <nav class="bg-white shadow-md">
+    <nav class="bg-blue-950/85 backdrop-blur-md shadow-lg border-b border-blue-900/50 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
 
                 <div class="flex items-center gap-3">
                     <x-application-logo class="h-10 w-auto" />
-                    <span class="font-bold text-xl text-tecnm-blue tracking-tight">NexusTec</span>
+                    <span class="font-bold text-xl text-white tracking-tight">NexusTec</span>
                 </div>
 
                 <div class="flex items-center gap-4">
                     @if (Route::has('login'))
                         @auth
                             <a href="{{ url('/dashboard') }}"
-                                class="text-sm font-semibold text-gray-600 hover:text-ito-orange">
+                                class="text-sm font-semibold text-white/90 hover:text-ito-orange transition">
                                 Ir al Panel
                             </a>
                         @else
                             <a href="{{ route('login') }}"
-                                class="text-sm font-semibold text-gray-600 hover:text-ito-orange transition">
+                                class="text-sm font-semibold text-white/90 hover:text-ito-orange transition">
                                 Iniciar Sesión
                             </a>
 
