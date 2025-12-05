@@ -90,18 +90,18 @@
             <div class="flex items-center">
                 
                 <!-- 🔔 Notification Bell -->
-                <div class="relative me-3 ms-6">
+                <div class="relative me-3 ms-6 group">
                      @php
                         $hasJoinRequests = $unreadNotifications->where('data.type', 'join_request')->count() > 0;
                         $totalNotifications = ($pendingAdvisories->count() ?? 0) + ($pendingEvaluations->count() ?? 0) + ($unreadNotifications->count() ?? 0);
                     @endphp
 
-                    <button @click="notificationsOpen = !notificationsOpen" class="relative text-gray-500 hover:text-gray-700 dark:text-gray-300 focus:outline-none">
+                    <button @click="notificationsOpen = !notificationsOpen" class="relative text-gray-500 hover:text-gray-700 dark:text-gray-300 focus:outline-none transition-all duration-200">
                         <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24">
                             <path stroke="currentColor" stroke-width="2" d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 00-4-5.7V4a2 2 0 10-4 0v1.3A6 6 0 006 11v3.2a2 2 0 01-.6 1.4L4 17h5m6 0v1a3 3 0 11-6 0v-1" />
                         </svg>
                         @if ($totalNotifications > 0)
-                            <span class="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center bg-red-600 text-white rounded-full text-[10px] font-bold">
+                            <span class="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center bg-red-600 text-white rounded-full text-[10px] font-bold group-hover:opacity-70 transition-opacity duration-200">
                                 {{ $totalNotifications > 9 ? '9+' : $totalNotifications }}
                             </span>
                         @endif
@@ -109,7 +109,7 @@
                     
                      <!-- NOTIFICATIONS PANEL -->
                      <div x-show="notificationsOpen" @click.away="notificationsOpen = false" x-transition
-                         class="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-xl shadow-xl border z-50 overflow-hidden divide-y divide-gray-200 dark:divide-gray-700"
+                         class="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-xl shadow-xl z-50 overflow-hidden divide-y divide-gray-200 dark:divide-gray-700"
                          style="display: none;">
                         
                         <!-- Header -->
