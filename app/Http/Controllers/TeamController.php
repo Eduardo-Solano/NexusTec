@@ -168,6 +168,39 @@ class TeamController extends Controller
     }
 
     /**
+     * Formulario de edición de equipo
+     */
+    public function edit(Team $team)
+    {
+        $team->load(['event', 'members', 'leader', 'advisor', 'project']);
+        
+        // Obtener asesores disponibles (docentes)
+        $advisors = User::role('advisor')->orderBy('name')->get();
+        
+        // Obtener eventos activos para el select
+        $events = Event::where('is_active', true)->orderBy('name')->get();
+        
+        return view('teams.edit', compact('team', 'advisors', 'events'));
+    }
+
+    /**
+     * Actualizar equipo
+     */
+    public function update(Request $request, Team $team)
+    {
+        $request->validate([
+            'name' => 'required|string|max:50',
+        ]);
+
+        $team->update([
+            'name' => $request->name,
+        ]);
+
+        return redirect()->route('teams.show', $team)
+            ->with('success', 'Equipo actualizado correctamente.');
+    }
+
+    /**
      * Enviar solicitud para UNIRSE a un equipo
      */
     public function requestJoin(Request $request, Team $team)

@@ -82,6 +82,13 @@ Route::middleware('auth')->group(function () {
         Route::get('/events/{event}/diplomas', [ExportController::class, 'diplomasIndex'])->name('export.diplomas');
         Route::get('/events/{event}/diploma/{user}', [ExportController::class, 'diplomaParticipation'])->name('export.diploma.participation');
         Route::get('/awards/{award}/diploma/{user}', [ExportController::class, 'diplomaWinner'])->name('export.diploma.winner');
+        // Generación masiva de diplomas
+        Route::get('/events/{event}/diplomas/team/{team}', [ExportController::class, 'diplomasByTeam'])->name('export.diplomas.team');
+        Route::get('/events/{event}/diplomas/all', [ExportController::class, 'diplomasByEvent'])->name('export.diplomas.event');
+        // Envío de diplomas por correo
+        Route::post('/events/{event}/diploma/{user}/send', [ExportController::class, 'sendDiplomaToUser'])->name('export.diploma.send');
+        Route::post('/events/{event}/diplomas/team/{team}/send', [ExportController::class, 'sendDiplomasToTeam'])->name('export.diplomas.team.send');
+        Route::post('/events/{event}/diplomas/send-all', [ExportController::class, 'sendDiplomasToEvent'])->name('export.diplomas.send');
     });
 
     /* EQUIPOS - Todos pueden ver, estudiantes pueden crear/unirse */

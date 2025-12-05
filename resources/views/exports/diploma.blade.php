@@ -7,7 +7,7 @@
     <style>
         @page {
             margin: 0;
-            size: landscape;
+            size: 279mm 216mm landscape;
         }
         
         * {
@@ -19,46 +19,47 @@
         body {
             font-family: 'DejaVu Sans', sans-serif;
             background: #fff;
-            width: 100%;
-            height: 100%;
+            width: 279mm;
+            height: 216mm;
         }
         
         .diploma {
-            width: 100%;
-            min-height: 100vh;
-            padding: 30px;
+            width: 279mm;
+            height: 216mm;
+            padding: 10px;
             position: relative;
             background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            overflow: hidden;
         }
         
         .border-frame {
-            border: 8px double #1E3A5F;
-            padding: 40px;
+            border: 5px double #1E3A5F;
+            padding: 12px 20px;
             height: 100%;
             position: relative;
         }
         
         .corner-decoration {
             position: absolute;
-            width: 60px;
-            height: 60px;
-            border: 3px solid #F97316;
+            width: 35px;
+            height: 35px;
+            border: 2px solid #F97316;
         }
         
-        .corner-tl { top: 10px; left: 10px; border-right: none; border-bottom: none; }
-        .corner-tr { top: 10px; right: 10px; border-left: none; border-bottom: none; }
-        .corner-bl { bottom: 10px; left: 10px; border-right: none; border-top: none; }
-        .corner-br { bottom: 10px; right: 10px; border-left: none; border-top: none; }
+        .corner-tl { top: 6px; left: 6px; border-right: none; border-bottom: none; }
+        .corner-tr { top: 6px; right: 6px; border-left: none; border-bottom: none; }
+        .corner-bl { bottom: 6px; left: 6px; border-right: none; border-top: none; }
+        .corner-br { bottom: 6px; right: 6px; border-left: none; border-top: none; }
         
         .header {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 5px;
         }
         
         .logo-section {
             display: table;
             width: 100%;
-            margin-bottom: 10px;
+            margin-bottom: 3px;
         }
         
         .logo-left, .logo-right {
@@ -66,6 +67,11 @@
             width: 15%;
             vertical-align: middle;
             text-align: center;
+        }
+        
+        .logo-left img, .logo-right img {
+            max-width: 55px;
+            max-height: 55px;
         }
         
         .logo-center {
@@ -76,118 +82,117 @@
         }
         
         .institution {
-            font-size: 11px;
+            font-size: 9px;
             color: #1E3A5F;
             text-transform: uppercase;
-            letter-spacing: 3px;
+            letter-spacing: 2px;
             font-weight: bold;
         }
         
         .campus {
-            font-size: 13px;
+            font-size: 10px;
             color: #F97316;
             font-weight: bold;
-            margin-top: 3px;
+            margin-top: 1px;
         }
         
         .diploma-title {
             text-align: center;
-            margin: 25px 0;
+            margin: 8px 0;
         }
         
         .diploma-title h1 {
-            font-size: 42px;
+            font-size: 28px;
             color: #1E3A5F;
             text-transform: uppercase;
-            letter-spacing: 8px;
+            letter-spacing: 5px;
             font-weight: bold;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
         }
         
         .subtitle {
-            font-size: 14px;
+            font-size: 10px;
             color: #666;
-            margin-top: 5px;
+            margin-top: 2px;
             letter-spacing: 2px;
         }
         
         .content {
             text-align: center;
-            margin: 30px 0;
+            margin: 8px 0;
         }
         
         .otorgado {
-            font-size: 14px;
+            font-size: 10px;
             color: #666;
-            margin-bottom: 15px;
+            margin-bottom: 5px;
         }
         
         .participant-name {
-            font-size: 32px;
+            font-size: 22px;
             color: #1E3A5F;
             font-weight: bold;
-            padding: 10px 0;
+            padding: 4px 0;
             border-bottom: 2px solid #F97316;
             display: inline-block;
-            min-width: 400px;
+            min-width: 300px;
         }
         
         .recognition-text {
-            font-size: 14px;
+            font-size: 10px;
             color: #444;
-            margin: 25px auto;
-            max-width: 600px;
-            line-height: 1.8;
+            margin: 8px auto;
+            max-width: 500px;
+            line-height: 1.5;
         }
         
         .event-name {
-            font-size: 18px;
+            font-size: 14px;
             color: #F97316;
             font-weight: bold;
-            margin: 15px 0;
+            margin: 5px 0;
         }
         
         .project-info {
             background: #f8f9fa;
             border: 1px solid #dee2e6;
-            border-radius: 8px;
-            padding: 15px 30px;
+            border-radius: 5px;
+            padding: 6px 15px;
             display: inline-block;
-            margin: 15px 0;
+            margin: 5px 0;
         }
         
         .project-label {
-            font-size: 10px;
+            font-size: 7px;
             color: #666;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
         
         .project-name {
-            font-size: 16px;
+            font-size: 10px;
             color: #1E3A5F;
             font-weight: bold;
         }
         
         .team-name {
-            font-size: 12px;
+            font-size: 9px;
             color: #888;
-            margin-top: 5px;
+            margin-top: 1px;
         }
         
         .award-section {
-            margin: 20px 0;
+            margin: 6px 0;
             text-align: center;
         }
         
         .medal {
-            font-size: 48px;
+            font-size: 30px;
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 2px;
         }
         
         .award-category {
-            font-size: 20px;
+            font-size: 13px;
             color: #1E3A5F;
             font-weight: bold;
             text-transform: uppercase;
@@ -197,48 +202,48 @@
         .signatures {
             display: table;
             width: 100%;
-            margin-top: 40px;
+            margin-top: 10px;
         }
         
         .signature-box {
             display: table-cell;
             width: 33.33%;
             text-align: center;
-            padding: 0 20px;
+            padding: 0 10px;
         }
         
         .signature-line {
             border-top: 1px solid #333;
             margin: 0 auto;
-            width: 200px;
-            padding-top: 8px;
+            width: 140px;
+            padding-top: 4px;
         }
         
         .signature-name {
-            font-size: 11px;
+            font-size: 8px;
             color: #333;
             font-weight: bold;
         }
         
         .signature-title {
-            font-size: 9px;
+            font-size: 7px;
             color: #666;
         }
         
         .footer {
             text-align: center;
-            margin-top: 20px;
+            margin-top: 8px;
         }
         
         .date-location {
-            font-size: 11px;
+            font-size: 8px;
             color: #666;
         }
         
         .folio {
-            font-size: 9px;
+            font-size: 7px;
             color: #999;
-            margin-top: 10px;
+            margin-top: 3px;
         }
     </style>
 </head>
@@ -253,16 +258,14 @@
             <div class="header">
                 <div class="logo-section">
                     <div class="logo-left">
-                        {{-- Logo TecNM --}}
-                        <div style="font-size: 24px;">🎓</div>
+                        <img src="{{ public_path('img/logo-tecnm.png') }}" alt="TecNM">
                     </div>
                     <div class="logo-center">
                         <div class="institution">Tecnológico Nacional de México</div>
                         <div class="campus">Instituto Tecnológico de Oaxaca</div>
                     </div>
                     <div class="logo-right">
-                        {{-- Logo ITO --}}
-                        <div style="font-size: 24px;">🏛️</div>
+                        <img src="{{ public_path('img/logo-ito.png') }}" alt="ITO">
                     </div>
                 </div>
             </div>
@@ -288,10 +291,10 @@
                 
                 <div class="event-name">« {{ $event->name }} »</div>
                 
-                @if(isset($project))
+                @if(isset($project) && $project)
                     <div class="project-info">
                         <div class="project-label">Proyecto presentado</div>
-                        <div class="project-name">{{ $project->title }}</div>
+                        <div class="project-name">{{ $project->name ?? 'Sin nombre' }}</div>
                         <div class="team-name">Equipo: {{ $team->name }}</div>
                     </div>
                 @endif
@@ -317,7 +320,7 @@
             <div class="signatures">
                 <div class="signature-box">
                     <div class="signature-line">
-                        <div class="signature-name">Dr. José Luis García Martínez</div>
+                        <div class="signature-name">Dr. Jesús Martínez García</div>
                         <div class="signature-title">Director del Instituto</div>
                     </div>
                 </div>
@@ -330,7 +333,7 @@
                 <div class="signature-box">
                     <div class="signature-line">
                         <div class="signature-name">Ing. María Fernanda López</div>
-                        <div class="signature-title">Jefa del Depto. de Vinculación</div>
+                        <div class="signature-title">Jefa del Depto. de Sistemas</div>
                     </div>
                 </div>
             </div>
