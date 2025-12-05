@@ -27,10 +27,10 @@ class StudentProfileController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%")
-                  ->orWhereHas('studentProfile', function ($q) use ($search) {
-                      $q->where('control_number', 'like', "%{$search}%");
-                  });
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhereHas('studentProfile', function ($q) use ($search) {
+                        $q->where('control_number', 'like', "%{$search}%");
+                    });
             });
         }
 
@@ -67,7 +67,7 @@ class StudentProfileController extends Controller
             'career_id' => 'required|exists:careers,id',
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
-        
+
         DB::transaction(function () use ($request) {
             // 1. Crear Usuario
             $user = User::create([
@@ -87,7 +87,7 @@ class StudentProfileController extends Controller
                 'career_id' => $request->career_id,
             ]);
         });
-        
+
         return redirect()->route('students.index')->with('success', 'Alumno registrado correctamente.');
     }
 
@@ -102,10 +102,126 @@ class StudentProfileController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
+    public function importCsv(Request $request)
+    {
+        $request->validate([
+            'csv_file' => 'required|mimes:csv,txt'
+        ]);
+
+        $file = $request->file('csv_file');
+        $handle = fopen($file, 'r');
+
+        $rowNumber = 0;
+        $imported = [];
+        $failed = [];
+
+        while (($data = fgetcsv($handle, 2000, ',')) !== false) {
+            $rowNumber++;
+
+            // Ignorar encabezado
+            if ($rowNumber == 1) {
+                continue;
+            }
+
+            // Columnas esperadas:
+            // 0 = Nombre
+            // 1 = Correo
+            // 2 = Matricula
+            // 3 = Carrera (texto)
+            $name = trim($data[0] ?? '');
+            $email = trim($data[1] ?? '');
+            $controlNumber = trim($data[2] ?? '');
+            $careerText = trim($data[3] ?? '');
+
+            // Resolver carrera por fuzzy matching
+            $careerId = \App\Models\Career::detectFromName($careerText);
+
+            // Acumular errores
+            $errors = [];
+
+            if (!$name)
+                $errors[] = "Nombre vacío";
+            if (!$email)
+                $errors[] = "Correo vacío";
+            if ($email && !filter_var($email, FILTER_VALIDATE_EMAIL))
+                $errors[] = "Correo inválido";
+
+            if (\App\Models\User::where('email', $email)->exists())
+                $errors[] = "Correo duplicado";
+
+            if (!$controlNumber)
+                $errors[] = "Número de control vacío";
+            if (\App\Models\StudentProfile::where('control_number', $controlNumber)->exists())
+                $errors[] = "Número de control duplicado";
+
+            if (!$careerId)
+                $errors[] = "Carrera no identificada";
+
+            // Si tuvo errores → enviarlo a la lista de fallos
+            if (count($errors) > 0) {
+                $failed[] = [
+                    'row' => $rowNumber,
+                    'name' => $name,
+                    'email' => $email,
+                    'control_number' => $controlNumber,
+                    'career' => $careerText,
+                    'errors' => $errors
+                ];
+                continue;
+            }
+
+            // --------------------------
+            //  INSERTAR ALUMNO CORRECTO
+            // --------------------------
+            DB::transaction(function () use ($name, $email, $controlNumber, $careerId, &$imported) {
+                // 1. Crear usuario
+                $user = \App\Models\User::create([
+                    'name' => $name,
+                    'email' => $email,
+                    'password' => \Illuminate\Support\Facades\Hash::make('password'),
+                    'is_active' => true,
+                ]);
+
+                // 2. Asignar rol student
+                if (method_exists($user, 'assignRole')) {
+                    $user->assignRole('student');
+                }
+
+                // 3. Crear perfil
+                \App\Models\StudentProfile::create([
+                    'user_id' => $user->id,
+                    'control_number' => $controlNumber,
+                    'career_id' => $careerId,
+                ]);
+
+                // 4. Registrar como importado
+                $imported[] = [
+                    'name' => $name,
+                    'email' => $email,
+                    'control_number' => $controlNumber,
+                    'career_id' => $careerId,
+                ];
+            });
+        }
+
+        fclose($handle);
+
+        // Respuesta para el frontend (modal 3 pasos)
+        return response()->json([
+            'success' => true,
+            'imported' => $imported,
+            'failed' => $failed,
+            'total_imported' => count($imported),
+            'total_failed' => count($failed),
+            'default_password' => "password",
+        ]);
+    }
+
+
     public function edit(User $student)
     {
         //
-    
+
         $student->load('studentProfile.career'); // Cargar perfil y carrera relacionada
         $careers = Career::all();
         return view('students.edit', compact('student', 'careers'));

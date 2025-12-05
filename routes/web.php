@@ -63,8 +63,9 @@ Route::middleware('auth')->group(function () {
 
     /* EVENTOS - Todos pueden ver, solo admin/staff pueden gestionar */
     Route::get('/events', [EventController::class, 'index'])->name('events.index');
+    Route::get('/events/{event}', [EventController::class, 'show'])->name('events.show');
+    Route::get('/events/{event}/rankings', [EventController::class, 'rankings'])->name('events.rankings');
     
-    // Rutas de creación y gestión (ANTES de las rutas con parámetros)
     Route::middleware(['role:admin|staff'])->group(function () {
         Route::get('/events/create', [EventController::class, 'create'])->name('events.create');
         Route::post('/events', [EventController::class, 'store'])->name('events.store');
@@ -73,10 +74,6 @@ Route::middleware('auth')->group(function () {
         Route::patch('/events/{event}', [EventController::class, 'update']);
         Route::delete('/events/{event}', [EventController::class, 'destroy'])->name('events.destroy');
     });
-    
-    // Rutas públicas con parámetros (DESPUÉS de las rutas estáticas)
-    Route::get('/events/{event}', [EventController::class, 'show'])->name('events.show');
-    Route::get('/events/{event}/rankings', [EventController::class, 'rankings'])->name('events.rankings');
 
     /* EXPORTACIONES - Solo admin/staff */
     Route::middleware(['role:admin|staff'])->group(function () {
@@ -97,7 +94,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/teams/{team}/invitations/accept/{notification?}', [TeamController::class, 'acceptInvitation'])->name('teams.invitations.accept');
         Route::post('/teams/{team}/invitations/reject/{notification?}', [TeamController::class, 'rejectInvitation'])->name('teams.invitations.reject');
     });
-    
+
     Route::middleware(['role:admin|staff'])->group(function () {
         Route::get('/teams/{team}/edit', [TeamController::class, 'edit'])->name('teams.edit');
         Route::put('/teams/{team}', [TeamController::class, 'update'])->name('teams.update');
@@ -113,13 +110,13 @@ Route::middleware('auth')->group(function () {
         Route::get('/projects/create', [ProjectController::class, 'create'])->name('projects.create');
         Route::post('/projects', [ProjectController::class, 'store'])->name('projects.store');
     });
-    
+
     Route::middleware(['role:admin|staff|student'])->group(function () {
         Route::get('/projects/{project}/edit', [ProjectController::class, 'edit'])->name('projects.edit');
         Route::put('/projects/{project}', [ProjectController::class, 'update'])->name('projects.update');
         Route::patch('/projects/{project}', [ProjectController::class, 'update']);
     });
-    
+
     Route::middleware(['role:admin|staff'])->group(function () {
         Route::delete('/projects/{project}', [ProjectController::class, 'destroy'])->name('projects.destroy');
         Route::post('/projects/{project}/assign-judge', [ProjectController::class, 'assignJudge'])->name('projects.assign-judge');
@@ -187,6 +184,12 @@ Route::middleware('auth')->group(function () {
         Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
         Route::get('/activity-logs/{activityLog}', [ActivityLogController::class, 'show'])->name('activity-logs.show');
     });
+
+    Route::post('/students/import-csv', [StudentProfileController::class, 'importCsv'])
+        ->name('students.importCsv');
+    Route::post('/students/import-csv', [\App\Http\Controllers\StudentProfileController::class, 'importCsv'])
+        ->name('students.importCsv');
+
 });
 
 require __DIR__ . '/auth.php';
