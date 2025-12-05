@@ -18,6 +18,66 @@ class Event extends Model
         'is_active' => 'boolean',
     ];
 
+    /**
+     * Verificar si el evento está abierto para inscripciones/acciones
+     */
+    public function isOpen(): bool
+    {
+        // El evento debe estar activo
+        if (!$this->is_active) {
+            return false;
+        }
+
+        // La fecha de fin no debe haber pasado
+        if ($this->end_date && $this->end_date->isPast()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Verificar si el evento está cerrado
+     */
+    public function isClosed(): bool
+    {
+        return !$this->isOpen();
+    }
+
+    /**
+     * Obtener el estado del evento como texto
+     */
+    public function getStatusAttribute(): string
+    {
+        if (!$this->is_active) {
+            return 'Inactivo';
+        }
+
+        if ($this->end_date && $this->end_date->isPast()) {
+            return 'Finalizado';
+        }
+
+        if ($this->start_date && $this->start_date->isFuture()) {
+            return 'Próximamente';
+        }
+
+        return 'En curso';
+    }
+
+    /**
+     * Obtener el color del badge según el estado
+     */
+    public function getStatusColorAttribute(): string
+    {
+        return match($this->status) {
+            'Inactivo' => 'gray',
+            'Finalizado' => 'red',
+            'Próximamente' => 'blue',
+            'En curso' => 'green',
+            default => 'gray'
+        };
+    }
+
     public function getAvailableRolesAttribute()
     {
         $name = strtolower($this->name);

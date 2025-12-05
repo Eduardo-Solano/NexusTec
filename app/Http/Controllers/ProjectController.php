@@ -56,6 +56,11 @@ class ProjectController extends Controller
 
         $team = Team::findOrFail($request->query('team_id'));
 
+        // ⛔ Validar que el evento esté abierto
+        if ($team->event->isClosed()) {
+            return back()->with('error', 'No se pueden entregar proyectos porque el evento está cerrado o ha finalizado.');
+        }
+
         // 2. Seguridad: Solo el LÍDER del equipo puede subir el proyecto
         if ($team->leader_id !== Auth::id()) {
             abort(403, 'Solo el líder del equipo puede entregar el proyecto.');
@@ -82,6 +87,11 @@ class ProjectController extends Controller
         ]);
 
         $team = Team::findOrFail($request->team_id);
+
+        // ⛔ Validar que el evento esté abierto
+        if ($team->event->isClosed()) {
+            return back()->with('error', 'No se pueden entregar proyectos porque el evento está cerrado o ha finalizado.');
+        }
 
         // Seguridad: Solo el LÍDER del equipo puede entregar el proyecto
         if ($team->leader_id !== Auth::id()) {
@@ -143,6 +153,12 @@ class ProjectController extends Controller
         // Cargar relaciones necesarias
         $project->load(['team.leader', 'team.event', 'evaluations']);
         
+        // ⛔ Validar que el evento esté abierto
+        if ($project->team->event->isClosed()) {
+            return redirect()->route('projects.show', $project)
+                ->with('error', 'No se puede editar el proyecto porque el evento está cerrado o ha finalizado.');
+        }
+        
         // Verificar permisos: Solo líder del equipo o admin/staff
         $user = Auth::user();
         $isLeader = $project->team->leader_id === $user->id;
@@ -166,6 +182,12 @@ class ProjectController extends Controller
      */
     public function update(Request $request, Project $project)
     {
+        // ⛔ Validar que el evento esté abierto
+        if ($project->team->event->isClosed()) {
+            return redirect()->route('projects.show', $project)
+                ->with('error', 'No se puede editar el proyecto porque el evento está cerrado o ha finalizado.');
+        }
+        
         // Verificar permisos: Solo líder del equipo o admin/staff
         $user = Auth::user();
         $isLeader = $project->team->leader_id === $user->id;
@@ -238,6 +260,11 @@ class ProjectController extends Controller
         // Verificar permisos
         if (!Auth::user()->can('projects.edit')) {
             abort(403);
+        }
+
+        // ⛔ Validar que el evento esté abierto
+        if ($project->team->event->isClosed()) {
+            return back()->with('error', 'No se pueden asignar jueces porque el evento está cerrado o ha finalizado.');
         }
 
         $request->validate([

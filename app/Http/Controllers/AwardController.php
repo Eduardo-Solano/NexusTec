@@ -38,8 +38,8 @@ class AwardController extends Controller
     {
         $event = Event::with(['teams.project', 'teams.leader'])->findOrFail($request->event_id);
         
-        // Validar que el evento esté cerrado
-        if ($event->is_active) {
+        // Los premios SOLO se asignan cuando el evento ha finalizado
+        if ($event->isOpen()) {
             return redirect()->route('events.rankings', $event)
                 ->with('error', 'Solo puedes asignar premios cuando el evento haya finalizado.');
         }
@@ -75,9 +75,9 @@ class AwardController extends Controller
             'name' => 'nullable|string|max:255',
         ]);
 
-        // Validar que el evento esté cerrado
+        // Los premios SOLO se asignan cuando el evento ha finalizado
         $event = Event::findOrFail($validated['event_id']);
-        if ($event->is_active) {
+        if ($event->isOpen()) {
             return back()->with('error', 'Solo puedes asignar premios cuando el evento haya finalizado.');        
         }
 

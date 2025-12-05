@@ -60,6 +60,12 @@ class TeamController extends Controller
             'advisor_id' => 'required|exists:users,id',
         ]);
 
+        // ⛔ Validar que el evento esté abierto
+        $event = Event::findOrFail($request->event_id);
+        if ($event->isClosed()) {
+            return back()->with('error', 'No se pueden registrar equipos porque el evento está cerrado o ha finalizado.');
+        }
+
         // Validar correos
         $correosInvalidos = [];
         foreach (array_filter($request->members ?? []) as $email) {
@@ -73,9 +79,7 @@ class TeamController extends Controller
             ]);
         }
 
-        return DB::transaction(function () use ($request) {
-
-            $event = Event::findOrFail($request->event_id);
+        return DB::transaction(function () use ($request, $event) {
 
             // Verificar si ya pertenece a un equipo del evento
             $exists = DB::table('team_user')
@@ -153,6 +157,13 @@ class TeamController extends Controller
     {
         $event = Event::find($request->event_id);
         abort_unless($event, 404);
+
+        // ⛔ Validar que el evento esté abierto
+        if ($event->isClosed()) {
+            return redirect()->route('events.show', $event)
+                ->with('error', 'No se pueden crear equipos porque el evento está cerrado o ha finalizado.');
+        }
+
         return view('teams.create', compact('event'));
     }
 
@@ -166,6 +177,11 @@ class TeamController extends Controller
         $request->validate([
             'role' => 'required|string'
         ]);
+
+        // ⛔ Validar que el evento esté abierto
+        if ($team->event->isClosed()) {
+            return back()->with('error', 'No se pueden unir al equipo porque el evento está cerrado o ha finalizado.');
+        }
 
         // Verificar si ya existe relación
         $existing = $team->members()->where('user_id', $user->id)->first();
@@ -197,6 +213,11 @@ class TeamController extends Controller
      */
     public function accept(Team $team, User $user, Request $request)
     {
+        // ⛔ Validar que el evento esté abierto
+        if ($team->event->isClosed()) {
+            return back()->with('error', 'No se pueden aceptar solicitudes porque el evento está cerrado o ha finalizado.');
+        }
+
         if ($request->notification) {
             Auth::user()->notifications()->where('id', $request->notification)->update(['read_at' => now()]);
         }
@@ -229,6 +250,11 @@ class TeamController extends Controller
     public function acceptInvitation(Team $team, $notification = null)
     {
         $user = Auth::user();
+
+        // ⛔ Validar que el evento esté abierto
+        if ($team->event->isClosed()) {
+            return back()->with('error', 'No se pueden aceptar invitaciones porque el evento está cerrado o ha finalizado.');
+        }
 
         // Marcar notificación como leída
         if ($notification) {
@@ -285,6 +311,11 @@ class TeamController extends Controller
     public function respondAdvisory(Team $team, string $status, Request $request)
     {
         $user = Auth::user();
+
+        // ⛔ Validar que el evento esté abierto (solo para aceptar)
+        if ($status === 'accepted' && $team->event->isClosed()) {
+            return back()->with('error', 'No se pueden aceptar solicitudes de asesoría porque el evento está cerrado o ha finalizado.');
+        }
 
         // Verificar que el usuario es el asesor solicitado
         if ($team->advisor_id !== $user->id) {
