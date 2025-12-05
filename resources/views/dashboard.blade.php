@@ -90,12 +90,93 @@
             {{-- Sección para Jueces: Proyectos Asignados --}}
             @if(Auth::user()->hasRole('judge'))
                 @php
-                    $assignedProjects = Auth::user()->assignedProjects()
-                        ->with(['team.event', 'team.members'])
-                        ->get();
-                    $pendingProjects = $assignedProjects->filter(fn($p) => !$p->pivot->is_completed);
-                    $completedProjects = $assignedProjects->filter(fn($p) => $p->pivot->is_completed);
+                    $assignedProjects = $data['assigned_projects'] ?? collect();
+                    $pendingProjects = $data['pending_projects'] ?? collect();
+                    $completedProjects = $data['completed_projects'] ?? collect();
                 @endphp
+
+                {{-- Estadísticas del Juez --}}
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-gradient-to-br from-amber-900/30 to-gray-800 p-6 rounded-2xl border border-amber-500/30 shadow-lg">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-gray-400 text-xs font-bold uppercase">Pendientes</h3>
+                            <span class="p-2 bg-amber-500/20 text-amber-400 rounded-lg">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </span>
+                        </div>
+                        <p class="text-3xl font-black text-amber-400">{{ $data['pending_count'] ?? 0 }}</p>
+                        <p class="text-xs text-gray-500 mt-1">proyectos por evaluar</p>
+                    </div>
+
+                    <div class="bg-gradient-to-br from-green-900/30 to-gray-800 p-6 rounded-2xl border border-green-500/30 shadow-lg">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-gray-400 text-xs font-bold uppercase">Completados</h3>
+                            <span class="p-2 bg-green-500/20 text-green-400 rounded-lg">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </span>
+                        </div>
+                        <p class="text-3xl font-black text-green-400">{{ $data['completed_count'] ?? 0 }}</p>
+                        <p class="text-xs text-gray-500 mt-1">proyectos evaluados</p>
+                    </div>
+
+                    <div class="bg-gradient-to-br from-blue-900/30 to-gray-800 p-6 rounded-2xl border border-blue-500/30 shadow-lg">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-gray-400 text-xs font-bold uppercase">Total Asignados</h3>
+                            <span class="p-2 bg-blue-500/20 text-blue-400 rounded-lg">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                                </svg>
+                            </span>
+                        </div>
+                        <p class="text-3xl font-black text-blue-400">{{ $assignedProjects->count() }}</p>
+                        <p class="text-xs text-gray-500 mt-1">proyectos asignados</p>
+                    </div>
+
+                    <div class="bg-gradient-to-br from-purple-900/30 to-gray-800 p-6 rounded-2xl border border-purple-500/30 shadow-lg">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-gray-400 text-xs font-bold uppercase">Promedio</h3>
+                            <span class="p-2 bg-purple-500/20 text-purple-400 rounded-lg">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/>
+                                </svg>
+                            </span>
+                        </div>
+                        <p class="text-3xl font-black text-purple-400">{{ $data['avg_score'] ?? 0 }}</p>
+                        <p class="text-xs text-gray-500 mt-1">puntuación promedio</p>
+                    </div>
+                </div>
+
+                {{-- Barra de progreso --}}
+                @if($assignedProjects->count() > 0)
+                    <div class="bg-gray-800 border border-gray-700 rounded-xl p-4 mb-8">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-sm font-bold text-white">Tu progreso de evaluación</span>
+                            <span class="text-sm text-gray-400">{{ $completedProjects->count() }} / {{ $assignedProjects->count() }}</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-3">
+                            @php
+                                $progressPercent = $assignedProjects->count() > 0 
+                                    ? round(($completedProjects->count() / $assignedProjects->count()) * 100) 
+                                    : 0;
+                            @endphp
+                            <div class="bg-gradient-to-r from-amber-500 to-green-500 h-3 rounded-full transition-all duration-500" 
+                                 style="width: {{ $progressPercent }}%"></div>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-2">
+                            @if($progressPercent == 100)
+                                🎉 ¡Excelente! Has completado todas tus evaluaciones.
+                            @elseif($progressPercent >= 50)
+                                👍 Vas muy bien, sigue así.
+                            @else
+                                ⏰ Tienes evaluaciones pendientes.
+                            @endif
+                        </p>
+                    </div>
+                @endif
 
                 <div class="mb-8">
                     <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2">

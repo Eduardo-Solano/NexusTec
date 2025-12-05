@@ -107,6 +107,39 @@ class DashboardController extends Controller
                 ->take(5)
                 ->get();
         } 
+        elseif ($user->hasRole('judge')) {
+            // Lógica para JUEZ
+            $assignedProjects = $user->assignedProjects()
+                ->with(['team.event', 'team.members', 'team.leader', 'evaluations'])
+                ->get();
+
+            $pendingProjects = $assignedProjects->filter(fn($p) => !$p->pivot->is_completed);
+            $completedProjects = $assignedProjects->filter(fn($p) => $p->pivot->is_completed);
+
+            // Estadísticas de evaluaciones
+            $totalEvaluations = Evaluation::where('judge_id', $user->id)->count();
+            $avgScore = Evaluation::where('judge_id', $user->id)->avg('score');
+
+            // Eventos en los que participa como juez
+            $eventsAsJudge = Event::whereHas('teams.project.judges', function($q) use ($user) {
+                $q->where('judge_id', $user->id);
+            })->with(['teams' => function($q) use ($user) {
+                $q->whereHas('project.judges', function($q2) use ($user) {
+                    $q2->where('judge_id', $user->id);
+                });
+            }])->get();
+
+            $data = [
+                'assigned_projects' => $assignedProjects,
+                'pending_projects' => $pendingProjects,
+                'completed_projects' => $completedProjects,
+                'total_evaluations' => $totalEvaluations,
+                'avg_score' => $avgScore ? round($avgScore, 2) : 0,
+                'events_as_judge' => $eventsAsJudge,
+                'pending_count' => $pendingProjects->count(),
+                'completed_count' => $completedProjects->count(),
+            ];
+        }
         elseif ($user->hasRole('student')) {
             // Lógica para ESTUDIANTE
             // Buscamos si tiene equipo en algún evento activo
