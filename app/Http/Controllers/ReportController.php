@@ -59,10 +59,12 @@ class ReportController extends Controller
         // Proyectos mejor evaluados (promedio)
         $topProjects = Project::with(['team.event'])
             ->withAvg('evaluations', 'score')
-            ->having('evaluations_avg_score', '>', 0)
-            ->orderByDesc('evaluations_avg_score')
+            ->withCount('evaluations')
+            ->get()
+            ->filter(fn($p) => $p->evaluations_count > 0 && $p->evaluations_avg_score > 0)
+            ->sortByDesc('evaluations_avg_score')
             ->take(5)
-            ->get();
+            ->values();
 
         return view('reports.index', compact(
             'stats',
@@ -131,10 +133,11 @@ class ReportController extends Controller
                 ->whereIn('id', $projectIds)
                 ->withAvg('evaluations', 'score')
                 ->withCount('evaluations')
-                ->having('evaluations_count', '>', 0)
-                ->orderByDesc('evaluations_avg_score')
+                ->get()
+                ->filter(fn($p) => $p->evaluations_count > 0)
+                ->sortByDesc('evaluations_avg_score')
                 ->take(10)
-                ->get();
+                ->values();
 
             $eventStats = [
                 'total_teams' => $selectedEvent->teams_count,
