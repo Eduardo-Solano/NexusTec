@@ -158,8 +158,21 @@
 
                                 {{-- Propiedades adicionales --}}
                                 @if($activity->properties && count($activity->properties) > 0)
-                                    <div class="mt-3 p-2 bg-gray-900/50 rounded-lg border border-gray-700 hidden group-hover:block">
-                                        <pre class="text-xs text-gray-400 overflow-x-auto">{{ json_encode($activity->properties, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
+                                    <div class="mt-3 p-3 bg-gray-900/50 rounded-lg border border-gray-700">
+                                        <div class="flex flex-wrap gap-2">
+                                            @foreach($activity->properties as $key => $value)
+                                                <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs bg-gray-800 border border-gray-600">
+                                                    <span class="text-gray-500 mr-1.5">{{ str_replace('_', ' ', ucfirst($key)) }}:</span>
+                                                    <span class="text-gray-300 font-medium">
+                                                        @if(is_array($value))
+                                                            {{ implode(', ', $value) }}
+                                                        @else
+                                                            {{ $value }}
+                                                        @endif
+                                                    </span>
+                                                </span>
+                                            @endforeach
+                                        </div>
                                     </div>
                                 @endif
                             </div>

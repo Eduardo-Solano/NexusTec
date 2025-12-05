@@ -7,9 +7,11 @@
                     <h2 class="text-3xl font-bold text-white">Gestión de Alumnos</h2>
                     <p class="text-gray-400 text-sm mt-1">Administración de alumnos</p>
                 </div>
-                <a href="{{ route('students.create') }}" class="bg-ito-orange hover:bg-orange-600 text-white text-sm font-bold py-2 px-4 rounded-lg shadow-lg transition">
-                    + Nuevo Alumno
-                </a>
+                <div class="flex gap-3">
+                    <a href="{{ route('students.create') }}" class="bg-ito-orange hover:bg-orange-600 text-white text-sm font-bold py-2 px-4 rounded-lg shadow-lg transition">
+                        + Nuevo Alumno
+                    </a>
+                </div>
             </div>
 
             <!-- Barra de Búsqueda y Filtros -->
