@@ -100,6 +100,11 @@ Route::middleware('auth')->group(function () {
         Route::post('/teams/{team}/reject/{user}', [TeamController::class, 'reject'])->name('teams.reject');
         Route::post('/teams/{team}/invitations/accept/{notification?}', [TeamController::class, 'acceptInvitation'])->name('teams.invitations.accept');
         Route::post('/teams/{team}/invitations/reject/{notification?}', [TeamController::class, 'rejectInvitation'])->name('teams.invitations.reject');
+        // Nuevas rutas de gestión de miembros
+        Route::post('/teams/{team}/leave', [TeamController::class, 'leaveTeam'])->name('teams.leave');
+        Route::delete('/teams/{team}/kick/{user}', [TeamController::class, 'kickMember'])->name('teams.kick');
+        Route::post('/teams/{team}/transfer/{user}', [TeamController::class, 'transferLeadership'])->name('teams.transfer');
+        Route::delete('/teams/{team}/cancel-invitation/{user}', [TeamController::class, 'cancelInvitation'])->name('teams.cancel-invitation');
     });
 
     Route::middleware(['role:admin|staff'])->group(function () {

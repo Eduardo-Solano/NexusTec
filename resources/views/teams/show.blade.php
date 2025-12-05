@@ -175,17 +175,112 @@
                                         </div>
                                     </div>
 
-                                    <div class="text-right">
-                                        <p class="text-gray-300 text-xs font-bold uppercase tracking-wider mb-1">
-                                            {{ $member->pivot->role ?? 'Miembro' }}
-                                        </p>
-                                        <span class="text-[10px] {{ $member->pivot->is_accepted ? 'text-green-400' : 'text-yellow-400' }}">
-                                            {{ $member->pivot->is_accepted ? '● Activo' : '● Pendiente' }}
-                                        </span>
+                                    <div class="flex items-center gap-3">
+                                        <div class="text-right">
+                                            <p class="text-gray-300 text-xs font-bold uppercase tracking-wider mb-1">
+                                                {{ $member->pivot->role ?? 'Miembro' }}
+                                            </p>
+                                            <span class="text-[10px] {{ $member->pivot->is_accepted ? 'text-green-400' : 'text-yellow-400' }}">
+                                                {{ $member->pivot->is_accepted ? '● Activo' : '● Pendiente' }}
+                                            </span>
+                                        </div>
+
+                                        {{-- Acciones de gestión de miembros --}}
+                                        @if($team->event->isOpen())
+                                            <div class="flex items-center gap-1">
+                                                {{-- Si soy el líder y este NO es el líder --}}
+                                                @if(auth()->id() === $team->leader_id && $member->id !== $team->leader_id)
+                                                    @if($member->pivot->is_accepted)
+                                                        {{-- Transferir liderazgo --}}
+                                                        <form action="{{ route('teams.transfer', [$team, $member]) }}" method="POST" 
+                                                              onsubmit="return confirm('¿Transferir el liderazgo a {{ $member->name }}?\n\nDejarás de ser el líder del equipo.')">
+                                                            @csrf
+                                                            <button type="submit" class="p-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition" title="Transferir liderazgo">
+                                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+                                                                </svg>
+                                                            </button>
+                                                        </form>
+                                                        {{-- Expulsar miembro --}}
+                                                        <form action="{{ route('teams.kick', [$team, $member]) }}" method="POST"
+                                                              onsubmit="return confirm('¿Expulsar a {{ $member->name }} del equipo?')">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="p-1.5 bg-red-600 hover:bg-red-500 text-white rounded-lg transition" title="Expulsar del equipo">
+                                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7a4 4 0 11-8 0 4 4 0 018 0zM9 14a6 6 0 00-6 6v1h12v-1a6 6 0 00-6-6zM21 12h-6"/>
+                                                                </svg>
+                                                            </button>
+                                                        </form>
+                                                    @else
+                                                        {{-- Cancelar invitación pendiente --}}
+                                                        <form action="{{ route('teams.cancel-invitation', [$team, $member]) }}" method="POST"
+                                                              onsubmit="return confirm('¿Cancelar la invitación a {{ $member->name }}?')">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="p-1.5 bg-yellow-600 hover:bg-yellow-500 text-white rounded-lg transition" title="Cancelar invitación">
+                                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                                                </svg>
+                                                            </button>
+                                                        </form>
+                                                    @endif
+                                                @endif
+
+                                                {{-- Si soy yo mismo y NO soy líder, puedo abandonar --}}
+                                                @if(auth()->id() === $member->id && $member->id !== $team->leader_id && $member->pivot->is_accepted)
+                                                    <form action="{{ route('teams.leave', $team) }}" method="POST"
+                                                          onsubmit="return confirm('¿Estás seguro de abandonar el equipo {{ $team->name }}?\n\nEsta acción no se puede deshacer.')">
+                                                        @csrf
+                                                        <button type="submit" class="p-1.5 bg-orange-600 hover:bg-orange-500 text-white rounded-lg transition" title="Abandonar equipo">
+                                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                                                            </svg>
+                                                        </button>
+                                                    </form>
+                                                @endif
+                                            </div>
+                                        @endif
                                     </div>
                                 </div>
                             @endforeach
                         </div>
+
+                        {{-- Leyenda de acciones --}}
+                        @if($team->event->isOpen() && (auth()->id() === $team->leader_id || $team->members->contains('id', auth()->id())))
+                            <div class="p-4 bg-gray-900/50 border-t border-gray-700">
+                                <p class="text-xs text-gray-500 mb-2 font-bold uppercase">Acciones disponibles:</p>
+                                <div class="flex flex-wrap gap-3 text-xs text-gray-400">
+                                    @if(auth()->id() === $team->leader_id)
+                                        <span class="flex items-center gap-1">
+                                            <span class="w-5 h-5 bg-blue-600 rounded flex items-center justify-center">
+                                                <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+                                            </span>
+                                            Transferir liderazgo
+                                        </span>
+                                        <span class="flex items-center gap-1">
+                                            <span class="w-5 h-5 bg-red-600 rounded flex items-center justify-center">
+                                                <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7a4 4 0 11-8 0 4 4 0 018 0zM9 14a6 6 0 00-6 6v1h12v-1a6 6 0 00-6-6zM21 12h-6"/></svg>
+                                            </span>
+                                            Expulsar miembro
+                                        </span>
+                                        <span class="flex items-center gap-1">
+                                            <span class="w-5 h-5 bg-yellow-600 rounded flex items-center justify-center">
+                                                <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                            </span>
+                                            Cancelar invitación
+                                        </span>
+                                    @else
+                                        <span class="flex items-center gap-1">
+                                            <span class="w-5 h-5 bg-orange-600 rounded flex items-center justify-center">
+                                                <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                                            </span>
+                                            Abandonar equipo
+                                        </span>
+                                    @endif
+                                </div>
+                            </div>
+                        @endif
                     </div>
                 </div>
 

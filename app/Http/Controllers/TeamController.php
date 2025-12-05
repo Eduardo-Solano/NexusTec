@@ -383,4 +383,156 @@ class TeamController extends Controller
         }
     }
 
+    /**
+     * Abandonar equipo (miembro se sale voluntariamente)
+     */
+    public function leaveTeam(Team $team)
+    {
+        $user = Auth::user();
+
+        // Verificar que el usuario es miembro del equipo
+        $member = $team->members()->where('user_id', $user->id)->first();
+        if (!$member) {
+            return back()->with('error', 'No eres miembro de este equipo.');
+        }
+
+        // El líder no puede abandonar (debe transferir liderazgo primero)
+        if ($team->leader_id === $user->id) {
+            return back()->with('error', 'Como líder, debes transferir el liderazgo a otro miembro antes de abandonar el equipo.');
+        }
+
+        // Remover del equipo
+        $team->members()->detach($user->id);
+
+        // Registrar actividad
+        ActivityLog::log('left_team', "El usuario '{$user->name}' abandonó el equipo '{$team->name}'", $team, [
+            'user_id' => $user->id,
+            'user_name' => $user->name,
+        ]);
+
+        return redirect()->route('events.show', $team->event)
+            ->with('success', 'Has abandonado el equipo correctamente.');
+    }
+
+    /**
+     * Expulsar miembro del equipo (solo líder)
+     */
+    public function kickMember(Team $team, User $user)
+    {
+        $leader = Auth::user();
+
+        // Solo el líder puede expulsar
+        if ($team->leader_id !== $leader->id) {
+            return back()->with('error', 'Solo el líder del equipo puede expulsar miembros.');
+        }
+
+        // No se puede expulsar a sí mismo
+        if ($user->id === $leader->id) {
+            return back()->with('error', 'No puedes expulsarte a ti mismo.');
+        }
+
+        // Verificar que el usuario es miembro del equipo
+        $member = $team->members()->where('user_id', $user->id)->first();
+        if (!$member) {
+            return back()->with('error', 'Este usuario no es miembro del equipo.');
+        }
+
+        // ⛔ Validar que el evento esté abierto
+        if ($team->event->isClosed()) {
+            return back()->with('error', 'No se pueden expulsar miembros porque el evento está cerrado.');
+        }
+
+        // Remover del equipo
+        $team->members()->detach($user->id);
+
+        // Registrar actividad
+        ActivityLog::log('kicked_member', "El líder '{$leader->name}' expulsó a '{$user->name}' del equipo '{$team->name}'", $team, [
+            'kicked_user_id' => $user->id,
+            'kicked_user_name' => $user->name,
+        ]);
+
+        return back()->with('success', "'{$user->name}' ha sido expulsado del equipo.");
+    }
+
+    /**
+     * Transferir liderazgo a otro miembro (solo líder)
+     */
+    public function transferLeadership(Team $team, User $user)
+    {
+        $currentLeader = Auth::user();
+
+        // Solo el líder puede transferir
+        if ($team->leader_id !== $currentLeader->id) {
+            return back()->with('error', 'Solo el líder actual puede transferir el liderazgo.');
+        }
+
+        // No se puede transferir a sí mismo
+        if ($user->id === $currentLeader->id) {
+            return back()->with('error', 'Ya eres el líder del equipo.');
+        }
+
+        // Verificar que el nuevo líder es miembro aceptado del equipo
+        $member = $team->members()
+            ->where('user_id', $user->id)
+            ->wherePivot('is_accepted', true)
+            ->first();
+
+        if (!$member) {
+            return back()->with('error', 'Este usuario no es un miembro activo del equipo.');
+        }
+
+        // ⛔ Validar que el evento esté abierto
+        if ($team->event->isClosed()) {
+            return back()->with('error', 'No se puede transferir liderazgo porque el evento está cerrado.');
+        }
+
+        // Transferir liderazgo
+        $team->update(['leader_id' => $user->id]);
+
+        // Registrar actividad
+        ActivityLog::log('transferred_leadership', "'{$currentLeader->name}' transfirió el liderazgo a '{$user->name}' en el equipo '{$team->name}'", $team, [
+            'old_leader_id' => $currentLeader->id,
+            'old_leader_name' => $currentLeader->name,
+            'new_leader_id' => $user->id,
+            'new_leader_name' => $user->name,
+        ]);
+
+        return back()->with('success', "El liderazgo ha sido transferido a '{$user->name}'.");
+    }
+
+    /**
+     * Cancelar invitación pendiente (solo líder)
+     */
+    public function cancelInvitation(Team $team, User $user)
+    {
+        $leader = Auth::user();
+
+        // Solo el líder puede cancelar invitaciones
+        if ($team->leader_id !== $leader->id) {
+            return back()->with('error', 'Solo el líder del equipo puede cancelar invitaciones.');
+        }
+
+        // Verificar que existe una invitación pendiente (no aceptada y no solicitada por el usuario)
+        $invitation = $team->members()
+            ->where('user_id', $user->id)
+            ->wherePivot('is_accepted', false)
+            ->wherePivot('requested_by_user', false)
+            ->first();
+
+        if (!$invitation) {
+            return back()->with('error', 'No hay invitación pendiente para este usuario.');
+        }
+
+        // Remover la invitación
+        $team->members()->detach($user->id);
+
+        // Marcar notificaciones relacionadas como leídas
+        $user->unreadNotifications()
+            ->where('type', 'App\Notifications\TeamInvitationNotification')
+            ->whereJsonContains('data->team_id', $team->id)
+            ->update(['read_at' => now()]);
+
+        return back()->with('success', "La invitación a '{$user->name}' ha sido cancelada.");
+    }
+
 }
