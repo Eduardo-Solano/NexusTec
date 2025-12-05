@@ -100,7 +100,7 @@ class ReportController extends Controller
         ];
 
         if ($request->filled('event_id')) {
-            $selectedEvent = Event::with(['teams.members', 'teams.project.evaluations', 'awards.team'])
+            $selectedEvent = Event::with(['teams.members', 'teams.project.evaluations', 'teams.project.judges', 'awards.team'])
                 ->withCount(['teams', 'awards'])
                 ->findOrFail($request->event_id);
 
@@ -108,13 +108,14 @@ class ReportController extends Controller
             $teamsWithProject = $selectedEvent->teams->filter(fn($t) => $t->project !== null);
             $totalMembers = $selectedEvent->teams->sum(fn($t) => $t->members->count());
 
-            // Jueces asignados al evento
-            $totalJudges = DB::table('event_user')
-                ->where('event_id', $selectedEvent->id)
-                ->count();
+            // Jueces asignados a proyectos del evento (únicos)
+            $projectIds = $teamsWithProject->pluck('project.id')->filter();
+            $totalJudges = DB::table('judge_project')
+                ->whereIn('project_id', $projectIds)
+                ->distinct('judge_id')
+                ->count('judge_id');
 
             // Evaluaciones del evento
-            $projectIds = $teamsWithProject->pluck('project.id')->filter();
             $evaluationsQuery = Evaluation::whereIn('project_id', $projectIds);
             $totalEvaluations = $evaluationsQuery->count();
             
