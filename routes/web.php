@@ -85,9 +85,6 @@ Route::middleware('auth')->group(function () {
     });
 
     /* EQUIPOS - Todos pueden ver, estudiantes pueden crear/unirse */
-    Route::get('/teams', [TeamController::class, 'index'])->name('teams.index');
-    Route::get('/teams/{team}', [TeamController::class, 'show'])->name('teams.show');
-    
     Route::middleware(['role:student'])->group(function () {
         Route::get('/teams/create', [TeamController::class, 'create'])->name('teams.create');
         Route::post('/teams', [TeamController::class, 'store'])->name('teams.store');
@@ -105,10 +102,10 @@ Route::middleware('auth')->group(function () {
         Route::delete('/teams/{team}', [TeamController::class, 'destroy'])->name('teams.destroy');
     });
 
+    Route::get('/teams', [TeamController::class, 'index'])->name('teams.index');
+    Route::get('/teams/{team}', [TeamController::class, 'show'])->name('teams.show');
+
     /* PROYECTOS - Todos pueden ver, estudiantes entregan, admin/staff gestionan */
-    Route::get('/projects', [ProjectController::class, 'index'])->name('projects.index');
-    Route::get('/projects/{project}', [ProjectController::class, 'show'])->name('projects.show');
-    
     Route::middleware(['role:student'])->group(function () {
         Route::get('/projects/create', [ProjectController::class, 'create'])->name('projects.create');
         Route::post('/projects', [ProjectController::class, 'store'])->name('projects.store');
@@ -125,6 +122,9 @@ Route::middleware('auth')->group(function () {
         Route::post('/projects/{project}/assign-judge', [ProjectController::class, 'assignJudge'])->name('projects.assign-judge');
         Route::delete('/projects/{project}/remove-judge/{judge}', [ProjectController::class, 'removeJudge'])->name('projects.remove-judge');
     });
+
+    Route::get('/projects', [ProjectController::class, 'index'])->name('projects.index');
+    Route::get('/projects/{project}', [ProjectController::class, 'show'])->name('projects.show');
 
     /* EVALUACIONES - Solo jueces */
     Route::middleware(['role:judge'])->group(function () {

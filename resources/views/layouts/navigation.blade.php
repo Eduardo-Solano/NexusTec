@@ -22,14 +22,14 @@
                         {{ __('Eventos') }}
                     </x-nav-link>
                 </div>
-                @can('teams.view')
+                @can('teams.edit')
                     <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                         <x-nav-link :href="route('teams.index')" :active="request()->routeIs('teams.*')">
                             {{ __('Equipos') }}
                         </x-nav-link>
                     </div>
                 @endcan
-                @can('projects.view')
+                @can('projects.edit')
                     <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                         <x-nav-link :href="route('projects.index')" :active="request()->routeIs('projects.*')">
                             {{ __('Proyectos') }}
@@ -556,15 +556,15 @@
                 {{ __('Eventos') }}
             </x-responsive-nav-link>
             
-            {{-- Equipos - Todos los autenticados pueden ver --}}
-            @can('teams.view')
+            {{-- Equipos - Solo admin/staff --}}
+            @can('teams.edit')
                 <x-responsive-nav-link :href="route('teams.index')" :active="request()->routeIs('teams.*')">
                     {{ __('Equipos') }}
                 </x-responsive-nav-link>
             @endcan
             
-            {{-- Proyectos - Todos pueden ver --}}
-            @can('projects.view')
+            {{-- Proyectos - Solo admin/staff --}}
+            @can('projects.edit')
                 <x-responsive-nav-link :href="route('projects.index')" :active="request()->routeIs('projects.*')">
                     {{ __('Proyectos') }}
                 </x-responsive-nav-link>
