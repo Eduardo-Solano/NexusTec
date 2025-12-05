@@ -7,9 +7,19 @@
                     <h2 class="text-3xl font-bold text-white">Gestión de Alumnos</h2>
                     <p class="text-gray-400 text-sm mt-1">Administración de alumnos</p>
                 </div>
-                <a href="{{ route('students.create') }}" class="bg-ito-orange hover:bg-orange-600 text-white text-sm font-bold py-2 px-4 rounded-lg shadow-lg transition">
-                    + Nuevo Alumno
-                </a>
+                <div class="flex gap-3">
+                    <!-- Botón Importar CSV -->
+                    <button type="button" onclick="document.getElementById('csv-modal').classList.remove('hidden')" 
+                        class="bg-green-600 hover:bg-green-700 text-white text-sm font-bold py-2 px-4 rounded-lg shadow-lg transition flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                        </svg>
+                        Importar CSV
+                    </button>
+                    <a href="{{ route('students.create') }}" class="bg-ito-orange hover:bg-orange-600 text-white text-sm font-bold py-2 px-4 rounded-lg shadow-lg transition">
+                        + Nuevo Alumno
+                    </a>
+                </div>
             </div>
 
             <!-- Barra de Búsqueda y Filtros -->
@@ -168,6 +178,53 @@
                     {{ $students->links() }}
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Modal para importar CSV -->
+    <div id="csv-modal" class="hidden fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
+        <div class="bg-gray-800 rounded-xl shadow-2xl border border-gray-700 max-w-lg w-full">
+            <div class="p-6 border-b border-gray-700">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-xl font-bold text-white">Importar Alumnos desde CSV</h3>
+                    <button type="button" onclick="document.getElementById('csv-modal').classList.add('hidden')" class="text-gray-400 hover:text-white">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <form action="{{ route('students.importCsv') }}" method="POST" enctype="multipart/form-data" class="p-6">
+                @csrf
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Archivo CSV</label>
+                    <input type="file" name="csv_file" accept=".csv,.txt" required
+                        class="block w-full text-sm text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-ito-orange file:text-white hover:file:bg-orange-600 cursor-pointer bg-gray-700 rounded-lg border border-gray-600">
+                </div>
+                <div class="bg-gray-900 rounded-lg p-4 mb-4">
+                    <p class="text-sm text-gray-400 mb-2">El archivo CSV debe contener las siguientes columnas:</p>
+                    <ul class="text-xs text-gray-500 list-disc list-inside space-y-1">
+                        <li><strong class="text-gray-300">name</strong> - Nombre completo del alumno</li>
+                        <li><strong class="text-gray-300">email</strong> - Correo electrónico institucional</li>
+                        <li><strong class="text-gray-300">control_number</strong> - Número de control</li>
+                        <li><strong class="text-gray-300">career_id</strong> - ID de la carrera</li>
+                    </ul>
+                    <p class="text-xs text-amber-400 mt-3">⚠️ La primera fila debe contener los encabezados. Contraseña temporal: <code class="bg-gray-800 px-1 rounded">Temporal123!</code></p>
+                </div>
+                <div class="flex justify-end gap-3">
+                    <button type="button" onclick="document.getElementById('csv-modal').classList.add('hidden')" 
+                        class="px-4 py-2 bg-gray-600 hover:bg-gray-500 text-white font-bold rounded-lg transition">
+                        Cancelar
+                    </button>
+                    <button type="submit" 
+                        class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg transition flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                        </svg>
+                        Importar
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </x-app-layout>
