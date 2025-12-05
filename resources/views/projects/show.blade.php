@@ -222,6 +222,146 @@
                         </div>
                     </div>
 
+                    {{-- SECCIÓN DE RETROALIMENTACIÓN (Visible para estudiantes cuando está habilitado) --}}
+                    @php
+                        $isMember = $project->team->members->contains('id', Auth::id());
+                        $event = $project->team->event;
+                        $canSeeFeedback = $isMember && $event->show_feedback_to_students && $hasEvaluations;
+                        $isAdminOrStaff = Auth::user()->hasAnyRole(['admin', 'staff']);
+                    @endphp
+
+                    @if($canSeeFeedback || $isAdminOrStaff)
+                        @php
+                            // Agrupar evaluaciones por juez
+                            $evaluationsByJudge = $project->evaluations()
+                                ->with(['judge', 'criterion'])
+                                ->get()
+                                ->groupBy('judge_id');
+                        @endphp
+
+                        @if($evaluationsByJudge->count() > 0)
+                            <div class="bg-gray-800 rounded-2xl border border-gray-700 shadow-lg overflow-hidden">
+                                <div class="p-6 border-b border-gray-700 bg-gradient-to-r from-green-900/20 to-emerald-900/20">
+                                    <h3 class="text-lg font-bold text-white flex items-center">
+                                        <svg class="w-5 h-5 mr-3 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                        </svg>
+                                        Retroalimentación de Jueces
+                                    </h3>
+                                    <p class="text-gray-400 text-sm mt-1">Comentarios y calificaciones recibidas por tu proyecto.</p>
+                                </div>
+
+                                <div class="p-6 space-y-6">
+                                    @foreach($evaluationsByJudge as $judgeId => $evaluations)
+                                        @php
+                                            $judge = $evaluations->first()->judge;
+                                            $totalScore = $evaluations->sum('score');
+                                            $maxPossible = $evaluations->sum(fn($e) => $e->criterion->max_points ?? 10);
+                                            $percentage = $maxPossible > 0 ? round(($totalScore / $maxPossible) * 100) : 0;
+                                            $feedback = $evaluations->first()->feedback;
+                                        @endphp
+
+                                        <div class="bg-gray-900/50 rounded-xl border border-gray-700 overflow-hidden">
+                                            {{-- Header del Juez --}}
+                                            <div class="p-4 border-b border-gray-700 flex items-center justify-between">
+                                                <div class="flex items-center gap-3">
+                                                    <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-green-600 to-emerald-700 flex items-center justify-center text-white font-bold">
+                                                        {{ substr($judge->name, 0, 1) }}
+                                                    </div>
+                                                    <div>
+                                                        <p class="text-white font-bold text-sm">{{ $judge->name }}</p>
+                                                        <p class="text-gray-500 text-xs">{{ $judge->judgeProfile->specialty->name ?? 'Juez' }}</p>
+                                                    </div>
+                                                </div>
+                                                <div class="text-right">
+                                                    <p class="text-2xl font-black {{ $percentage >= 70 ? 'text-green-400' : ($percentage >= 50 ? 'text-yellow-400' : 'text-red-400') }}">
+                                                        {{ $percentage }}%
+                                                    </p>
+                                                    <p class="text-gray-500 text-xs">{{ $totalScore }}/{{ $maxPossible }} pts</p>
+                                                </div>
+                                            </div>
+
+                                            {{-- Calificaciones por Criterio --}}
+                                            <div class="p-4 space-y-3">
+                                                @foreach($evaluations as $evaluation)
+                                                    <div class="flex items-center justify-between">
+                                                        <span class="text-gray-300 text-sm">{{ $evaluation->criterion->name }}</span>
+                                                        <div class="flex items-center gap-2">
+                                                            <div class="w-24 h-2 bg-gray-700 rounded-full overflow-hidden">
+                                                                @php
+                                                                    $criterionPercentage = $evaluation->criterion->max_points > 0 
+                                                                        ? ($evaluation->score / $evaluation->criterion->max_points) * 100 
+                                                                        : 0;
+                                                                @endphp
+                                                                <div class="h-full rounded-full {{ $criterionPercentage >= 70 ? 'bg-green-500' : ($criterionPercentage >= 50 ? 'bg-yellow-500' : 'bg-red-500') }}" 
+                                                                     style="width: {{ $criterionPercentage }}%"></div>
+                                                            </div>
+                                                            <span class="text-white text-sm font-bold w-16 text-right">
+                                                                {{ $evaluation->score }}/{{ $evaluation->criterion->max_points }}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+
+                                            {{-- Comentarios del Juez --}}
+                                            @if($feedback)
+                                                <div class="p-4 border-t border-gray-700 bg-gray-800/50">
+                                                    <p class="text-xs text-gray-400 uppercase tracking-wider font-bold mb-2 flex items-center">
+                                                        <svg class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/>
+                                                        </svg>
+                                                        Comentarios
+                                                    </p>
+                                                    <p class="text-gray-300 text-sm leading-relaxed">{{ $feedback }}</p>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    @endforeach
+
+                                    {{-- Resumen Total --}}
+                                    @php
+                                        $allEvaluations = $project->evaluations()->with('criterion')->get();
+                                        $grandTotal = $allEvaluations->sum('score');
+                                        $grandMax = $allEvaluations->sum(fn($e) => $e->criterion->max_points ?? 10);
+                                        $grandPercentage = $grandMax > 0 ? round(($grandTotal / $grandMax) * 100) : 0;
+                                        $judgeCount = $evaluationsByJudge->count();
+                                    @endphp
+
+                                    <div class="mt-4 p-4 bg-gradient-to-r from-gray-900 to-gray-800 rounded-xl border border-gray-600">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <p class="text-gray-400 text-xs uppercase tracking-wider font-bold">Promedio General</p>
+                                                <p class="text-gray-500 text-xs mt-1">Basado en {{ $judgeCount }} evaluación(es)</p>
+                                            </div>
+                                            <div class="text-right">
+                                                <p class="text-4xl font-black {{ $grandPercentage >= 70 ? 'text-green-400' : ($grandPercentage >= 50 ? 'text-yellow-400' : 'text-red-400') }}">
+                                                    {{ $grandPercentage }}%
+                                                </p>
+                                                <p class="text-gray-400 text-sm">{{ $grandTotal }}/{{ $grandMax }} pts totales</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+                    @elseif($isMember && $hasEvaluations && !$event->show_feedback_to_students)
+                        {{-- Mensaje cuando hay evaluaciones pero no se muestra feedback --}}
+                        <div class="bg-gray-800 rounded-2xl border border-gray-700 p-6">
+                            <div class="flex items-center gap-4">
+                                <div class="p-3 bg-blue-500/10 rounded-xl">
+                                    <svg class="w-8 h-8 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="text-white font-bold">Tu proyecto ha sido evaluado</p>
+                                    <p class="text-gray-400 text-sm mt-1">Los comentarios de los jueces estarán disponibles cuando el administrador habilite la visualización de retroalimentación.</p>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+
                 </div>
 
                 <div class="space-y-6">

@@ -152,7 +152,8 @@ class EventController extends Controller
             'start_date' => $validated['start_date'],
             'end_date' => $validated['end_date'],
             // Truco para checkbox: Si viene en el request es true, si no, false
-            'is_active' => $request->has('is_active'), 
+            'is_active' => $request->has('is_active'),
+            'show_feedback_to_students' => $request->has('show_feedback_to_students'),
         ]);
 
         // Actualizar criterios (Muchos a Muchos)

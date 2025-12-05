@@ -53,6 +53,14 @@
                                 <span class="ms-2 text-sm text-gray-300">{{ __('Evento Activo (Visible para alumnos)') }}</span>
                             </label>
                         </div>
+
+                        <div class="block">
+                            <label for="show_feedback_to_students" class="inline-flex items-center">
+                                <input id="show_feedback_to_students" type="checkbox" class="rounded border-gray-700 bg-gray-900 text-green-500 shadow-sm focus:ring-green-500" name="show_feedback_to_students" value="1" {{ $event->show_feedback_to_students ? 'checked' : '' }}>
+                                <span class="ms-2 text-sm text-gray-300">{{ __('Mostrar retroalimentación a estudiantes') }}</span>
+                            </label>
+                            <p class="mt-1 text-xs text-gray-500 ml-7">Cuando está activado, los estudiantes pueden ver los comentarios de los jueces en sus proyectos evaluados.</p>
+                        </div>
                         <div class="mt-8 pt-6 border-t border-gray-700">
                             <h3 class="text-lg font-bold text-white mb-2">Rúbrica de Evaluación</h3>
                             <p class="text-gray-400 text-sm mb-6">Selecciona los criterios que los jueces utilizarán para calificar este evento.</p>

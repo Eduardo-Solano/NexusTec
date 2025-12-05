@@ -10,12 +10,13 @@ class Event extends Model
     /** @use HasFactory<\Database\Factories\EventFactory> */
     use HasFactory;
 
-    protected $fillable = ['name', 'description', 'start_date', 'end_date', 'is_active'];
+    protected $fillable = ['name', 'description', 'start_date', 'end_date', 'is_active', 'show_feedback_to_students'];
 
     protected $casts = [
         'start_date' => 'datetime',
         'end_date' => 'datetime',
         'is_active' => 'boolean',
+        'show_feedback_to_students' => 'boolean',
     ];
 
     /**
