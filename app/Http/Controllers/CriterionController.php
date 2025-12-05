@@ -26,7 +26,7 @@ class CriterionController extends Controller
     {
         return view('criteria.create');
     }
-
+     //Se agrega un comentario
     /**
      * Store a newly created resource in storage.
      */
