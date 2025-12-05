@@ -23,15 +23,20 @@
                         {{ __('Eventos') }}
                     </x-nav-link>
                 </div>
-
-                @can('teams.view')
+                @can('teams.edit')
                     <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                         <x-nav-link :href="route('teams.index')" :active="request()->routeIs('teams.*')">
                             {{ __('Equipos') }}
                         </x-nav-link>
                     </div>
                 @endcan
-
+                @can('projects.edit')
+                    <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                        <x-nav-link :href="route('projects.index')" :active="request()->routeIs('projects.*')">
+                            {{ __('Proyectos') }}
+                        </x-nav-link>
+                    </div>
+                @endcan
                 @can('criteria.view')
                     <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                         <x-nav-link :href="route('criteria.index')" :active="request()->routeIs('criteria.*')">
@@ -436,6 +441,62 @@
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 Dashboard
             </x-responsive-nav-link>
+            
+            {{-- Eventos - Todos pueden ver --}}
+            <x-responsive-nav-link :href="route('events.index')" :active="request()->routeIs('events.*')">
+                {{ __('Eventos') }}
+            </x-responsive-nav-link>
+            
+            {{-- Equipos - Solo admin/staff --}}
+            @can('teams.edit')
+                <x-responsive-nav-link :href="route('teams.index')" :active="request()->routeIs('teams.*')">
+                    {{ __('Equipos') }}
+                </x-responsive-nav-link>
+            @endcan
+            
+            {{-- Proyectos - Solo admin/staff --}}
+            @can('projects.edit')
+                <x-responsive-nav-link :href="route('projects.index')" :active="request()->routeIs('projects.*')">
+                    {{ __('Proyectos') }}
+                </x-responsive-nav-link>
+            @endcan
+            
+            {{-- Criterios - Solo admin/staff --}}
+            @can('criteria.view')
+                <x-responsive-nav-link :href="route('criteria.index')" :active="request()->routeIs('criteria.*')">
+                    {{ __('Criterios') }}
+                </x-responsive-nav-link>
+            @endcan
+            
+            @can('staff.view')
+                <x-responsive-nav-link :href="route('staff.index')" :active="request()->routeIs('staff.*')">
+                    {{ __('Docentes') }}
+                </x-responsive-nav-link>
+            @endcan
+            @can('students.view')
+                <x-responsive-nav-link :href="route('students.index')" :active="request()->routeIs('students.*')">
+                    {{ __('Alumnos') }}
+                </x-responsive-nav-link>
+            @endcan
+            @can('judges.view')
+                <x-responsive-nav-link :href="route('judges.index')" :active="request()->routeIs('judges.*')">
+                    {{ __('Jueces') }}
+                </x-responsive-nav-link>
+            @endcan
+            @role('admin')
+                <x-responsive-nav-link :href="route('activity-logs.index')" :active="request()->routeIs('activity-logs.*')">
+                    {{ __('Historial de Actividad') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('careers.index')" :active="request()->routeIs('careers.*')">
+                    🎓 {{ __('Carreras') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('specialties.index')" :active="request()->routeIs('specialties.*')">
+                    ⚖️ {{ __('Especialidades') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('reports.index')" :active="request()->routeIs('reports.*')">
+                    📊 {{ __('Reportes') }}
+                </x-responsive-nav-link>
+            @endrole
         </div>
 
         <div class="pt-4 pb-1 border-t">

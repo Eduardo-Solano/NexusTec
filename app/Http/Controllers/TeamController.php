@@ -279,4 +279,44 @@ class TeamController extends Controller
         return back()->with('success', 'Invitación rechazada.');
     }
 
+    /**
+     * Responder a solicitud de asesoría (aceptar o rechazar)
+     */
+    public function respondAdvisory(Team $team, string $status, Request $request)
+    {
+        $user = Auth::user();
+
+        // Verificar que el usuario es el asesor solicitado
+        if ($team->advisor_id !== $user->id) {
+            return back()->with('error', 'No tienes permiso para responder a esta solicitud.');
+        }
+
+        // Verificar que la solicitud está pendiente
+        if ($team->advisor_status !== 'pending') {
+            return back()->with('error', 'Esta solicitud ya fue respondida.');
+        }
+
+        // Validar el status
+        if (!in_array($status, ['accepted', 'rejected'])) {
+            return back()->with('error', 'Estado inválido.');
+        }
+
+        // Marcar notificación como leída si existe
+        if ($request->notification) {
+            $user->notifications()->where('id', $request->notification)->update(['read_at' => now()]);
+        }
+
+        if ($status === 'accepted') {
+            $team->update(['advisor_status' => 'accepted']);
+            return back()->with('success', '¡Has aceptado ser asesor de este equipo!');
+        } else {
+            // Si rechaza, limpiar el advisor_id
+            $team->update([
+                'advisor_id' => null,
+                'advisor_status' => null
+            ]);
+            return back()->with('success', 'Has rechazado la solicitud de asesoría.');
+        }
+    }
+
 }
