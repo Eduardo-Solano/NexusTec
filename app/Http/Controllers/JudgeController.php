@@ -148,4 +148,107 @@ class JudgeController extends Controller
 
         return redirect()->route('judges.index')->with('success', 'Juez actualizado correctamente.');
     }
+
+    /**
+     * Importar jueces desde un archivo CSV
+     */
+    public function importCsv(Request $request)
+    {
+        $request->validate([
+            'csv_file' => 'required|mimes:csv,txt'
+        ]);
+
+        $file = $request->file('csv_file');
+        $handle = fopen($file, 'r');
+
+        $rowNumber = 0;
+        $imported = [];
+        $failed = [];
+
+        while (($data = fgetcsv($handle, 2000, ',')) !== false) {
+            $rowNumber++;
+
+            // Ignorar encabezado
+            if ($rowNumber == 1) {
+                continue;
+            }
+
+            // Columnas esperadas:
+            // 0 = Nombre
+            // 1 = Correo
+            // 2 = Teléfono (opcional)
+            // 3 = Empresa (opcional)
+            // 4 = Especialidad (nombre, se detecta por similitud)
+            $name = trim($data[0] ?? '');
+            $email = trim($data[1] ?? '');
+            $phone = trim($data[2] ?? '');
+            $company = trim($data[3] ?? '');
+            $specialtyText = trim($data[4] ?? '');
+
+            // Resolver especialidad por fuzzy matching
+            $specialtyId = null;
+            if ($specialtyText) {
+                $specialtyId = Specialty::detectFromName($specialtyText);
+            }
+
+            // Acumular errores
+            $errors = [];
+
+            if (!$name) $errors[] = "Nombre vacío";
+            if (!$email) $errors[] = "Correo vacío";
+            if ($email && !filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = "Correo inválido";
+            if (User::where('email', $email)->exists()) $errors[] = "Correo duplicado";
+
+            // Si tuvo errores → enviarlo a la lista de fallos
+            if (count($errors) > 0) {
+                $failed[] = [
+                    'row' => $rowNumber,
+                    'name' => $name,
+                    'email' => $email,
+                    'company' => $company,
+                    'specialty' => $specialtyText,
+                    'errors' => $errors
+                ];
+                continue;
+            }
+
+            // INSERTAR JUEZ CORRECTO
+            DB::transaction(function () use ($name, $email, $phone, $company, $specialtyId, &$imported) {
+                $user = User::create([
+                    'name' => $name,
+                    'email' => $email,
+                    'phone' => $phone ?: null,
+                    'password' => Hash::make('password'),
+                    'is_active' => true,
+                ]);
+
+                Role::findOrCreate('judge');
+                $user->assignRole('judge');
+
+                JudgeProfile::create([
+                    'user_id' => $user->id,
+                    'specialty_id' => $specialtyId,
+                    'company' => $company ?: null,
+                ]);
+
+                $imported[] = [
+                    'name' => $name,
+                    'email' => $email,
+                    'phone' => $phone,
+                    'company' => $company,
+                ];
+            });
+        }
+
+        fclose($handle);
+
+        return response()->json([
+            'success' => true,
+            'imported' => $imported,
+            'failed' => $failed,
+            'total_imported' => count($imported),
+            'total_failed' => count($failed),
+            'default_password' => 'password',
+        ]);
+    }
 }

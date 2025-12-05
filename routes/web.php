@@ -164,8 +164,13 @@ Route::middleware('auth')->group(function () {
     Route::group(['middleware' => ['role:admin']], function () {
 
         Route::resource('staff', StaffProfileController::class);
+        Route::post('/staff/import-csv', [StaffProfileController::class, 'importCsv'])->name('staff.importCsv');
+        
         Route::resource('students', StudentProfileController::class);
+        Route::post('/students/import-csv', [StudentProfileController::class, 'importCsv'])->name('students.importCsv');
+        
         Route::resource('judges', JudgeController::class);
+        Route::post('/judges/import-csv', [JudgeController::class, 'importCsv'])->name('judges.importCsv');
 
         /* GESTIÓN DE CARRERAS */
         Route::resource('careers', CareerController::class);
@@ -184,11 +189,6 @@ Route::middleware('auth')->group(function () {
         Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
         Route::get('/activity-logs/{activityLog}', [ActivityLogController::class, 'show'])->name('activity-logs.show');
     });
-
-    Route::post('/students/import-csv', [StudentProfileController::class, 'importCsv'])
-        ->name('students.importCsv');
-    Route::post('/students/import-csv', [\App\Http\Controllers\StudentProfileController::class, 'importCsv'])
-        ->name('students.importCsv');
 
 });
 

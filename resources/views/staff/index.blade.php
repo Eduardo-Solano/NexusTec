@@ -7,12 +7,22 @@
                     <h2 class="text-3xl font-bold text-white">Gestión de Personal</h2>
                     <p class="text-gray-400 text-sm mt-1">Administración de docentes y organizadores</p>
                 </div>
-                <a href="{{ route('staff.create') }}" class="bg-ito-orange hover:bg-orange-600 text-white text-sm font-bold py-2 px-4 rounded-lg shadow-lg transition flex items-center gap-2">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                    </svg>
-                    Nuevo Personal
-                </a>
+                <div class="flex gap-3">
+                    <!-- Botón Importar CSV -->
+                    <button type="button" onclick="document.getElementById('csv-modal').classList.remove('hidden')" 
+                        class="bg-green-600 hover:bg-green-700 text-white text-sm font-bold py-2 px-4 rounded-lg shadow-lg transition flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                        </svg>
+                        Importar CSV
+                    </button>
+                    <a href="{{ route('staff.create') }}" class="bg-ito-orange hover:bg-orange-600 text-white text-sm font-bold py-2 px-4 rounded-lg shadow-lg transition flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        Nuevo Personal
+                    </a>
+                </div>
             </div>
 
             @if(session('success'))
@@ -199,4 +209,254 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal para importar CSV -->
+    <div id="csv-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-gradient-to-b from-gray-800 to-gray-900 rounded-2xl shadow-2xl border border-gray-700 max-w-2xl w-full max-h-[90vh] overflow-hidden">
+            
+            <!-- Header del Modal -->
+            <div class="p-6 border-b border-gray-700 bg-gradient-to-r from-green-600/20 to-emerald-600/10">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2 bg-green-500/20 rounded-xl">
+                            <svg class="w-6 h-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-white">Importar Personal</h3>
+                            <p class="text-sm text-gray-400">Carga masiva desde archivo CSV</p>
+                        </div>
+                    </div>
+                    <button type="button" onclick="closeImportModal()" class="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Contenido del Modal -->
+            <div id="import-form-section" class="p-6 overflow-y-auto max-h-[60vh]">
+                <form id="csv-import-form" enctype="multipart/form-data">
+                    @csrf
+                    
+                    <!-- Área de Drag & Drop -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-bold text-gray-300 mb-3">📁 Selecciona tu archivo</label>
+                        <div id="drop-zone" class="relative border-2 border-dashed border-gray-600 rounded-xl p-8 text-center hover:border-green-500 hover:bg-green-500/5 transition-all cursor-pointer">
+                            <input type="file" name="csv_file" id="csv-file-input" accept=".csv,.txt" required
+                                class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                            <div id="upload-placeholder">
+                                <svg class="w-12 h-12 mx-auto text-gray-500 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                </svg>
+                                <p class="text-gray-400 font-medium">Arrastra tu archivo aquí o haz clic para seleccionar</p>
+                                <p class="text-xs text-gray-500 mt-1">Formatos aceptados: CSV, TXT</p>
+                            </div>
+                            <div id="file-selected" class="hidden">
+                                <svg class="w-12 h-12 mx-auto text-green-400 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <p class="text-green-400 font-medium" id="selected-file-name">archivo.csv</p>
+                                <p class="text-xs text-gray-500 mt-1">Listo para importar</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Formato requerido -->
+                    <div class="bg-gray-900/70 rounded-xl p-5 mb-6 border border-gray-700">
+                        <div class="flex items-center gap-2 mb-4">
+                            <svg class="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span class="text-sm font-bold text-gray-300">Formato del archivo CSV</span>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
+                            <div class="flex items-start gap-2 p-3 bg-gray-800 rounded-lg">
+                                <span class="text-lg">👤</span>
+                                <div>
+                                    <p class="text-xs font-bold text-white">Nombre</p>
+                                    <p class="text-[10px] text-gray-500">Nombre completo</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-2 p-3 bg-gray-800 rounded-lg">
+                                <span class="text-lg">📧</span>
+                                <div>
+                                    <p class="text-xs font-bold text-white">Email</p>
+                                    <p class="text-[10px] text-gray-500">Correo institucional</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-2 p-3 bg-gray-800 rounded-lg">
+                                <span class="text-lg">🔢</span>
+                                <div>
+                                    <p class="text-xs font-bold text-white">No. Empleado</p>
+                                    <p class="text-[10px] text-gray-500">Identificador único</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-2 p-3 bg-gray-800 rounded-lg">
+                                <span class="text-lg">🏢</span>
+                                <div>
+                                    <p class="text-xs font-bold text-white">Departamento</p>
+                                    <p class="text-[10px] text-gray-500">Área de trabajo</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-2 p-3 bg-gray-800 rounded-lg col-span-2 lg:col-span-1">
+                                <span class="text-lg">👔</span>
+                                <div>
+                                    <p class="text-xs font-bold text-white">Tipo</p>
+                                    <p class="text-[10px] text-gray-500">advisor / staff / both</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-gray-800 rounded-lg p-3 font-mono text-xs text-gray-400 overflow-x-auto">
+                            <span class="text-gray-500"># Ejemplo de contenido:</span><br>
+                            <span class="text-blue-400">Nombre,Email,No.Empleado,Departamento,Tipo</span><br>
+                            <span class="text-gray-300">Juan Pérez,juan@ito.edu.mx,EMP001,Sistemas,advisor</span><br>
+                            <span class="text-gray-300">María López,maria@ito.edu.mx,EMP002,Industrial,both</span>
+                        </div>
+                    </div>
+
+                    <!-- Nota importante -->
+                    <div class="flex items-start gap-3 p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl mb-6">
+                        <svg class="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        <div>
+                            <p class="text-sm font-medium text-amber-300">Información importante</p>
+                            <ul class="text-xs text-amber-200/70 mt-1 space-y-1">
+                                <li>• La primera fila debe ser el encabezado (se ignora)</li>
+                                <li>• El campo "Tipo" es opcional, por defecto: <code class="bg-amber-500/20 px-1 rounded">advisor</code></li>
+                                <li>• Contraseña temporal: <code class="bg-amber-500/20 px-1.5 py-0.5 rounded font-bold">password</code></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Botones -->
+                    <div class="flex justify-end gap-3">
+                        <button type="button" onclick="closeImportModal()" 
+                            class="px-5 py-2.5 bg-gray-700 hover:bg-gray-600 text-white font-bold rounded-xl transition">
+                            Cancelar
+                        </button>
+                        <button type="submit" id="import-btn"
+                            class="px-5 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-bold rounded-xl transition flex items-center gap-2 shadow-lg shadow-green-500/25">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                            </svg>
+                            Importar Personal
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Sección de Resultados -->
+            <div id="import-results-section" class="hidden p-6 overflow-y-auto max-h-[60vh]">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('csv-file-input').addEventListener('change', function(e) {
+            const fileName = e.target.files[0]?.name;
+            if (fileName) {
+                document.getElementById('upload-placeholder').classList.add('hidden');
+                document.getElementById('file-selected').classList.remove('hidden');
+                document.getElementById('selected-file-name').textContent = fileName;
+            }
+        });
+
+        function closeImportModal() {
+            document.getElementById('csv-modal').classList.add('hidden');
+            document.getElementById('csv-import-form').reset();
+            document.getElementById('upload-placeholder').classList.remove('hidden');
+            document.getElementById('file-selected').classList.add('hidden');
+            document.getElementById('import-form-section').classList.remove('hidden');
+            document.getElementById('import-results-section').classList.add('hidden');
+        }
+
+        document.getElementById('csv-import-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const btn = document.getElementById('import-btn');
+            
+            btn.disabled = true;
+            btn.innerHTML = `<svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Procesando...`;
+
+            try {
+                const response = await fetch('{{ route("staff.importCsv") }}', {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
+                });
+                const data = await response.json();
+                showImportResults(data);
+            } catch (error) {
+                alert('Error al procesar el archivo: ' + error.message);
+                btn.disabled = false;
+                btn.innerHTML = `<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg> Importar Personal`;
+            }
+        });
+
+        function showImportResults(data) {
+            document.getElementById('import-form-section').classList.add('hidden');
+            const resultsSection = document.getElementById('import-results-section');
+            resultsSection.classList.remove('hidden');
+
+            let html = `
+                <div class="text-center mb-6">
+                    <div class="inline-flex p-4 rounded-full ${data.total_imported > 0 ? 'bg-green-500/20' : 'bg-red-500/20'} mb-4">
+                        ${data.total_imported > 0 
+                            ? '<svg class="w-12 h-12 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>'
+                            : '<svg class="w-12 h-12 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>'
+                        }
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2">Importación ${data.total_imported > 0 ? 'Completada' : 'Finalizada'}</h3>
+                    <div class="flex justify-center gap-6 text-sm">
+                        <div class="text-center"><p class="text-2xl font-bold text-green-400">${data.total_imported}</p><p class="text-gray-500">Importados</p></div>
+                        <div class="text-center"><p class="text-2xl font-bold text-red-400">${data.total_failed}</p><p class="text-gray-500">Errores</p></div>
+                    </div>
+                </div>
+            `;
+
+            if (data.imported && data.imported.length > 0) {
+                html += `<div class="mb-4"><h4 class="text-sm font-bold text-green-400 mb-2">✓ Personal importado</h4>
+                    <div class="bg-gray-900 rounded-lg border border-gray-700 max-h-40 overflow-y-auto">
+                        <table class="w-full text-xs"><thead class="bg-gray-800 sticky top-0"><tr>
+                            <th class="px-3 py-2 text-left text-gray-400">Nombre</th>
+                            <th class="px-3 py-2 text-left text-gray-400">Email</th>
+                            <th class="px-3 py-2 text-left text-gray-400">Departamento</th>
+                        </tr></thead><tbody class="divide-y divide-gray-800">
+                            ${data.imported.map(s => `<tr class="hover:bg-gray-800/50"><td class="px-3 py-2 text-white">${s.name}</td><td class="px-3 py-2 text-gray-400">${s.email}</td><td class="px-3 py-2 text-gray-400">${s.department}</td></tr>`).join('')}
+                        </tbody></table></div></div>`;
+            }
+
+            if (data.failed && data.failed.length > 0) {
+                html += `<div class="mb-4"><h4 class="text-sm font-bold text-red-400 mb-2">✗ Registros con errores</h4>
+                    <div class="bg-gray-900 rounded-lg border border-red-900/50 max-h-40 overflow-y-auto">
+                        <table class="w-full text-xs"><thead class="bg-red-900/20 sticky top-0"><tr>
+                            <th class="px-3 py-2 text-left text-gray-400">Fila</th>
+                            <th class="px-3 py-2 text-left text-gray-400">Datos</th>
+                            <th class="px-3 py-2 text-left text-gray-400">Errores</th>
+                        </tr></thead><tbody class="divide-y divide-gray-800">
+                            ${data.failed.map(f => `<tr class="hover:bg-red-900/10"><td class="px-3 py-2 text-white">#${f.row}</td><td class="px-3 py-2 text-gray-400">${f.name || '-'}</td><td class="px-3 py-2 text-red-400 text-[10px]">${f.errors.join(', ')}</td></tr>`).join('')}
+                        </tbody></table></div></div>`;
+            }
+
+            if (data.total_imported > 0) {
+                html += `<div class="flex items-start gap-3 p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg mb-4">
+                    <svg class="w-5 h-5 text-blue-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    <p class="text-xs text-blue-300">Contraseña temporal: <code class="bg-blue-500/20 px-1.5 py-0.5 rounded font-bold">${data.default_password}</code></p>
+                </div>`;
+            }
+
+            html += `<div class="flex justify-end gap-3">
+                <button onclick="closeImportModal()" class="px-5 py-2.5 bg-gray-700 hover:bg-gray-600 text-white font-bold rounded-xl transition">Cerrar</button>
+                ${data.total_imported > 0 ? '<button onclick="location.reload()" class="px-5 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold rounded-xl transition">Ver Personal</button>' : ''}
+            </div>`;
+
+            resultsSection.innerHTML = html;
+        }
+    </script>
 </x-app-layout>
