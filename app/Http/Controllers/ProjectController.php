@@ -14,9 +14,34 @@ class ProjectController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        // Obtener lista de eventos para el filtro
+        $events = \App\Models\Event::orderBy('name')->get();
+
+        $query = Project::with(['team.event', 'team.leader', 'team.advisor', 'judges']);
+
+        // Filtro por búsqueda (nombre del proyecto o equipo)
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhereHas('team', function ($q) use ($search) {
+                      $q->where('name', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        // Filtro por evento
+        if ($request->filled('event_id')) {
+            $query->whereHas('team', function ($q) use ($request) {
+                $q->where('event_id', $request->event_id);
+            });
+        }
+
+        $projects = $query->orderBy('created_at', 'desc')->paginate(10)->withQueryString();
+
+        return view('projects.index', compact('projects', 'events'));
     }
 
     /**
