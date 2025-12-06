@@ -11,8 +11,8 @@
         <nav class="bg-tecnm-blue shadow-lg">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex justify-between h-16 items-center">
-                    <a href="/" class="flex items-center gap-2 text-white font-bold text-xl">
-                        <img src="{{ asset('img/logo-ito.png') }}" class="h-8 w-auto bg-white rounded-full p-0.5" alt="Logo">
+                    <a href="/" class="flex items-center gap-3 text-white font-bold text-xl group">
+                        <x-application-logo class="h-10 w-auto transition-transform duration-500 group-hover:rotate-180" />
                         NexusTec
                     </a>
                     <div class="flex items-center gap-4">
