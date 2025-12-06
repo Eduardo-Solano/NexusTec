@@ -133,6 +133,6 @@ class Event extends Model
 
     public function judges()
     {
-        return $this->belongsToMany(JudgeProfile::class, 'event_judge');
+        return $this->belongsToMany(JudgeProfile::class, 'event_judge', 'event_id', 'judge_id');
     }
 }

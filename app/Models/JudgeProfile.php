@@ -27,6 +27,6 @@ class JudgeProfile extends Model
 
     // --- Relaciones de N:M ---
     public function events() {
-        return $this->belongsToMany(Event::class, 'event_judge');
+        return $this->belongsToMany(Event::class, 'event_judge', 'judge_id', 'event_id');
     }
 }
