@@ -9,14 +9,16 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="antialiased bg-gray-50 text-gray-800">
+<body class="antialiased bg-gray-50 text-gray-800" x-data="{ showDevelopers: false }">
 
     <nav class="bg-blue-950/85 backdrop-blur-md shadow-lg border-b border-blue-900/50 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
 
                 <div class="flex items-center gap-3">
-                    <x-application-logo class="h-10 w-auto" />
+                    <button @click="showDevelopers = true" class="focus:outline-none cursor-pointer group">
+                        <x-application-logo class="h-10 w-auto transition-transform duration-500 group-hover:rotate-180" />
+                    </button>
                     <span class="font-bold text-xl text-white tracking-tight">NexusTec</span>
                 </div>
 
@@ -180,6 +182,124 @@
             &copy; {{ date('Y') }} NexusTec - Instituto Tecnológico de Oaxaca. Todos los derechos reservados.
         </div>
     </footer>
+
+    <!-- Easter Egg Modal - Desarrolladores -->
+    <div x-show="showDevelopers" 
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         @click.self="showDevelopers = false"
+         class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
+         style="display: none;">
+        
+        <div x-show="showDevelopers"
+             x-transition:enter="transition ease-out duration-300 transform"
+             x-transition:enter-start="opacity-0 scale-95"
+             x-transition:enter-end="opacity-100 scale-100"
+             x-transition:leave="transition ease-in duration-200 transform"
+             x-transition:leave-start="opacity-100 scale-100"
+             x-transition:leave-end="opacity-0 scale-95"
+             class="relative bg-gradient-to-br from-blue-900 to-blue-950 rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4">
+            
+            <!-- Botón cerrar -->
+            <button @click="showDevelopers = false" 
+                    class="absolute top-4 right-4 text-white/70 hover:text-white transition">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+
+            <!-- Engranaje animado en el centro -->
+            <div class="flex justify-center mb-6">
+                <svg class="w-24 h-24 text-ito-orange animate-spin-slow" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2l2.5 2.5L17 2v5l2.5-2.5L22 7l-5 2.5L22 12l-2.5 2.5L22 17l-2.5 2.5L17 22v-5l-2.5 2.5L12 22l-2.5-2.5L7 22v-5l-2.5 2.5L2 17l5-2.5L2 12l2.5-2.5L2 7l2.5-2.5L7 2v5l2.5-2.5L12 2z"/>
+                </svg>
+            </div>
+
+            <!-- Título -->
+            <h2 class="text-3xl font-bold text-center text-white mb-2">
+                Desarrolladores
+            </h2>
+            <p class="text-center text-blue-300 mb-6 text-sm">
+                Equipo de Desarrollo NexusTec
+            </p>
+
+            <!-- Lista de desarrolladores -->
+            <div class="space-y-3">
+                <div class="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-ito-orange rounded-full flex items-center justify-center text-white font-bold text-lg">
+                            JF
+                        </div>
+                        <div>
+                            <p class="text-white font-semibold">Juan Francisco</p>
+                            <p class="text-blue-300 text-xs">Desarrollador Full Stack</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-ito-orange rounded-full flex items-center justify-center text-white font-bold text-lg">
+                            JA
+                        </div>
+                        <div>
+                            <p class="text-white font-semibold">Jesús Abraham</p>
+                            <p class="text-blue-300 text-xs">Desarrollador Full Stack</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-ito-orange rounded-full flex items-center justify-center text-white font-bold text-lg">
+                            SR
+                        </div>
+                        <div>
+                            <p class="text-white font-semibold">Solano Ramos</p>
+                            <p class="text-blue-300 text-xs">Desarrollador Full Stack</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-ito-orange rounded-full flex items-center justify-center text-white font-bold text-lg">
+                            FM
+                        </div>
+                        <div>
+                            <p class="text-white font-semibold">Franco Matías</p>
+                            <p class="text-blue-300 text-xs">Desarrollador Full Stack</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mensaje especial -->
+            <div class="mt-6 text-center">
+                <p class="text-blue-200 text-sm italic">
+                    "Construyendo el futuro, una línea de código a la vez"
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        @keyframes spin-slow {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        .animate-spin-slow {
+            animation: spin-slow 3s linear infinite;
+        }
+    </style>
 </body>
 
 </html>
