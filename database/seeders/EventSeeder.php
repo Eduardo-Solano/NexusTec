@@ -24,9 +24,9 @@ class EventSeeder extends Seeder
 
         // ==========================================
         // PARTE 1: EVENTOS PASADOS (5 Eventos)
-        // Tienen proyectos, repositorios, evaluaciones terminadas y ganadores
+        // COMENTADO: El usuario solicitó solo eventos activos.
         // ==========================================
-        
+        /*
         $pastEvents = Event::factory(5)->create([
             'is_active' => false,
             'start_date' => now()->subMonths(6),
@@ -37,22 +37,18 @@ class EventSeeder extends Seeder
             // Asignar criterios al evento
             $event->criteria()->attach($criterios->pluck('id'));
 
-
-
             // Asignar un subconjunto aleatorio de jueces al evento (entre 3 y 5 jueces)
-            // Obtenemos los JudgeProfiles asociados a los usuarios 'judges'
             $judgesIds = \App\Models\JudgeProfile::whereIn('user_id', $judges->pluck('id'))->pluck('id');
-            // Si el seeder de usuarios ya creó perfiles de jueces, esto funcionará.
             if ($judgesIds->isNotEmpty()) {
                 $event->judges()->syncWithoutDetaching($judgesIds->random(min($judgesIds->count(), rand(3, 5))));
             }
 
             // Crear 6 equipos por evento (30 equipos pasados en total)
-            // Esto genera estudiantes y los mete a equipos
             for ($i = 0; $i < 6; $i++) {
                 $this->createCompleteTeam($event, $careers, $advisors, $judges, $criterios, true);
             }
         }
+        */
 
         // ==========================================
         // PARTE 2: EVENTOS ACTIVOS/FUTUROS (5 Eventos)
@@ -66,7 +62,8 @@ class EventSeeder extends Seeder
         ]);
 
         foreach ($activeEvents as $event) {
-            $event->criteria()->attach($criterios->pluck('id'));
+            // COMENTADO: Criterios se asignarán manualmente después
+            // $event->criteria()->attach($criterios->pluck('id'));
 
             // Asignar un subconjunto aleatorio de jueces al evento (entre 3 y 5 jueces)
             // Obtenemos los JudgeProfiles asociados a los usuarios 'judges'
@@ -151,6 +148,8 @@ class EventSeeder extends Seeder
         ]);
 
         // 7. SI ES PASADO: Asignar Jueces y Evaluar
+        // COMENTADO: Para permitir pruebas manuales, no asignamos jueces a proyectos ni creamos evaluaciones automáticas
+        /*
         if ($isPast) {
             // Asignar 3 jueces aleatorios al proyecto
             $projectJudges = $judges->random(3);
@@ -180,5 +179,6 @@ class EventSeeder extends Seeder
                 }
             }
         }
+        */
     }
 }
