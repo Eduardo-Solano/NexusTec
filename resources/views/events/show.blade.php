@@ -355,8 +355,7 @@
                                     class="w-full px-4 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg focus:outline-none focus:border-indigo-500">
                                     <option value="">-- Selecciona un juez --</option>
                                     @php
-                                        use App\Models\JudgeProfile;
-                                        $availableJudges = JudgeProfile::whereDoesntHave('events', function($q) use ($event) {
+                                        $availableJudges = \App\Models\JudgeProfile::whereDoesntHave('events', function($q) use ($event) {
                                             $q->where('event_id', $event->id);
                                         })->with('user', 'specialty')->get();
                                     @endphp
