@@ -273,7 +273,7 @@
                 @endif
 
                 {{-- SECCIÓN: GESTIÓN DE JUECES --}}
-                @can('events.manage')
+                @if(Auth::user()->hasAnyRole(['admin', 'staff']))
                 <div class="bg-gradient-to-r from-indigo-900/20 to-gray-800 border border-indigo-500/20 rounded-2xl p-8">
                     <div class="flex items-end justify-between mb-8 border-b border-indigo-500/20 pb-4">
                         <div>
@@ -382,7 +382,7 @@
                         </form>
                     </div>
                 </dialog>
-                @endcan
+                @endif
 
                 <div>
                     <div class="flex items-end justify-between mb-8 border-b border-gray-800 pb-4">
