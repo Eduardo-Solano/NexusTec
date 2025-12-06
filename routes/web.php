@@ -71,6 +71,9 @@ Route::middleware('auth')->group(function () {
         Route::put('/events/{event}', [EventController::class, 'update'])->name('events.update');
         Route::patch('/events/{event}', [EventController::class, 'update']);
         Route::delete('/events/{event}', [EventController::class, 'destroy'])->name('events.destroy');
+        // Gestión de jueces en eventos
+        Route::post('/events/{event}/assign-judge', [EventController::class, 'assignJudge'])->name('events.assign-judge');
+        Route::delete('/events/{event}/remove-judge/{judge}', [EventController::class, 'removeJudge'])->name('events.remove-judge');
     });
     
     Route::get('/events/{event}', [EventController::class, 'show'])->name('events.show');

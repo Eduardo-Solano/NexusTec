@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Event;
 use App\Models\Criterion;
 use App\Models\Project;
+use App\Models\JudgeProfile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -263,5 +264,38 @@ class EventController extends Controller
         ];
 
         return view('events.rankings', compact('event', 'rankedProjects', 'criteria', 'stats'));
+    }
+
+    /**
+     * Asignar un juez a un evento
+     */
+    public function assignJudge(Request $request, Event $event)
+    {
+        $validated = $request->validate([
+            'judge_id' => 'required|exists:judge_profiles,id',
+        ]);
+
+        // Evitar duplicados
+        if ($event->judges()->where('judge_id', $validated['judge_id'])->exists()) {
+            return back()->with('warning', 'Este juez ya está asignado a este evento.');
+        }
+
+        $event->judges()->attach($validated['judge_id']);
+
+        return back()->with('success', 'Juez asignado exitosamente al evento.');
+    }
+
+    /**
+     * Remover un juez de un evento
+     */
+    public function removeJudge(Event $event, JudgeProfile $judge)
+    {
+        if (!$event->judges()->where('judge_id', $judge->id)->exists()) {
+            return back()->with('error', 'Este juez no está asignado a este evento.');
+        }
+
+        $event->judges()->detach($judge->id);
+
+        return back()->with('success', 'Juez removido del evento exitosamente.');
     }
 }

@@ -24,4 +24,9 @@ class JudgeProfile extends Model
     public function specialty() {
         return $this->belongsTo(Specialty::class);
     }
+
+    // --- Relaciones de N:M ---
+    public function events() {
+        return $this->belongsToMany(Event::class, 'event_judge');
+    }
 }

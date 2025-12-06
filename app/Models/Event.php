@@ -130,4 +130,9 @@ class Event extends Model
     {
         return $this->belongsToMany(Criterion::class, 'event_criterion');
     }
+
+    public function judges()
+    {
+        return $this->belongsToMany(JudgeProfile::class, 'event_judge');
+    }
 }

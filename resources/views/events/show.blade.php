@@ -272,6 +272,119 @@
                     </div>
                 @endif
 
+                {{-- SECCIÓN: GESTIÓN DE JUECES --}}
+                @can('events.manage')
+                <div class="bg-gradient-to-r from-indigo-900/20 to-gray-800 border border-indigo-500/20 rounded-2xl p-8">
+                    <div class="flex items-end justify-between mb-8 border-b border-indigo-500/20 pb-4">
+                        <div>
+                            <h3 class="text-3xl font-bold text-white flex items-center gap-3">
+                                <svg class="w-8 h-8 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                                </svg>
+                                Jueces Asignados
+                            </h3>
+                            <p class="text-gray-500 mt-1">Gestiona los jueces del evento</p>
+                        </div>
+                        <div class="text-4xl font-black text-gray-800">
+                            {{ str_pad($event->judges->count(), 2, '0', STR_PAD_LEFT) }}</div>
+                    </div>
+
+                    {{-- Botón para agregar juez --}}
+                    <div class="mb-6">
+                        <button type="button" onclick="document.getElementById('assignJudgeModal').showModal()"
+                            class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm rounded-xl transition-all duration-300 shadow-lg hover:shadow-indigo-500/30">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                            </svg>
+                            Asignar Juez
+                        </button>
+                    </div>
+
+                    {{-- Lista de jueces asignados --}}
+                    @if($event->judges->count() > 0)
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            @foreach($event->judges as $judge)
+                                <div class="bg-gray-800 border border-indigo-500/20 rounded-lg p-4 flex justify-between items-start">
+                                    <div class="flex-1">
+                                        <h4 class="text-white font-bold text-sm">{{ $judge->user->name }}</h4>
+                                        <p class="text-xs text-gray-400 mt-1">{{ $judge->user->email }}</p>
+                                        @if($judge->specialty)
+                                            <span class="inline-block mt-2 px-2 py-1 bg-indigo-500/20 border border-indigo-500/30 rounded text-xs text-indigo-300">
+                                                {{ $judge->specialty->name }}
+                                            </span>
+                                        @endif
+                                    </div>
+                                    <form action="{{ route('events.remove-judge', [$event, $judge]) }}" method="POST" class="ml-2">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" onclick="return confirm('¿Remover este juez del evento?')"
+                                            class="p-2 bg-red-500/20 hover:bg-red-500/40 text-red-400 rounded transition-colors">
+                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
+                                    </form>
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <div class="text-center py-8 text-gray-400">
+                            <p>No hay jueces asignados a este evento</p>
+                        </div>
+                    @endif
+                </div>
+
+                {{-- MODAL: Asignar Juez --}}
+                <dialog id="assignJudgeModal" class="backdrop:bg-black/50 rounded-2xl shadow-2xl">
+                    <div class="bg-gray-800 border border-gray-700 rounded-2xl p-8 max-w-md w-full">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-2xl font-bold text-white">Asignar Juez</h2>
+                            <button type="button" onclick="document.getElementById('assignJudgeModal').close()"
+                                class="text-gray-400 hover:text-white transition">
+                                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <form action="{{ route('events.assign-judge', $event) }}" method="POST">
+                            @csrf
+                            <div class="mb-6">
+                                <label for="judge_id" class="block text-sm font-bold text-white mb-2">Seleccionar Juez</label>
+                                <select name="judge_id" id="judge_id" required
+                                    class="w-full px-4 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg focus:outline-none focus:border-indigo-500">
+                                    <option value="">-- Selecciona un juez --</option>
+                                    @php
+                                        use App\Models\JudgeProfile;
+                                        $availableJudges = JudgeProfile::whereDoesntHave('events', function($q) use ($event) {
+                                            $q->where('event_id', $event->id);
+                                        })->with('user', 'specialty')->get();
+                                    @endphp
+                                    @forelse($availableJudges as $judge)
+                                        <option value="{{ $judge->id }}">
+                                            {{ $judge->user->name }} - {{ $judge->specialty->name ?? 'Sin especialidad' }}
+                                        </option>
+                                    @empty
+                                        <option disabled>No hay jueces disponibles</option>
+                                    @endforelse
+                                </select>
+                            </div>
+
+                            <div class="flex gap-3">
+                                <button type="button" onclick="document.getElementById('assignJudgeModal').close()"
+                                    class="flex-1 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white font-bold rounded-lg transition">
+                                    Cancelar
+                                </button>
+                                <button type="submit"
+                                    class="flex-1 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-lg transition">
+                                    Asignar
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </dialog>
+                @endcan
+
                 <div>
                     <div class="flex items-end justify-between mb-8 border-b border-gray-800 pb-4">
                         <div>
