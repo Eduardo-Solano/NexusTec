@@ -81,8 +81,9 @@ class EventController extends Controller
 
         // MAGIA ELOQUENT: Guardar relación Muchos a Muchos
         $event->criteria()->sync($validated['criteria']);
-        // 3. Redireccionar con Mensaje de Éxito
-        return redirect()->route('events.index')
+        
+        // 3. Redireccionar al evento creado con Mensaje de Éxito
+        return redirect()->route('events.show', $event)
             ->with('success', 'Evento creado exitosamente.');
     }
 

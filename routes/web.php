@@ -63,8 +63,6 @@ Route::middleware('auth')->group(function () {
 
     /* EVENTOS - Todos pueden ver, solo admin/staff pueden gestionar */
     Route::get('/events', [EventController::class, 'index'])->name('events.index');
-    Route::get('/events/{event}', [EventController::class, 'show'])->name('events.show');
-    Route::get('/events/{event}/rankings', [EventController::class, 'rankings'])->name('events.rankings');
     
     Route::middleware(['role:admin|staff'])->group(function () {
         Route::get('/events/create', [EventController::class, 'create'])->name('events.create');
@@ -74,6 +72,9 @@ Route::middleware('auth')->group(function () {
         Route::patch('/events/{event}', [EventController::class, 'update']);
         Route::delete('/events/{event}', [EventController::class, 'destroy'])->name('events.destroy');
     });
+    
+    Route::get('/events/{event}', [EventController::class, 'show'])->name('events.show');
+    Route::get('/events/{event}/rankings', [EventController::class, 'rankings'])->name('events.rankings');
 
     /* EXPORTACIONES - Solo admin/staff */
     Route::middleware(['role:admin|staff'])->group(function () {
