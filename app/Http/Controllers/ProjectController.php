@@ -133,10 +133,17 @@ class ProjectController extends Controller
         $project->load(['team.members', 'team.leader', 'team.event', 'team.advisor', 'judges.judgeProfile', 'evaluations']);
         
         // Obtener jueces disponibles para asignar (que no estén ya asignados a este proyecto)
+        // Y que estén asignados al EVENTO del proyecto
         $availableJudges = [];
         if (Auth::user() && Auth::user()->can('projects.edit')) {
             $assignedJudgeIds = $project->judges->pluck('id')->toArray();
+            
+            // Obtener IDs de usuarios de los jueces asignados al evento
+            // La relación event->judges devuelve JudgeProfile, necesitamos los user_id
+            $eventJudgeUserIds = $project->team->event->judges()->pluck('user_id');
+
             $availableJudges = User::role('judge')
+                ->whereIn('id', $eventJudgeUserIds)
                 ->whereNotIn('id', $assignedJudgeIds)
                 ->with('judgeProfile.specialty')
                 ->get();
