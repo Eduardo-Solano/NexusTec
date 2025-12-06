@@ -49,6 +49,25 @@ class UserSeeder extends Seeder
             ]
         );
 
+        // 1.3 JUEZ DE PRUEBA (Para evaluar eventos activos)
+        $juezPrueba = User::firstOrCreate(
+            ['email' => 'juez@nexustec.com'],
+            [
+                'name' => 'Ing. Juez Prueba',
+                'password' => Hash::make('password'),
+                'is_active' => true,
+            ]
+        );
+        $juezPrueba->assignRole('judge');
+
+        JudgeProfile::updateOrCreate(
+            ['user_id' => $juezPrueba->id],
+            [
+                'specialty_id' => Specialty::first()->id ?? Specialty::factory()->create()->id,
+                'company' => 'NexusTec Partners',
+            ]
+        );
+
         // =========================================================
         // 2. GENERACIÓN MASIVA DE PERSONAL (Staff/Advisors)
         // =========================================================

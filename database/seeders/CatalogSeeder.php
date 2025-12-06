@@ -16,6 +16,8 @@ class CatalogSeeder extends Seeder
             ['name' => 'Innovación', 'max_points' => 30],
             ['name' => 'Complejidad Técnica', 'max_points' => 40],
             ['name' => 'Modelo de Negocio', 'max_points' => 30],
+            ['name' => 'Impacto Social', 'max_points' => 20],
+            ['name' => 'Viabilidad Financiera', 'max_points' => 20],
         ];
         foreach ($criterios as $crit) {
             Criterion::firstOrCreate($crit);

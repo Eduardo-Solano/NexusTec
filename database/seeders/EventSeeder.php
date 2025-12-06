@@ -37,6 +37,16 @@ class EventSeeder extends Seeder
             // Asignar criterios al evento
             $event->criteria()->attach($criterios->pluck('id'));
 
+
+
+            // Asignar un subconjunto aleatorio de jueces al evento (entre 3 y 5 jueces)
+            // Obtenemos los JudgeProfiles asociados a los usuarios 'judges'
+            $judgesIds = \App\Models\JudgeProfile::whereIn('user_id', $judges->pluck('id'))->pluck('id');
+            // Si el seeder de usuarios ya creó perfiles de jueces, esto funcionará.
+            if ($judgesIds->isNotEmpty()) {
+                $event->judges()->syncWithoutDetaching($judgesIds->random(min($judgesIds->count(), rand(3, 5))));
+            }
+
             // Crear 6 equipos por evento (30 equipos pasados en total)
             // Esto genera estudiantes y los mete a equipos
             for ($i = 0; $i < 6; $i++) {
@@ -57,6 +67,29 @@ class EventSeeder extends Seeder
 
         foreach ($activeEvents as $event) {
             $event->criteria()->attach($criterios->pluck('id'));
+
+            // Asignar un subconjunto aleatorio de jueces al evento (entre 3 y 5 jueces)
+            // Obtenemos los JudgeProfiles asociados a los usuarios 'judges'
+            $judgesIds = \App\Models\JudgeProfile::whereIn('user_id', $judges->pluck('id'))->pluck('id');
+            
+            // Buscar al Juez de Prueba
+            $testJudge = User::where('email', 'juez@nexustec.com')->first();
+            $testJudgeProfileId = $testJudge?->judgeProfile?->id;
+
+            $selectedJudges = collect();
+            
+            if ($judgesIds->isNotEmpty()) {
+                $selectedJudges = $judgesIds->random(min($judgesIds->count(), rand(3, 5)));
+            }
+
+            // Asegurar que el juez de prueba esté incluido si existe
+            if ($testJudgeProfileId) {
+                $selectedJudges->push($testJudgeProfileId);
+            }
+
+            if ($selectedJudges->isNotEmpty()) {
+                $event->judges()->syncWithoutDetaching($selectedJudges->unique());
+            }
 
             // Crear 6 equipos por evento (30 equipos activos en total)
             for ($i = 0; $i < 6; $i++) {
