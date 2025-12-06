@@ -5,7 +5,7 @@
                 {{ __('Eventos NexusTec') }}
             </h2>
 
-            @can('events.create')
+            @role('admin|staff')
                 <a href="{{ route('events.create') }}"
                     class="bg-ito-orange hover:bg-orange-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition transform hover:scale-105 flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -15,7 +15,7 @@
                     </svg>
                     Nuevo Evento
                 </a>
-            @endcan
+            @endrole
         </div>
     </x-slot>
 
