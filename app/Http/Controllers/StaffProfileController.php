@@ -200,108 +200,157 @@ class StaffProfileController extends Controller
      */
     public function importCsv(Request $request)
     {
-        $request->validate([
-            'csv_file' => 'required|mimes:csv,txt'
-        ]);
+        try {
+            $request->validate([
+                'csv_file' => 'required|mimes:csv,txt'
+            ]);
 
-        $file = $request->file('csv_file');
-        $handle = fopen($file, 'r');
+            $file = $request->file('csv_file');
+            $handle = fopen($file, 'r');
 
-        $rowNumber = 0;
-        $imported = [];
-        $failed = [];
+            $rowNumber = 0;
+            $imported = [];
+            $failed = [];
 
-        while (($data = fgetcsv($handle, 2000, ',')) !== false) {
-            $rowNumber++;
+            while (($data = fgetcsv($handle, 2000, ',')) !== false) {
+                $rowNumber++;
 
-            // Ignorar encabezado
-            if ($rowNumber == 1) {
-                continue;
+                // Ignorar encabezado
+                if ($rowNumber == 1) {
+                    continue;
+                }
+
+                // Columnas esperadas:
+                // 0 = Nombre
+                // 1 = Correo
+                // 2 = No. Empleado
+                // 3 = Departamento
+                // 4 = Tipo (advisor/staff/both) - opcional, default: advisor
+                $name = trim($data[0] ?? '');
+                $email = trim($data[1] ?? '');
+                $employeeNumber = trim($data[2] ?? '');
+                $department = trim($data[3] ?? '');
+                $staffType = strtolower(trim($data[4] ?? 'advisor'));
+
+                // Normalizar tipo
+                if (!in_array($staffType, ['advisor', 'staff', 'both'])) {
+                    $staffType = 'advisor';
+                }
+
+                // Acumular errores
+                $errors = [];
+
+                if (!$name) $errors[] = "Nombre vacío";
+                if (!$email) $errors[] = "Correo vacío";
+                if ($email && !filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = "Correo inválido";
+                
+                // Verificar correo duplicado
+                if ($email && User::where('email', $email)->exists()) {
+                    $errors[] = "Correo duplicado";
+                }
+                
+                // Verificar nombre duplicado
+                if ($name && User::where('name', $name)->exists()) {
+                    $errors[] = "Ya existe un usuario con este nombre";
+                }
+                
+                if (!$employeeNumber) $errors[] = "No. empleado vacío";
+                
+                // Verificar número de empleado duplicado
+                if ($employeeNumber && StaffProfile::where('employee_number', $employeeNumber)->exists()) {
+                    $errors[] = "No. empleado duplicado";
+                }
+                
+                if (!$department) $errors[] = "Departamento vacío";
+
+                // Si tuvo errores → enviarlo a la lista de fallos
+                if (count($errors) > 0) {
+                    $failed[] = [
+                        'row' => $rowNumber,
+                        'name' => $name,
+                        'email' => $email,
+                        'employee_number' => $employeeNumber,
+                        'department' => $department,
+                        'errors' => $errors
+                    ];
+                    continue;
+                }
+
+                // INSERTAR DOCENTE CORRECTO
+                try {
+                    DB::transaction(function () use ($name, $email, $employeeNumber, $department, $staffType, &$imported) {
+                        $user = User::create([
+                            'name' => $name,
+                            'email' => $email,
+                            'password' => Hash::make('password'),
+                            'is_active' => true,
+                        ]);
+
+                        // Asignar roles según tipo
+                        $roles = match($staffType) {
+                            'advisor' => ['advisor'],
+                            'staff' => ['staff'],
+                            'both' => ['staff', 'advisor'],
+                        };
+                        $user->assignRole($roles);
+
+                        StaffProfile::create([
+                            'user_id' => $user->id,
+                            'employee_number' => $employeeNumber,
+                            'department' => $department,
+                        ]);
+
+                        $imported[] = [
+                            'name' => $name,
+                            'email' => $email,
+                            'employee_number' => $employeeNumber,
+                            'department' => $department,
+                            'type' => $staffType,
+                        ];
+                    });
+                } catch (\Exception $e) {
+                    // Limpiar mensaje de error para el usuario
+                    $errorMessage = 'Error al guardar el registro';
+                    
+                    if (str_contains($e->getMessage(), 'Duplicate entry')) {
+                        $errorMessage = 'Registro duplicado en el sistema';
+                    } elseif (str_contains($e->getMessage(), 'employee_number')) {
+                        $errorMessage = 'Número de empleado duplicado';
+                    } elseif (str_contains($e->getMessage(), 'foreign key')) {
+                        $errorMessage = 'Error de validación de datos';
+                    }
+                    
+                    $failed[] = [
+                        'row' => $rowNumber,
+                        'name' => $name,
+                        'email' => $email,
+                        'employee_number' => $employeeNumber,
+                        'department' => $department,
+                        'errors' => [$errorMessage]
+                    ];
+                }
             }
 
-            // Columnas esperadas:
-            // 0 = Nombre
-            // 1 = Correo
-            // 2 = No. Empleado
-            // 3 = Departamento
-            // 4 = Tipo (advisor/staff/both) - opcional, default: advisor
-            $name = trim($data[0] ?? '');
-            $email = trim($data[1] ?? '');
-            $employeeNumber = trim($data[2] ?? '');
-            $department = trim($data[3] ?? '');
-            $staffType = strtolower(trim($data[4] ?? 'advisor'));
+            fclose($handle);
 
-            // Normalizar tipo
-            if (!in_array($staffType, ['advisor', 'staff', 'both'])) {
-                $staffType = 'advisor';
-            }
+            return response()->json([
+                'success' => true,
+                'imported' => $imported,
+                'failed' => $failed,
+                'total_imported' => count($imported),
+                'total_failed' => count($failed),
+                'default_password' => 'password',
+            ]);
 
-            // Acumular errores
-            $errors = [];
-
-            if (!$name) $errors[] = "Nombre vacío";
-            if (!$email) $errors[] = "Correo vacío";
-            if ($email && !filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = "Correo inválido";
-            if (User::where('email', $email)->exists()) $errors[] = "Correo duplicado";
-            if (!$employeeNumber) $errors[] = "No. empleado vacío";
-            if (StaffProfile::where('employee_number', $employeeNumber)->exists()) $errors[] = "No. empleado duplicado";
-            if (!$department) $errors[] = "Departamento vacío";
-
-            // Si tuvo errores → enviarlo a la lista de fallos
-            if (count($errors) > 0) {
-                $failed[] = [
-                    'row' => $rowNumber,
-                    'name' => $name,
-                    'email' => $email,
-                    'employee_number' => $employeeNumber,
-                    'department' => $department,
-                    'errors' => $errors
-                ];
-                continue;
-            }
-
-            // INSERTAR DOCENTE CORRECTO
-            DB::transaction(function () use ($name, $email, $employeeNumber, $department, $staffType, &$imported) {
-                $user = User::create([
-                    'name' => $name,
-                    'email' => $email,
-                    'password' => Hash::make('password'),
-                    'is_active' => true,
-                ]);
-
-                // Asignar roles según tipo
-                $roles = match($staffType) {
-                    'advisor' => ['advisor'],
-                    'staff' => ['staff'],
-                    'both' => ['staff', 'advisor'],
-                };
-                $user->assignRole($roles);
-
-                StaffProfile::create([
-                    'user_id' => $user->id,
-                    'employee_number' => $employeeNumber,
-                    'department' => $department,
-                ]);
-
-                $imported[] = [
-                    'name' => $name,
-                    'email' => $email,
-                    'employee_number' => $employeeNumber,
-                    'department' => $department,
-                    'type' => $staffType,
-                ];
-            });
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al procesar el archivo CSV',
+                'imported' => [],
+                'failed' => [],
+                'total_imported' => 0,
+                'total_failed' => 0,
+            ], 500);
         }
-
-        fclose($handle);
-
-        return response()->json([
-            'success' => true,
-            'imported' => $imported,
-            'failed' => $failed,
-            'total_imported' => count($imported),
-            'total_failed' => count($failed),
-            'default_password' => 'password',
-        ]);
     }
 }
