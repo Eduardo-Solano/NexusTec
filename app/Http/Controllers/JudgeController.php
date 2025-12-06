@@ -154,101 +154,149 @@ class JudgeController extends Controller
      */
     public function importCsv(Request $request)
     {
-        $request->validate([
-            'csv_file' => 'required|mimes:csv,txt'
-        ]);
+        try {
+            $request->validate([
+                'csv_file' => 'required|mimes:csv,txt'
+            ]);
 
-        $file = $request->file('csv_file');
-        $handle = fopen($file, 'r');
+            $file = $request->file('csv_file');
+            $handle = fopen($file, 'r');
 
-        $rowNumber = 0;
-        $imported = [];
-        $failed = [];
+            $rowNumber = 0;
+            $imported = [];
+            $failed = [];
 
-        while (($data = fgetcsv($handle, 2000, ',')) !== false) {
-            $rowNumber++;
+            while (($data = fgetcsv($handle, 2000, ',')) !== false) {
+                $rowNumber++;
 
-            // Ignorar encabezado
-            if ($rowNumber == 1) {
-                continue;
+                // Ignorar encabezado
+                if ($rowNumber == 1) {
+                    continue;
+                }
+
+                // Columnas esperadas:
+                // 0 = Nombre
+                // 1 = Correo
+                // 2 = Teléfono (opcional)
+                // 3 = Empresa (opcional)
+                // 4 = Especialidad (nombre, se detecta por similitud)
+                $name = trim($data[0] ?? '');
+                $email = trim($data[1] ?? '');
+                $phone = trim($data[2] ?? '');
+                $company = trim($data[3] ?? '');
+                $specialtyText = trim($data[4] ?? '');
+
+                // Resolver especialidad por fuzzy matching
+                $specialtyId = null;
+                if ($specialtyText) {
+                    $specialtyId = Specialty::detectFromName($specialtyText);
+                }
+
+                // Acumular errores
+                $errors = [];
+
+                if (!$name) $errors[] = "Nombre vacío";
+                if (!$email) $errors[] = "Correo vacío";
+                if ($email && !filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = "Correo inválido";
+                
+                // Verificar correo duplicado
+                if ($email && User::where('email', $email)->exists()) {
+                    $errors[] = "Correo duplicado";
+                }
+                
+                // Verificar nombre duplicado (advertencia, no error crítico)
+                if ($name && User::where('name', $name)->exists()) {
+                    $errors[] = "Ya existe un usuario con este nombre";
+                }
+                
+                // Verificar teléfono duplicado
+                if ($phone && User::where('phone', $phone)->exists()) {
+                    $errors[] = "Teléfono duplicado";
+                }
+
+                // Si tuvo errores → enviarlo a la lista de fallos
+                if (count($errors) > 0) {
+                    $failed[] = [
+                        'row' => $rowNumber,
+                        'name' => $name,
+                        'email' => $email,
+                        'company' => $company,
+                        'specialty' => $specialtyText,
+                        'errors' => $errors
+                    ];
+                    continue;
+                }
+
+                // INSERTAR JUEZ CORRECTO
+                try {
+                    DB::transaction(function () use ($name, $email, $phone, $company, $specialtyId, &$imported) {
+                        $user = User::create([
+                            'name' => $name,
+                            'email' => $email,
+                            'phone' => $phone ?: null,
+                            'password' => Hash::make('password'),
+                            'is_active' => true,
+                        ]);
+
+                        Role::findOrCreate('judge');
+                        $user->assignRole('judge');
+
+                        JudgeProfile::create([
+                            'user_id' => $user->id,
+                            'specialty_id' => $specialtyId,
+                            'company' => $company ?: null,
+                        ]);
+
+                        $imported[] = [
+                            'name' => $name,
+                            'email' => $email,
+                            'phone' => $phone,
+                            'company' => $company,
+                        ];
+                    });
+                } catch (\Exception $e) {
+                    // Limpiar mensaje de error para el usuario
+                    $errorMessage = 'Error al guardar el registro';
+                    
+                    if (str_contains($e->getMessage(), 'Duplicate entry')) {
+                        $errorMessage = 'Correo electrónico duplicado';
+                    } elseif (str_contains($e->getMessage(), 'specialty_id')) {
+                        $errorMessage = 'Especialidad no válida';
+                    } elseif (str_contains($e->getMessage(), 'foreign key')) {
+                        $errorMessage = 'Error de validación de datos';
+                    }
+                    
+                    $failed[] = [
+                        'row' => $rowNumber,
+                        'name' => $name,
+                        'email' => $email,
+                        'company' => $company,
+                        'specialty' => $specialtyText,
+                        'errors' => [$errorMessage]
+                    ];
+                }
             }
 
-            // Columnas esperadas:
-            // 0 = Nombre
-            // 1 = Correo
-            // 2 = Teléfono (opcional)
-            // 3 = Empresa (opcional)
-            // 4 = Especialidad (nombre, se detecta por similitud)
-            $name = trim($data[0] ?? '');
-            $email = trim($data[1] ?? '');
-            $phone = trim($data[2] ?? '');
-            $company = trim($data[3] ?? '');
-            $specialtyText = trim($data[4] ?? '');
+            fclose($handle);
 
-            // Resolver especialidad por fuzzy matching
-            $specialtyId = null;
-            if ($specialtyText) {
-                $specialtyId = Specialty::detectFromName($specialtyText);
-            }
+            return response()->json([
+                'success' => true,
+                'imported' => $imported,
+                'failed' => $failed,
+                'total_imported' => count($imported),
+                'total_failed' => count($failed),
+                'default_password' => 'password',
+            ]);
 
-            // Acumular errores
-            $errors = [];
-
-            if (!$name) $errors[] = "Nombre vacío";
-            if (!$email) $errors[] = "Correo vacío";
-            if ($email && !filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = "Correo inválido";
-            if (User::where('email', $email)->exists()) $errors[] = "Correo duplicado";
-
-            // Si tuvo errores → enviarlo a la lista de fallos
-            if (count($errors) > 0) {
-                $failed[] = [
-                    'row' => $rowNumber,
-                    'name' => $name,
-                    'email' => $email,
-                    'company' => $company,
-                    'specialty' => $specialtyText,
-                    'errors' => $errors
-                ];
-                continue;
-            }
-
-            // INSERTAR JUEZ CORRECTO
-            DB::transaction(function () use ($name, $email, $phone, $company, $specialtyId, &$imported) {
-                $user = User::create([
-                    'name' => $name,
-                    'email' => $email,
-                    'phone' => $phone ?: null,
-                    'password' => Hash::make('password'),
-                    'is_active' => true,
-                ]);
-
-                Role::findOrCreate('judge');
-                $user->assignRole('judge');
-
-                JudgeProfile::create([
-                    'user_id' => $user->id,
-                    'specialty_id' => $specialtyId,
-                    'company' => $company ?: null,
-                ]);
-
-                $imported[] = [
-                    'name' => $name,
-                    'email' => $email,
-                    'phone' => $phone,
-                    'company' => $company,
-                ];
-            });
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al procesar el archivo CSV',
+                'imported' => [],
+                'failed' => [],
+                'total_imported' => 0,
+                'total_failed' => 0,
+            ], 500);
         }
-
-        fclose($handle);
-
-        return response()->json([
-            'success' => true,
-            'imported' => $imported,
-            'failed' => $failed,
-            'total_imported' => count($imported),
-            'total_failed' => count($failed),
-            'default_password' => 'password',
-        ]);
     }
 }
