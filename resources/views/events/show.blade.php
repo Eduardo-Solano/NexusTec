@@ -429,6 +429,91 @@
                 </script>
                 @endif
 
+                {{-- SECCIÓN: CRITERIOS --}}
+                <div class="bg-gray-800 border border-gray-700 rounded-2xl p-8 mb-8">
+                    <div class="flex items-end justify-between mb-8 border-b border-gray-700 pb-4">
+                        <div>
+                            <h3 class="text-3xl font-bold text-white">Criterios de Evaluación</h3>
+                            <p class="text-gray-500 mt-1">Puntos a evaluar en los proyectos</p>
+                        </div>
+                        <div class="text-4xl font-black text-gray-700">
+                             {{ str_pad($event->criteria->count(), 2, '0', STR_PAD_LEFT) }}
+                        </div>
+                    </div>
+
+                    @if($event->criteria->count() > 0)
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            @foreach($event->criteria as $criterion)
+                                <div class="bg-gray-900/50 border border-gray-700 p-6 rounded-xl relative overflow-hidden group hover:border-ito-orange transition duration-300">
+                                    <div class="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition">
+                                        <svg class="w-16 h-16 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                    </div>
+                                    <h4 class="text-xl font-bold text-white mb-2">{{ $criterion->name }}</h4>
+                                    <p class="text-gray-400 text-sm mb-4 line-clamp-3">{{ $criterion->description }}</p>
+                                    <div class="inline-flex items-center px-3 py-1 bg-gray-800 border border-gray-600 rounded-full text-xs font-bold text-gray-300">
+                                        Max. {{ $criterion->max_points }} pts
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <div class="text-center py-8 text-gray-500 border-2 border-dashed border-gray-700 rounded-xl">
+                            <p>No se han definido criterios para este evento aún.</p>
+                        </div>
+                    @endif
+                </div>
+
+                {{-- SECCIÓN: PROYECTOS --}}
+                <div class="bg-gray-800 border border-gray-700 rounded-2xl p-8 mb-8">
+                     <div class="flex items-end justify-between mb-8 border-b border-gray-700 pb-4">
+                        <div>
+                            <h3 class="text-3xl font-bold text-white">Proyectos</h3>
+                            <p class="text-gray-500 mt-1">Avances y entregas de los equipos</p>
+                        </div>
+                        <div class="text-4xl font-black text-gray-700">
+                             {{ str_pad($projects->count(), 2, '0', STR_PAD_LEFT) }}
+                        </div>
+                    </div>
+
+                    @if($projects->count() > 0)
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            @foreach($projects as $project)
+                                <a href="{{ route('projects.show', $project) }}" class="block p-5 bg-gray-900 border border-gray-700 rounded-xl hover:border-blue-500 hover:shadow-lg hover:shadow-blue-500/10 transition duration-300 group">
+                                    <div class="flex justify-between items-start mb-3">
+                                         <span class="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-blue-300 bg-blue-900/30 border border-blue-500/20 rounded">
+                                            {{ $project->team->name }}
+                                         </span>
+                                         <svg class="w-5 h-5 text-gray-600 group-hover:text-blue-500 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                         </svg>
+                                    </div>
+                                    <h4 class="text-lg font-bold text-white mb-2 group-hover:text-blue-400 transition">{{ $project->name }}</h4>
+                                    <p class="text-gray-400 text-sm line-clamp-2 mb-4">{{ $project->description }}</p>
+                                    
+                                    <div class="flex items-center gap-2 text-xs text-gray-500">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <span>Entregado {{ $project->created_at->diffForHumans() }}</span>
+                                    </div>
+                                </a>
+                            @endforeach
+                        </div>
+                    @else
+                        <div class="text-center py-12 border-2 border-dashed border-gray-700 rounded-xl">
+                            <div class="inline-flex p-3 bg-gray-800 rounded-full mb-3">
+                                <svg class="w-6 h-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                                </svg>
+                            </div>
+                            <p class="text-gray-400 font-medium">No hay proyectos entregados todavía.</p>
+                            <p class="text-sm text-gray-600 mt-1">Los equipos aparecerán aquí cuando suban sus avances.</p>
+                        </div>
+                    @endif
+                </div>
+
                 <div>
                     <div class="flex items-end justify-between mb-8 border-b border-gray-800 pb-4">
                         <div>

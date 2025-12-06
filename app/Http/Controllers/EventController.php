@@ -142,8 +142,12 @@ class EventController extends Controller
      */
     public function show(Event $event)
     {
-       // Cargamos los equipos
-        $event->load(['teams.leader', 'teams.members', 'teams.project']);
+       // Cargamos los equipos y criterios
+        $event->load(['teams.leader', 'teams.members', 'teams.project', 'criteria']);
+        
+        // Cargar proyectos del evento (a través de los equipos)
+        // Esto crea una colección de proyectos filtrando los equipos que sí tienen proyecto
+        $projects = $event->teams->map(fn($team) => $team->project)->filter();
         
         $userHasTeam = false;
         $myTeam = null;
@@ -166,7 +170,7 @@ class EventController extends Controller
             }
         }
         
-        return view('events.show', compact('event', 'userHasTeam', 'myTeam', 'teamToAdvise'));
+        return view('events.show', compact('event', 'userHasTeam', 'myTeam', 'teamToAdvise', 'projects'));
     }
 
     /**
