@@ -336,7 +336,7 @@
 
                 {{-- MODAL: Asignar Juez --}}
                 <dialog id="assignJudgeModal" class="backdrop:bg-black/50 rounded-2xl shadow-2xl">
-                    <div class="bg-gray-800 border border-gray-700 rounded-2xl p-8 max-w-md w-full">
+                    <div class="bg-gray-800 border border-gray-700 rounded-2xl p-8 w-full max-w-2xl">
                         <div class="flex justify-between items-center mb-6">
                             <h2 class="text-2xl font-bold text-white">Asignar Juez</h2>
                             <button type="button" onclick="document.getElementById('assignJudgeModal').close()"
@@ -349,24 +349,38 @@
 
                         <form action="{{ route('events.assign-judge', $event) }}" method="POST">
                             @csrf
+                            <div class="mb-4">
+                                <label for="judge_search" class="block text-sm font-bold text-white mb-2">
+                                    <svg class="w-4 h-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                    Buscar Juez
+                                </label>
+                                <input type="text" id="judge_search" 
+                                    class="w-full px-4 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg focus:outline-none focus:border-indigo-500 placeholder-gray-400"
+                                    placeholder="Escribe el nombre o especialidad...">
+                            </div>
                             <div class="mb-6">
-                                <label for="judge_id" class="block text-sm font-bold text-white mb-2">Seleccionar Juez</label>
-                                <select name="judge_id" id="judge_id" required
-                                    class="w-full px-4 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg focus:outline-none focus:border-indigo-500">
-                                    <option value="">-- Selecciona un juez --</option>
+                                <label for="judge_id" class="block text-sm font-bold text-white mb-2">Seleccionar Juez (haz clic para elegir)</label>
+                                <select name="judge_id" id="judge_id" required size="8"
+                                    class="w-full px-4 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 text-sm leading-relaxed"
+                                    style="min-height: 280px;">
                                     @php
                                         $availableJudges = \App\Models\JudgeProfile::whereDoesntHave('events', function($q) use ($event) {
                                             $q->where('event_id', $event->id);
                                         })->with('user', 'specialty')->get();
                                     @endphp
                                     @forelse($availableJudges as $judge)
-                                        <option value="{{ $judge->id }}">
+                                        <option value="{{ $judge->id }}" class="py-2 px-2">
                                             {{ $judge->user->name }} - {{ $judge->specialty->name ?? 'Sin especialidad' }}
                                         </option>
                                     @empty
-                                        <option disabled>No hay jueces disponibles</option>
+                                        <option value="" disabled>No hay jueces disponibles</option>
                                     @endforelse
                                 </select>
+                                <p id="no_results_message" class="hidden text-sm text-yellow-400 mt-2">
+                                    ⚠️ No se encontraron jueces con ese criterio
+                                </p>
                             </div>
 
                             <div class="flex gap-3">
@@ -382,6 +396,37 @@
                         </form>
                     </div>
                 </dialog>
+
+                <script>
+                    // Filtro de búsqueda en tiempo real para jueces en eventos
+                    document.getElementById('judge_search')?.addEventListener('input', function(e) {
+                        const searchTerm = e.target.value.toLowerCase();
+                        const select = document.getElementById('judge_id');
+                        const options = select.querySelectorAll('option');
+                        const noResultsMsg = document.getElementById('no_results_message');
+                        let hasVisibleOptions = false;
+                        
+                        options.forEach(option => {
+                            const text = option.textContent.toLowerCase();
+                            if (text.includes(searchTerm)) {
+                                option.style.display = '';
+                                hasVisibleOptions = true;
+                            } else {
+                                option.style.display = 'none';
+                            }
+                        });
+                        
+                        // Mostrar/ocultar mensaje de sin resultados
+                        if (noResultsMsg) {
+                            noResultsMsg.classList.toggle('hidden', hasVisibleOptions || searchTerm === '');
+                        }
+                        
+                        // Limpiar selección si no hay resultados
+                        if (!hasVisibleOptions) {
+                            select.selectedIndex = -1;
+                        }
+                    });
+                </script>
                 @endif
 
                 <div>

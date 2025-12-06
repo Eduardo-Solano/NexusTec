@@ -194,24 +194,43 @@
                                 @if(isset($availableJudges) && $availableJudges->count() > 0)
                                     <div class="pt-4 border-t border-gray-700">
                                         <p class="text-xs text-gray-400 font-bold uppercase tracking-wider mb-3">Asignar Nuevo Juez</p>
-                                        <form action="{{ route('projects.assign-judge', $project) }}" method="POST" class="flex gap-3">
+                                        
+                                        {{-- Barra de búsqueda --}}
+                                        <div class="mb-3">
+                                            <div class="relative">
+                                                <input type="text" id="project_judge_search" 
+                                                    class="w-full bg-gray-900 border border-gray-600 text-white text-sm rounded-lg px-4 py-2.5 pl-10 focus:ring-2 focus:ring-amber-500 focus:border-transparent placeholder-gray-500"
+                                                    placeholder="🔍 Buscar juez por nombre o especialidad...">
+                                                <svg class="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                                </svg>
+                                            </div>
+                                        </div>
+                                        
+                                        <form action="{{ route('projects.assign-judge', $project) }}" method="POST">
                                             @csrf
-                                            <select name="judge_id" required class="flex-1 bg-gray-900 border border-gray-600 text-white text-sm rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-amber-500 focus:border-transparent">
-                                                <option value="">Seleccionar juez...</option>
-                                                @foreach($availableJudges as $judge)
-                                                    <option value="{{ $judge->id }}">
-                                                        {{ $judge->name }}
-                                                        @if($judge->judgeProfile && $judge->judgeProfile->specialty)
-                                                            - {{ $judge->judgeProfile->specialty->name }}
-                                                        @endif
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                            <button type="submit" class="px-5 py-2.5 bg-amber-600 hover:bg-amber-500 text-white font-bold text-sm rounded-lg transition flex items-center gap-2">
+                                            <div class="mb-3">
+                                                <select name="judge_id" id="project_judge_select" required size="6"
+                                                    class="w-full bg-gray-900 border border-gray-600 text-white text-sm rounded-lg px-4 py-2 focus:ring-2 focus:ring-amber-500 focus:border-transparent leading-relaxed"
+                                                    style="min-height: 220px;">
+                                                    @foreach($availableJudges as $judge)
+                                                        <option value="{{ $judge->id }}" class="py-2 px-2">
+                                                            {{ $judge->name }}
+                                                            @if($judge->judgeProfile && $judge->judgeProfile->specialty)
+                                                                - {{ $judge->judgeProfile->specialty->name }}
+                                                            @endif
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <button type="submit" class="w-full px-5 py-2.5 bg-amber-600 hover:bg-amber-500 text-white font-bold text-sm rounded-lg transition flex items-center justify-center gap-2">
                                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                                                Asignar
+                                                Asignar Juez Seleccionado
                                             </button>
                                         </form>
+                                        <p id="project_no_results" class="hidden text-sm text-yellow-400 mt-2">
+                                            ⚠️ No se encontraron jueces con ese criterio
+                                        </p>
                                     </div>
                                 @elseif($project->judges->count() > 0)
                                     <div class="pt-4 border-t border-gray-700 text-center">
@@ -457,4 +476,41 @@
             </div>
         </div>
     </div>
+
+    <script>
+        // Filtro de búsqueda en tiempo real para jueces en proyectos
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('project_judge_search');
+            const selectElement = document.getElementById('project_judge_select');
+            const noResultsMsg = document.getElementById('project_no_results');
+            
+            if (searchInput && selectElement) {
+                searchInput.addEventListener('input', function(e) {
+                    const searchTerm = e.target.value.toLowerCase().trim();
+                    const options = selectElement.querySelectorAll('option');
+                    let hasVisibleOptions = false;
+                    
+                    options.forEach(option => {
+                        const text = option.textContent.toLowerCase();
+                        if (text.includes(searchTerm)) {
+                            option.style.display = '';
+                            hasVisibleOptions = true;
+                        } else {
+                            option.style.display = 'none';
+                        }
+                    });
+                    
+                    // Mostrar/ocultar mensaje de "no hay resultados"
+                    if (noResultsMsg) {
+                        noResultsMsg.classList.toggle('hidden', hasVisibleOptions || searchTerm === '');
+                    }
+                    
+                    // Si no hay resultados visibles, limpiar selección
+                    if (!hasVisibleOptions && searchTerm !== '') {
+                        selectElement.selectedIndex = -1;
+                    }
+                });
+            }
+        });
+    </script>
 </x-app-layout>
