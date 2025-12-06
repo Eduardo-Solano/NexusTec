@@ -104,117 +104,158 @@ class StudentProfileController extends Controller
      */
     public function importCsv(Request $request)
     {
-        $request->validate([
-            'csv_file' => 'required|mimes:csv,txt'
-        ]);
+        try {
+            $request->validate([
+                'csv_file' => 'required|mimes:csv,txt'
+            ]);
 
-        $file = $request->file('csv_file');
-        $handle = fopen($file, 'r');
+            $file = $request->file('csv_file');
+            $handle = fopen($file, 'r');
 
-        $rowNumber = 0;
-        $imported = [];
-        $failed = [];
+            $rowNumber = 0;
+            $imported = [];
+            $failed = [];
 
-        while (($data = fgetcsv($handle, 2000, ',')) !== false) {
-            $rowNumber++;
+            while (($data = fgetcsv($handle, 2000, ',')) !== false) {
+                $rowNumber++;
 
-            // Ignorar encabezado
-            if ($rowNumber == 1) {
-                continue;
-            }
-
-            // Columnas esperadas:
-            // 0 = Nombre
-            // 1 = Correo
-            // 2 = Matricula
-            // 3 = Carrera (texto)
-            $name = trim($data[0] ?? '');
-            $email = trim($data[1] ?? '');
-            $controlNumber = trim($data[2] ?? '');
-            $careerText = trim($data[3] ?? '');
-
-            // Resolver carrera por fuzzy matching
-            $careerId = \App\Models\Career::detectFromName($careerText);
-
-            // Acumular errores
-            $errors = [];
-
-            if (!$name)
-                $errors[] = "Nombre vacío";
-            if (!$email)
-                $errors[] = "Correo vacío";
-            if ($email && !filter_var($email, FILTER_VALIDATE_EMAIL))
-                $errors[] = "Correo inválido";
-
-            if (\App\Models\User::where('email', $email)->exists())
-                $errors[] = "Correo duplicado";
-
-            if (!$controlNumber)
-                $errors[] = "Número de control vacío";
-            if (\App\Models\StudentProfile::where('control_number', $controlNumber)->exists())
-                $errors[] = "Número de control duplicado";
-
-            if (!$careerId)
-                $errors[] = "Carrera no identificada";
-
-            // Si tuvo errores → enviarlo a la lista de fallos
-            if (count($errors) > 0) {
-                $failed[] = [
-                    'row' => $rowNumber,
-                    'name' => $name,
-                    'email' => $email,
-                    'control_number' => $controlNumber,
-                    'career' => $careerText,
-                    'errors' => $errors
-                ];
-                continue;
-            }
-
-            // --------------------------
-            //  INSERTAR ALUMNO CORRECTO
-            // --------------------------
-            DB::transaction(function () use ($name, $email, $controlNumber, $careerId, &$imported) {
-                // 1. Crear usuario
-                $user = \App\Models\User::create([
-                    'name' => $name,
-                    'email' => $email,
-                    'password' => \Illuminate\Support\Facades\Hash::make('password'),
-                    'is_active' => true,
-                ]);
-
-                // 2. Asignar rol student
-                if (method_exists($user, 'assignRole')) {
-                    $user->assignRole('student');
+                // Ignorar encabezado
+                if ($rowNumber == 1) {
+                    continue;
                 }
 
-                // 3. Crear perfil
-                \App\Models\StudentProfile::create([
-                    'user_id' => $user->id,
-                    'control_number' => $controlNumber,
-                    'career_id' => $careerId,
-                ]);
+                // Columnas esperadas:
+                // 0 = Nombre
+                // 1 = Correo
+                // 2 = Matricula
+                // 3 = Carrera (texto)
+                $name = trim($data[0] ?? '');
+                $email = trim($data[1] ?? '');
+                $controlNumber = trim($data[2] ?? '');
+                $careerText = trim($data[3] ?? '');
 
-                // 4. Registrar como importado
-                $imported[] = [
-                    'name' => $name,
-                    'email' => $email,
-                    'control_number' => $controlNumber,
-                    'career_id' => $careerId,
-                ];
-            });
+                // Resolver carrera por fuzzy matching
+                $careerId = \App\Models\Career::detectFromName($careerText);
+
+                // Acumular errores
+                $errors = [];
+
+                if (!$name)
+                    $errors[] = "Nombre vacío";
+                if (!$email)
+                    $errors[] = "Correo vacío";
+                if ($email && !filter_var($email, FILTER_VALIDATE_EMAIL))
+                    $errors[] = "Correo inválido";
+
+                // Verificar correo duplicado
+                if ($email && \App\Models\User::where('email', $email)->exists())
+                    $errors[] = "Correo duplicado";
+
+                // Verificar nombre duplicado
+                if ($name && \App\Models\User::where('name', $name)->exists())
+                    $errors[] = "Ya existe un usuario con este nombre";
+
+                if (!$controlNumber)
+                    $errors[] = "Número de control vacío";
+                    
+                // Verificar número de control duplicado
+                if ($controlNumber && \App\Models\StudentProfile::where('control_number', $controlNumber)->exists())
+                    $errors[] = "Número de control duplicado";
+
+                if (!$careerId)
+                    $errors[] = "Carrera no identificada";
+
+                // Si tuvo errores → enviarlo a la lista de fallos
+                if (count($errors) > 0) {
+                    $failed[] = [
+                        'row' => $rowNumber,
+                        'name' => $name,
+                        'email' => $email,
+                        'control_number' => $controlNumber,
+                        'career' => $careerText,
+                        'errors' => $errors
+                    ];
+                    continue;
+                }
+
+                // INSERTAR ALUMNO CORRECTO
+                try {
+                    DB::transaction(function () use ($name, $email, $controlNumber, $careerId, &$imported) {
+                        // 1. Crear usuario
+                        $user = \App\Models\User::create([
+                            'name' => $name,
+                            'email' => $email,
+                            'password' => \Illuminate\Support\Facades\Hash::make('password'),
+                            'is_active' => true,
+                        ]);
+
+                        // 2. Asignar rol student
+                        if (method_exists($user, 'assignRole')) {
+                            $user->assignRole('student');
+                        }
+
+                        // 3. Crear perfil
+                        \App\Models\StudentProfile::create([
+                            'user_id' => $user->id,
+                            'control_number' => $controlNumber,
+                            'career_id' => $careerId,
+                        ]);
+
+                        // 4. Registrar como importado
+                        $imported[] = [
+                            'name' => $name,
+                            'email' => $email,
+                            'control_number' => $controlNumber,
+                            'career_id' => $careerId,
+                        ];
+                    });
+                } catch (\Exception $e) {
+                    // Limpiar mensaje de error para el usuario
+                    $errorMessage = 'Error al guardar el registro';
+                    
+                    if (str_contains($e->getMessage(), 'Duplicate entry')) {
+                        $errorMessage = 'Registro duplicado en el sistema';
+                    } elseif (str_contains($e->getMessage(), 'career_id')) {
+                        $errorMessage = 'Carrera no válida';
+                    } elseif (str_contains($e->getMessage(), 'control_number')) {
+                        $errorMessage = 'Número de control duplicado';
+                    } elseif (str_contains($e->getMessage(), 'foreign key')) {
+                        $errorMessage = 'Error de validación de datos';
+                    }
+                    
+                    $failed[] = [
+                        'row' => $rowNumber,
+                        'name' => $name,
+                        'email' => $email,
+                        'control_number' => $controlNumber,
+                        'career' => $careerText,
+                        'errors' => [$errorMessage]
+                    ];
+                }
+            }
+
+            fclose($handle);
+
+            // Respuesta para el frontend (modal 3 pasos)
+            return response()->json([
+                'success' => true,
+                'imported' => $imported,
+                'failed' => $failed,
+                'total_imported' => count($imported),
+                'total_failed' => count($failed),
+                'default_password' => "password",
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al procesar el archivo CSV',
+                'imported' => [],
+                'failed' => [],
+                'total_imported' => 0,
+                'total_failed' => 0,
+            ], 500);
         }
-
-        fclose($handle);
-
-        // Respuesta para el frontend (modal 3 pasos)
-        return response()->json([
-            'success' => true,
-            'imported' => $imported,
-            'failed' => $failed,
-            'total_imported' => count($imported),
-            'total_failed' => count($failed),
-            'default_password' => "password",
-        ]);
     }
 
 
