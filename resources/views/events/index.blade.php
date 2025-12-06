@@ -32,55 +32,103 @@
 
             <!-- Barra de Búsqueda y Filtros -->
             <div class="mb-6 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
-                <form method="GET" action="{{ route('events.index') }}" class="flex flex-col md:flex-row gap-4">
-                    <!-- Búsqueda por texto -->
-                    <div class="flex-1">
-                        <div class="relative">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                </svg>
+                <form method="GET" action="{{ route('events.index') }}" class="flex flex-col gap-4">
+                    <!-- Primera fila: Búsqueda y Estado -->
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <!-- Búsqueda por texto -->
+                        <div class="flex-1">
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                </div>
+                                <input type="text" name="search" value="{{ request('search') }}" 
+                                    placeholder="Buscar por nombre o descripción..."
+                                    class="block w-full pl-10 pr-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-ito-orange focus:border-ito-orange transition">
                             </div>
-                            <input type="text" name="search" value="{{ request('search') }}" 
-                                placeholder="Buscar por nombre o descripción..."
-                                class="block w-full pl-10 pr-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-ito-orange focus:border-ito-orange transition">
+                        </div>
+
+                        <!-- Filtro por estado -->
+                        <div class="w-full md:w-48">
+                            <select name="status" 
+                                class="block w-full py-2.5 px-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-ito-orange focus:border-ito-orange transition">
+                                <option value="">📋 Todos los estados</option>
+                                <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>🟢 Activos</option>
+                                <option value="finished" {{ request('status') === 'finished' ? 'selected' : '' }}>🔴 Finalizados</option>
+                            </select>
                         </div>
                     </div>
 
-                    <!-- Filtro por estado -->
-                    <div class="w-full md:w-48">
-                        <select name="status" 
-                            class="block w-full py-2.5 px-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-ito-orange focus:border-ito-orange transition">
-                            <option value="">📋 Todos los estados</option>
-                            <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>🟢 Activos</option>
-                            <option value="finished" {{ request('status') === 'finished' ? 'selected' : '' }}>🔴 Finalizados</option>
-                        </select>
-                    </div>
+                    <!-- Segunda fila: Filtros de fecha -->
+                    <div class="flex flex-col md:flex-row gap-4 items-end">
+                        <div class="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <!-- Fecha específica -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">📅 Fecha específica</label>
+                                <input type="date" name="date" value="{{ request('date') }}" 
+                                    class="block w-full py-2.5 px-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-ito-orange focus:border-ito-orange transition">
+                            </div>
 
-                    <!-- Botones -->
-                    <div class="flex gap-2">
-                        <button type="submit" 
-                            class="px-4 py-2.5 bg-tecnm-blue hover:bg-blue-700 text-white font-bold rounded-lg transition flex items-center gap-2">
-                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                            </svg>
-                            Filtrar
-                        </button>
-                        @if(request('search') || request('status'))
-                            <a href="{{ route('events.index') }}" 
-                                class="px-4 py-2.5 bg-gray-500 hover:bg-gray-600 text-white font-bold rounded-lg transition flex items-center gap-2">
+                            <!-- Mes -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">📆 Mes</label>
+                                <select name="month" 
+                                    class="block w-full py-2.5 px-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-ito-orange focus:border-ito-orange transition">
+                                    <option value="">Todos</option>
+                                    <option value="1" {{ request('month') == '1' ? 'selected' : '' }}>Enero</option>
+                                    <option value="2" {{ request('month') == '2' ? 'selected' : '' }}>Febrero</option>
+                                    <option value="3" {{ request('month') == '3' ? 'selected' : '' }}>Marzo</option>
+                                    <option value="4" {{ request('month') == '4' ? 'selected' : '' }}>Abril</option>
+                                    <option value="5" {{ request('month') == '5' ? 'selected' : '' }}>Mayo</option>
+                                    <option value="6" {{ request('month') == '6' ? 'selected' : '' }}>Junio</option>
+                                    <option value="7" {{ request('month') == '7' ? 'selected' : '' }}>Julio</option>
+                                    <option value="8" {{ request('month') == '8' ? 'selected' : '' }}>Agosto</option>
+                                    <option value="9" {{ request('month') == '9' ? 'selected' : '' }}>Septiembre</option>
+                                    <option value="10" {{ request('month') == '10' ? 'selected' : '' }}>Octubre</option>
+                                    <option value="11" {{ request('month') == '11' ? 'selected' : '' }}>Noviembre</option>
+                                    <option value="12" {{ request('month') == '12' ? 'selected' : '' }}>Diciembre</option>
+                                </select>
+                            </div>
+
+                            <!-- Año -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">📅 Año</label>
+                                <select name="year" 
+                                    class="block w-full py-2.5 px-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-ito-orange focus:border-ito-orange transition">
+                                    <option value="">Todos</option>
+                                    @for ($y = date('Y') + 1; $y >= 2020; $y--)
+                                        <option value="{{ $y }}" {{ request('year') == $y ? 'selected' : '' }}>{{ $y }}</option>
+                                    @endfor
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Botones -->
+                        <div class="flex gap-2">
+                            <button type="submit" 
+                                class="px-4 py-2.5 bg-tecnm-blue hover:bg-blue-700 text-white font-bold rounded-lg transition flex items-center gap-2">
                                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
                                 </svg>
-                                Limpiar
-                            </a>
-                        @endif
+                                Filtrar
+                            </button>
+                            @if(request('search') || request('status') || request('date') || request('month') || request('year'))
+                                <a href="{{ route('events.index') }}" 
+                                    class="px-4 py-2.5 bg-gray-500 hover:bg-gray-600 text-white font-bold rounded-lg transition flex items-center gap-2">
+                                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                    Limpiar
+                                </a>
+                            @endif
+                        </div>
                     </div>
                 </form>
 
                 <!-- Indicador de filtros activos -->
-                @if(request('search') || request('status'))
-                    <div class="mt-3 flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                @if(request('search') || request('status') || request('date') || request('month') || request('year'))
+                    <div class="mt-3 flex flex-wrap items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                         <span class="font-medium">Filtros activos:</span>
                         @if(request('search'))
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
@@ -90,6 +138,22 @@
                         @if(request('status'))
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
                                 Estado: {{ request('status') === 'active' ? 'Activos' : 'Finalizados' }}
+                            </span>
+                        @endif
+                        @if(request('date'))
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                                Fecha: {{ \Carbon\Carbon::parse(request('date'))->format('d/m/Y') }}
+                            </span>
+                        @endif
+                        @if(request('month') || request('year'))
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200">
+                                Período: 
+                                @if(request('month'))
+                                    {{ ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'][request('month') - 1] }}
+                                @endif
+                                @if(request('year'))
+                                    {{ request('year') }}
+                                @endif
                             </span>
                         @endif
                         <span class="text-gray-500">— {{ $events->total() }} resultado(s)</span>
@@ -202,23 +266,57 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                         </svg>
-                        <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">No hay eventos activos</h3>
-                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Comienza creando el primer evento
-                            académico.</p>
-                        @can('events.create')
+                        
+                        @php
+                            $hasFilters = request('search') || request('status') || request('date') || request('month') || request('year');
+                        @endphp
+
+                        @if($hasFilters)
+                            <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">
+                                No existen eventos para los filtros seleccionados
+                            </h3>
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                @if(request('date'))
+                                    No hay eventos programados para el {{ \Carbon\Carbon::parse(request('date'))->format('d/m/Y') }}
+                                @elseif(request('month') && request('year'))
+                                    No hay eventos en {{ ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'][request('month') - 1] }} de {{ request('year') }}
+                                @elseif(request('year'))
+                                    No hay eventos en el año {{ request('year') }}
+                                @elseif(request('status') === 'active')
+                                    No hay eventos activos en este momento
+                                @elseif(request('status') === 'finished')
+                                    No hay eventos finalizados
+                                @else
+                                    Intenta modificar los criterios de búsqueda
+                                @endif
+                            </p>
                             <div class="mt-6">
-                                <a href="{{ route('events.create') }}"
-                                    class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-ito-orange hover:bg-orange-700">
-                                    <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                                        fill="currentColor">
-                                        <path fill-rule="evenodd"
-                                            d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-                                            clip-rule="evenodd" />
+                                <a href="{{ route('events.index') }}" 
+                                    class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gray-500 hover:bg-gray-600">
+                                    <svg class="-ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                     </svg>
-                                    Crear Evento
+                                    Limpiar Filtros
                                 </a>
                             </div>
-                        @endcan
+                        @else
+                            <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">No hay eventos</h3>
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Comienza creando el primer evento académico.</p>
+                            @can('events.create')
+                                <div class="mt-6">
+                                    <a href="{{ route('events.create') }}"
+                                        class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-ito-orange hover:bg-orange-700">
+                                        <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                                            fill="currentColor">
+                                            <path fill-rule="evenodd"
+                                                d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                                                clip-rule="evenodd" />
+                                        </svg>
+                                        Crear Evento
+                                    </a>
+                                </div>
+                            @endcan
+                        @endif
                     </div>
                 @endforelse
             </div>

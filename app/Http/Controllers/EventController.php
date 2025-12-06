@@ -30,13 +30,63 @@ class EventController extends Controller
             });
         }
 
-        // Filtro por estado (activo/finalizado)
+        // Filtro por estado (activo/finalizado) - EXCLUSIVO
         if ($request->filled('status')) {
             $today = now();
             if ($request->status === 'active') {
+                // Solo eventos que terminen hoy o después (activos)
                 $query->where('end_date', '>=', $today);
             } elseif ($request->status === 'finished') {
+                // Solo eventos que terminaron antes de hoy (finalizados)
                 $query->where('end_date', '<', $today);
+            }
+        }
+
+        // Filtro por fecha (día específico, mes, o año) - EXCLUSIVO
+        if ($request->filled('date')) {
+            // Eventos que estén activos en esta fecha específica
+            $date = $request->date;
+            $query->whereDate('start_date', '<=', $date)
+                  ->whereDate('end_date', '>=', $date);
+        } elseif ($request->filled('month') || $request->filled('year')) {
+            // Filtro por mes y/o año
+            if ($request->filled('month') && $request->filled('year')) {
+                // Mes y año específicos
+                $year = $request->year;
+                $month = str_pad($request->month, 2, '0', STR_PAD_LEFT);
+                $startOfMonth = "{$year}-{$month}-01";
+                $endOfMonth = date('Y-m-d', strtotime("last day of {$year}-{$month}"));
+                
+                $query->where(function ($q) use ($startOfMonth, $endOfMonth) {
+                    $q->whereBetween('start_date', [$startOfMonth, $endOfMonth])
+                      ->orWhereBetween('end_date', [$startOfMonth, $endOfMonth])
+                      ->orWhere(function ($q3) use ($startOfMonth, $endOfMonth) {
+                          $q3->where('start_date', '<=', $startOfMonth)
+                             ->where('end_date', '>=', $endOfMonth);
+                      });
+                });
+            } elseif ($request->filled('month')) {
+                // Solo mes (cualquier año)
+                $month = str_pad($request->month, 2, '0', STR_PAD_LEFT);
+                $query->where(function ($q) use ($month) {
+                    $q->whereRaw('MONTH(start_date) = ?', [$month])
+                      ->orWhereRaw('MONTH(end_date) = ?', [$month])
+                      ->orWhereRaw('(MONTH(start_date) < ? AND MONTH(end_date) > ?)', [$month, $month]);
+                });
+            } elseif ($request->filled('year')) {
+                // Solo año
+                $year = $request->year;
+                $startOfYear = "{$year}-01-01";
+                $endOfYear = "{$year}-12-31";
+                
+                $query->where(function ($q) use ($startOfYear, $endOfYear) {
+                    $q->whereBetween('start_date', [$startOfYear, $endOfYear])
+                      ->orWhereBetween('end_date', [$startOfYear, $endOfYear])
+                      ->orWhere(function ($q3) use ($startOfYear, $endOfYear) {
+                          $q3->where('start_date', '<=', $startOfYear)
+                             ->where('end_date', '>=', $endOfYear);
+                      });
+                });
             }
         }
 
