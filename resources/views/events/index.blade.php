@@ -31,123 +31,152 @@
             @endif
 
             <!-- Barra de Búsqueda y Filtros -->
-            <div class="mb-6 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
-                <form method="GET" action="{{ route('events.index') }}" class="flex flex-col gap-4">
-                    <!-- Primera fila: Búsqueda y Estado -->
-                    <div class="flex flex-col md:flex-row gap-4">
-                        <!-- Búsqueda por texto -->
-                        <div class="flex-1">
-                            <div class="relative">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                    </svg>
-                                </div>
-                                <input type="text" name="search" value="{{ request('search') }}" 
-                                    placeholder="Buscar por nombre o descripción..."
-                                    class="block w-full pl-10 pr-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-ito-orange focus:border-ito-orange transition">
+            <div class="mb-6 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
+                <form method="GET" action="{{ route('events.index') }}" class="space-y-4">
+                    <!-- Fila 1: Búsqueda -->
+                    <div class="w-full">
+                        <div class="relative group">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-all duration-300 group-focus-within:scale-110">
+                                <svg class="h-5 w-5 text-gray-400 group-focus-within:text-ito-orange transition-colors" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
                             </div>
-                        </div>
-
-                        <!-- Filtro por estado -->
-                        <div class="w-full md:w-48">
-                            <select name="status" 
-                                class="block w-full py-2.5 px-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-ito-orange focus:border-ito-orange transition">
-                                <option value="">📋 Todos los estados</option>
-                                <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>🟢 Activos</option>
-                                <option value="finished" {{ request('status') === 'finished' ? 'selected' : '' }}>🔴 Finalizados</option>
-                            </select>
+                            <input type="text" name="search" value="{{ request('search') }}" 
+                                placeholder="Buscar por nombre o descripción..."
+                                class="block w-full pl-10 pr-3 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-ito-orange focus:border-ito-orange focus:bg-white dark:focus:bg-gray-800 transition-all duration-300 hover:border-gray-400 dark:hover:border-gray-500">
                         </div>
                     </div>
 
-                    <!-- Segunda fila: Filtros de fecha -->
-                    <div class="flex flex-col md:flex-row gap-4 items-end">
-                        <div class="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <!-- Fecha específica -->
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">📅 Fecha específica</label>
-                                <input type="date" name="date" value="{{ request('date') }}" 
-                                    class="block w-full py-2.5 px-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-ito-orange focus:border-ito-orange transition">
-                            </div>
+                    <!-- Fila 2: Fecha específica, Mes, Año, Estado -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <!-- Fecha específica -->
+                        <div class="group">
+                            <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2 group-focus-within:text-ito-orange transition-colors">
+                                <span class="text-lg">📅</span>
+                                <span>Fecha específica</span>
+                            </label>
+                            <input type="date" name="date" value="{{ request('date') }}" 
+                                class="block w-full py-3 px-4 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-ito-orange focus:border-ito-orange focus:bg-white dark:focus:bg-gray-800 transition-all duration-300 hover:border-gray-400 dark:hover:border-gray-500 cursor-pointer font-medium">
+                        </div>
 
-                            <!-- Mes -->
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">📆 Mes</label>
+                        <!-- Mes -->
+                        <div class="group">
+                            <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2 group-focus-within:text-ito-orange transition-colors">
+                                <span class="text-lg">📆</span>
+                                <span>Mes</span>
+                            </label>
+                            <div class="relative">
                                 <select name="month" 
-                                    class="block w-full py-2.5 px-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-ito-orange focus:border-ito-orange transition">
+                                    class="block w-full py-3 pl-4 pr-10 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-ito-orange focus:border-ito-orange focus:bg-white dark:focus:bg-gray-800 transition-all duration-300 hover:border-gray-400 dark:hover:border-gray-500 cursor-pointer font-medium appearance-none">
                                     <option value="">Todos</option>
-                                    <option value="1" {{ request('month') == '1' ? 'selected' : '' }}>Enero</option>
-                                    <option value="2" {{ request('month') == '2' ? 'selected' : '' }}>Febrero</option>
-                                    <option value="3" {{ request('month') == '3' ? 'selected' : '' }}>Marzo</option>
-                                    <option value="4" {{ request('month') == '4' ? 'selected' : '' }}>Abril</option>
-                                    <option value="5" {{ request('month') == '5' ? 'selected' : '' }}>Mayo</option>
-                                    <option value="6" {{ request('month') == '6' ? 'selected' : '' }}>Junio</option>
-                                    <option value="7" {{ request('month') == '7' ? 'selected' : '' }}>Julio</option>
-                                    <option value="8" {{ request('month') == '8' ? 'selected' : '' }}>Agosto</option>
-                                    <option value="9" {{ request('month') == '9' ? 'selected' : '' }}>Septiembre</option>
-                                    <option value="10" {{ request('month') == '10' ? 'selected' : '' }}>Octubre</option>
-                                    <option value="11" {{ request('month') == '11' ? 'selected' : '' }}>Noviembre</option>
-                                    <option value="12" {{ request('month') == '12' ? 'selected' : '' }}>Diciembre</option>
+                                    <option value="1" {{ request('month') == '1' ? 'selected' : '' }}>🌟 Enero</option>
+                                    <option value="2" {{ request('month') == '2' ? 'selected' : '' }}>💝 Febrero</option>
+                                    <option value="3" {{ request('month') == '3' ? 'selected' : '' }}>🌸 Marzo</option>
+                                    <option value="4" {{ request('month') == '4' ? 'selected' : '' }}>🌷 Abril</option>
+                                    <option value="5" {{ request('month') == '5' ? 'selected' : '' }}>🌺 Mayo</option>
+                                    <option value="6" {{ request('month') == '6' ? 'selected' : '' }}>☀️ Junio</option>
+                                    <option value="7" {{ request('month') == '7' ? 'selected' : '' }}>🏖️ Julio</option>
+                                    <option value="8" {{ request('month') == '8' ? 'selected' : '' }}>🌊 Agosto</option>
+                                    <option value="9" {{ request('month') == '9' ? 'selected' : '' }}>🍂 Septiembre</option>
+                                    <option value="10" {{ request('month') == '10' ? 'selected' : '' }}>🎃 Octubre</option>
+                                    <option value="11" {{ request('month') == '11' ? 'selected' : '' }}>🦃 Noviembre</option>
+                                    <option value="12" {{ request('month') == '12' ? 'selected' : '' }}>🎄 Diciembre</option>
                                 </select>
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <svg class="h-5 w-5 text-gray-400 group-focus-within:text-ito-orange transition-colors" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
                             </div>
+                        </div>
 
-                            <!-- Año -->
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">📅 Año</label>
+                        <!-- Año -->
+                        <div class="group">
+                            <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2 group-focus-within:text-ito-orange transition-colors">
+                                <span class="text-lg">🗓️</span>
+                                <span>Año</span>
+                            </label>
+                            <div class="relative">
                                 <select name="year" 
-                                    class="block w-full py-2.5 px-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-ito-orange focus:border-ito-orange transition">
+                                    class="block w-full py-3 pl-4 pr-10 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-ito-orange focus:border-ito-orange focus:bg-white dark:focus:bg-gray-800 transition-all duration-300 hover:border-gray-400 dark:hover:border-gray-500 cursor-pointer font-medium appearance-none">
                                     <option value="">Todos</option>
                                     @for ($y = date('Y') + 1; $y >= 2020; $y--)
                                         <option value="{{ $y }}" {{ request('year') == $y ? 'selected' : '' }}>{{ $y }}</option>
                                     @endfor
                                 </select>
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <svg class="h-5 w-5 text-gray-400 group-focus-within:text-ito-orange transition-colors" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Botones -->
-                        <div class="flex gap-2">
-                            <button type="submit" 
-                                class="px-4 py-2.5 bg-tecnm-blue hover:bg-blue-700 text-white font-bold rounded-lg transition flex items-center gap-2">
-                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                                </svg>
-                                Filtrar
-                            </button>
-                            @if(request('search') || request('status') || request('date') || request('month') || request('year'))
-                                <a href="{{ route('events.index') }}" 
-                                    class="px-4 py-2.5 bg-gray-500 hover:bg-gray-600 text-white font-bold rounded-lg transition flex items-center gap-2">
-                                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        <!-- Estado -->
+                        <div class="group">
+                            <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2 group-focus-within:text-ito-orange transition-colors">
+                                <span class="text-lg">📋</span>
+                                <span>Estado</span>
+                            </label>
+                            <div class="relative">
+                                <select name="status" 
+                                    class="block w-full py-3 pl-4 pr-10 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-ito-orange focus:border-ito-orange focus:bg-white dark:focus:bg-gray-800 transition-all duration-300 hover:border-gray-400 dark:hover:border-gray-500 cursor-pointer font-medium appearance-none">
+                                    <option value="">Todos</option>
+                                    <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>🟢 Activos</option>
+                                    <option value="finished" {{ request('status') === 'finished' ? 'selected' : '' }}>🔴 Finalizados</option>
+                                </select>
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <svg class="h-5 w-5 text-gray-400 group-focus-within:text-ito-orange transition-colors" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
                                     </svg>
-                                    Limpiar
-                                </a>
-                            @endif
+                                </div>
+                            </div>
                         </div>
+                    </div>
+
+                    <!-- Fila 3: Botones -->
+                    <div class="flex gap-3 justify-end pt-2">
+                        <button type="submit" 
+                            class="px-6 py-3 bg-gradient-to-r from-tecnm-blue to-blue-600 hover:from-blue-600 hover:to-tecnm-blue text-white font-bold rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-xl flex items-center gap-2">
+                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                            </svg>
+                            Filtrar
+                        </button>
+                        @if(request('search') || request('status') || request('date') || request('month') || request('year'))
+                            <a href="{{ route('events.index') }}" 
+                                class="px-6 py-3 bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white font-bold rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-xl flex items-center gap-2">
+                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                                Limpiar
+                            </a>
+                        @endif
                     </div>
                 </form>
 
                 <!-- Indicador de filtros activos -->
                 @if(request('search') || request('status') || request('date') || request('month') || request('year'))
-                    <div class="mt-3 flex flex-wrap items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                        <span class="font-medium">Filtros activos:</span>
+                    <div class="mt-4 flex flex-wrap items-center gap-2 text-sm text-gray-600 dark:text-gray-400 animate-fade-in">
+                        <span class="font-bold text-gray-700 dark:text-gray-300">🎯 Filtros activos:</span>
                         @if(request('search'))
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                                Búsqueda: "{{ request('search') }}"
+                            <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 dark:from-blue-900 dark:to-blue-800 dark:text-blue-200 border border-blue-300 dark:border-blue-700 shadow-sm animate-slide-in">
+                                🔍 Búsqueda: "{{ request('search') }}"
                             </span>
                         @endif
                         @if(request('status'))
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
-                                Estado: {{ request('status') === 'active' ? 'Activos' : 'Finalizados' }}
+                            <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-purple-100 to-purple-200 text-purple-800 dark:from-purple-900 dark:to-purple-800 dark:text-purple-200 border border-purple-300 dark:border-purple-700 shadow-sm animate-slide-in">
+                                {{ request('status') === 'active' ? '🟢 Activos' : '🔴 Finalizados' }}
                             </span>
                         @endif
                         @if(request('date'))
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                                Fecha: {{ \Carbon\Carbon::parse(request('date'))->format('d/m/Y') }}
+                            <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-green-100 to-green-200 text-green-800 dark:from-green-900 dark:to-green-800 dark:text-green-200 border border-green-300 dark:border-green-700 shadow-sm animate-slide-in">
+                                📅 {{ \Carbon\Carbon::parse(request('date'))->format('d/m/Y') }}
                             </span>
                         @endif
                         @if(request('month') || request('year'))
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200">
-                                Período: 
+                            <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-orange-100 to-orange-200 text-orange-800 dark:from-orange-900 dark:to-orange-800 dark:text-orange-200 border border-orange-300 dark:border-orange-700 shadow-sm animate-slide-in">
+                                🗓️ Período: 
                                 @if(request('month'))
                                     {{ ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'][request('month') - 1] }}
                                 @endif
@@ -156,10 +185,50 @@
                                 @endif
                             </span>
                         @endif
-                        <span class="text-gray-500">— {{ $events->total() }} resultado(s)</span>
+                        <span class="inline-flex items-center text-gray-500 dark:text-gray-400 font-semibold">
+                            <svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                            </svg>
+                            {{ $events->total() }} resultado(s)
+                        </span>
                     </div>
                 @endif
             </div>
+
+            <style>
+                @keyframes fade-in {
+                    from {
+                        opacity: 0;
+                    }
+                    to {
+                        opacity: 1;
+                    }
+                }
+                
+                @keyframes slide-in {
+                    from {
+                        transform: translateY(-10px);
+                        opacity: 0;
+                    }
+                    to {
+                        transform: translateY(0);
+                        opacity: 1;
+                    }
+                }
+                
+                .animate-fade-in {
+                    animation: fade-in 0.3s ease-out;
+                }
+                
+                .animate-slide-in {
+                    animation: slide-in 0.4s ease-out;
+                }
+                
+                /* Eliminar flecha nativa de los selects */
+                select::-ms-expand {
+                    display: none;
+                }
+            </style>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 @forelse ($events as $event)
