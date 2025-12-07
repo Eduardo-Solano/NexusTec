@@ -548,9 +548,9 @@
                 new Chart(careersCtx, {
                     type: 'doughnut',
                     data: {
-                        labels: {!! json_encode($data['students_by_career']->pluck('name') ?? []) !!},
+                        labels: {!! json_encode(($data['students_by_career'] ?? collect())->pluck('name')) !!},
                         datasets: [{
-                            data: {!! json_encode($data['students_by_career']->pluck('count') ?? []) !!},
+                            data: {!! json_encode(($data['students_by_career'] ?? collect())->pluck('count')) !!},
                             backgroundColor: [
                                 '#8B5CF6', '#EC4899', '#3B82F6', '#10B981', '#F59E0B'
                             ],
@@ -593,10 +593,10 @@
                 new Chart(eventsCtx, {
                     type: 'bar',
                     data: {
-                        labels: {!! json_encode($data['projects_by_event']->pluck('name') ?? []) !!},
+                        labels: {!! json_encode(($data['projects_by_event'] ?? collect())->pluck('name')) !!},
                         datasets: [{
                             label: 'Equipos',
-                            data: {!! json_encode($data['projects_by_event']->pluck('teams_count') ?? []) !!},
+                            data: {!! json_encode(($data['projects_by_event'] ?? collect())->pluck('teams_count')) !!},
                             backgroundColor: gradientBar,
                             borderRadius: { topLeft: 20, topRight: 20 },
                             barThickness: 50,
