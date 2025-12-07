@@ -112,10 +112,13 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::middleware(['role:admin|staff'])->group(function () {
+        Route::delete('/teams/{team}', [TeamController::class, 'destroy'])->name('teams.destroy');
+    });
+
+    Route::middleware(['auth'])->group(function () {
         Route::get('/teams/{team}/edit', [TeamController::class, 'edit'])->name('teams.edit');
         Route::put('/teams/{team}', [TeamController::class, 'update'])->name('teams.update');
         Route::patch('/teams/{team}', [TeamController::class, 'update']);
-        Route::delete('/teams/{team}', [TeamController::class, 'destroy'])->name('teams.destroy');
     });
 
     Route::get('/teams', [TeamController::class, 'index'])->name('teams.index');

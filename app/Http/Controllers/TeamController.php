@@ -163,7 +163,7 @@ class TeamController extends Controller
         $event = Event::find($request->event_id);
         abort_unless($event, 404);
 
-        // ⛔ Validar que el evento esté abierto
+        // Validar que el evento esté abierto
         if ($event->isClosed()) {
             return redirect()->route('events.show', $event)
                 ->with('error', 'No se pueden crear equipos porque el evento está cerrado o ha finalizado.');
@@ -177,6 +177,11 @@ class TeamController extends Controller
      */
     public function edit(Team $team)
     {
+        // ⛔ SEGURIDAD: Solo el líder del equipo o admin/staff pueden editar
+        if (Auth::id() !== $team->leader_id && !Auth::user()->hasRole(['admin', 'staff'])) {
+            abort(403, 'No tienes permiso para editar este equipo. Solo el líder puede hacerlo.');
+        }
+
         $team->load(['event', 'members', 'leader', 'advisor', 'project']);
         
         // Obtener asesores disponibles (docentes)
@@ -196,6 +201,11 @@ class TeamController extends Controller
         $request->validate([
             'name' => 'required|string|max:50',
         ]);
+
+        // ⛔ SEGURIDAD: Solo el líder del equipo o admin/staff pueden editar
+        if (Auth::id() !== $team->leader_id && !Auth::user()->hasRole(['admin', 'staff'])) {
+            abort(403, 'No tienes permiso para actualizar este equipo.');
+        }
 
         $team->update([
             'name' => $request->name,
