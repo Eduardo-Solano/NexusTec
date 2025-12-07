@@ -1,5 +1,88 @@
 <x-app-layout>
-    <div class="py-12 bg-[#0B1120] min-h-screen">
+    <!-- Fondo animado -->
+    <div class="fixed inset-0 bg-gradient-to-br from-[#0a1128] via-[#0d1b2a] to-[#1b263b] -z-10">
+        <!-- Grid de circuitos -->
+        <div class="absolute inset-0 opacity-40">
+            <div class="absolute inset-0" style="
+                background-image: 
+                    linear-gradient(rgba(6, 182, 212, 0.1) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(6, 182, 212, 0.1) 1px, transparent 1px);
+                background-size: 80px 80px;
+                animation: circuit-flow-app 8s linear infinite;
+            "></div>
+        </div>
+
+        <!-- Partículas de luz -->
+        <div class="absolute inset-0 overflow-hidden">
+            <div class="absolute inset-0">
+                <svg class="absolute w-full h-full" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <filter id="glow-app">
+                            <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                            <feMerge>
+                                <feMergeNode in="coloredBlur"/>
+                                <feMergeNode in="SourceGraphic"/>
+                            </feMerge>
+                        </filter>
+                    </defs>
+                    @for ($i = 0; $i < 7; $i++)
+                        <circle 
+                            cx="{{ rand(0, 100) }}%" 
+                            cy="{{ rand(0, 100) }}%" 
+                            r="{{ rand(2, 4) }}" 
+                            fill="#06B6D4" 
+                            opacity="0.6"
+                            filter="url(#glow-app)"
+                            style="animation: particles-pulse-app 2s ease-in-out infinite {{ $i * 0.3 }}s, particles-move-app 12s ease-in-out infinite {{ $i * 1.5 }}s;"
+                        />
+                    @endfor
+                </svg>
+            </div>
+        </div>
+
+        <!-- Líneas de circuito flotantes horizontales -->
+        <div class="absolute inset-0 overflow-hidden opacity-30">
+            <div class="absolute h-px bg-gradient-to-r from-transparent via-cyan-400 to-transparent w-full top-1/4" 
+                 style="animation: line-flow-1-app 3s ease-in-out infinite;"></div>
+            <div class="absolute h-px bg-gradient-to-r from-transparent via-blue-400 to-transparent w-full top-2/4" 
+                 style="animation: line-flow-2-app 3.5s ease-in-out infinite 0.5s;"></div>
+            <div class="absolute h-px bg-gradient-to-r from-transparent via-cyan-400 to-transparent w-full top-3/4" 
+                 style="animation: line-flow-1-app 4s ease-in-out infinite 1s;"></div>
+        </div>
+    </div>
+
+    <style>
+        @keyframes circuit-flow-app {
+            0% { transform: translateX(0) translateY(0); }
+            100% { transform: translateX(80px) translateY(80px); }
+        }
+        
+        @keyframes particles-pulse-app {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.5); }
+        }
+        
+        @keyframes particles-move-app {
+            0%, 100% { transform: translate(0, 0); }
+            25% { transform: translate(100px, -100px); }
+            50% { transform: translate(-50px, -150px); }
+            75% { transform: translate(-100px, 50px); }
+        }
+        
+        @keyframes line-flow-1-app {
+            0%, 100% { transform: translateX(-100%); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateX(100%); }
+        }
+        
+        @keyframes line-flow-2-app {
+            0%, 100% { transform: translateX(100%); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateX(-100%); }
+        }
+    </style>
+
+    <div class="relative z-10 py-12 min-h-screen">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
 
             {{-- Header --}}
@@ -43,7 +126,7 @@
 
             {{-- Estadísticas rápidas --}}
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                <div class="bg-gray-800 border border-gray-700 rounded-xl p-5">
+                <div class="bg-white/[0.02] backdrop-blur-xl border border-white/20 rounded-xl p-5 hover:border-white/30 transition-colors">
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-xs text-gray-400 uppercase font-bold tracking-wider">Total Criterios</p>
@@ -57,7 +140,7 @@
                     </div>
                 </div>
 
-                <div class="bg-gray-800 border border-gray-700 rounded-xl p-5">
+                <div class="bg-white/[0.02] backdrop-blur-xl border border-white/20 rounded-xl p-5 hover:border-white/30 transition-colors">
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-xs text-gray-400 uppercase font-bold tracking-wider">Puntos Totales</p>
@@ -71,7 +154,7 @@
                     </div>
                 </div>
 
-                <div class="bg-gray-800 border border-gray-700 rounded-xl p-5">
+                <div class="bg-white/[0.02] backdrop-blur-xl border border-white/20 rounded-xl p-5 hover:border-white/30 transition-colors">
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-xs text-gray-400 uppercase font-bold tracking-wider">Promedio por Criterio</p>
@@ -87,7 +170,7 @@
             </div>
 
             {{-- Tabla de criterios --}}
-            <div class="bg-gray-800 border border-gray-700 rounded-2xl overflow-hidden shadow-xl">
+            <div class="bg-white/[0.02] backdrop-blur-xl border border-white/20 rounded-2xl overflow-hidden shadow-xl hover:border-white/30 transition-colors">
                 <div class="px-6 py-5 border-b border-gray-700 flex items-center justify-between">
                     <div class="flex items-center gap-3">
                         <div class="p-2 bg-ito-orange/10 rounded-lg">

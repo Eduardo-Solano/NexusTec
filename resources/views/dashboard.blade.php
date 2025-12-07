@@ -1,4 +1,87 @@
 <x-app-layout>
+    <!-- Fondo animado -->
+    <div class="fixed inset-0 bg-gradient-to-br from-[#0a1128] via-[#0d1b2a] to-[#1b263b] -z-10">
+        <!-- Grid de circuitos -->
+        <div class="absolute inset-0 opacity-40">
+            <div class="absolute inset-0" style="
+                background-image: 
+                    linear-gradient(rgba(6, 182, 212, 0.1) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(6, 182, 212, 0.1) 1px, transparent 1px);
+                background-size: 80px 80px;
+                animation: circuit-flow-app 8s linear infinite;
+            "></div>
+        </div>
+
+        <!-- Partículas de luz -->
+        <div class="absolute inset-0 overflow-hidden">
+            <div class="absolute inset-0">
+                <svg class="absolute w-full h-full" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <filter id="glow-app">
+                            <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                            <feMerge>
+                                <feMergeNode in="coloredBlur"/>
+                                <feMergeNode in="SourceGraphic"/>
+                            </feMerge>
+                        </filter>
+                    </defs>
+                    @for ($i = 0; $i < 7; $i++)
+                        <circle 
+                            cx="{{ rand(0, 100) }}%" 
+                            cy="{{ rand(0, 100) }}%" 
+                            r="{{ rand(2, 4) }}" 
+                            fill="#06B6D4" 
+                            opacity="0.6"
+                            filter="url(#glow-app)"
+                            style="animation: particles-pulse-app 2s ease-in-out infinite {{ $i * 0.3 }}s, particles-move-app 12s ease-in-out infinite {{ $i * 1.5 }}s;"
+                        />
+                    @endfor
+                </svg>
+            </div>
+        </div>
+
+        <!-- Líneas de circuito flotantes horizontales -->
+        <div class="absolute inset-0 overflow-hidden opacity-30">
+            <div class="absolute h-px bg-gradient-to-r from-transparent via-cyan-400 to-transparent w-full top-1/4" 
+                 style="animation: line-flow-1-app 3s ease-in-out infinite;"></div>
+            <div class="absolute h-px bg-gradient-to-r from-transparent via-blue-400 to-transparent w-full top-2/4" 
+                 style="animation: line-flow-2-app 3.5s ease-in-out infinite 0.5s;"></div>
+            <div class="absolute h-px bg-gradient-to-r from-transparent via-cyan-400 to-transparent w-full top-3/4" 
+                 style="animation: line-flow-1-app 4s ease-in-out infinite 1s;"></div>
+        </div>
+    </div>
+
+    <style>
+        @keyframes circuit-flow-app {
+            0% { transform: translateX(0) translateY(0); }
+            100% { transform: translateX(80px) translateY(80px); }
+        }
+        
+        @keyframes particles-pulse-app {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.5); }
+        }
+        
+        @keyframes particles-move-app {
+            0%, 100% { transform: translate(0, 0); }
+            25% { transform: translate(100px, -100px); }
+            50% { transform: translate(-50px, -150px); }
+            75% { transform: translate(-100px, 50px); }
+        }
+        
+        @keyframes line-flow-1-app {
+            0%, 100% { transform: translateX(-100%); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateX(100%); }
+        }
+        
+        @keyframes line-flow-2-app {
+            0%, 100% { transform: translateX(100%); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateX(-100%); }
+        }
+    </style>
+
     <x-slot name="header">
         <style>
              @keyframes blob {
@@ -17,20 +100,26 @@
                 animation-delay: 4s;
             }
             .glass-card {
-                background: rgba(255, 255, 255, 0.05); /* Muy sutil en dark */
-                backdrop-filter: blur(16px);
-                -webkit-backdrop-filter: blur(16px);
-                border: 1px solid rgba(255, 255, 255, 0.1);
+                background: rgba(255, 255, 255, 0.02);
+                backdrop-filter: blur(24px);
+                -webkit-backdrop-filter: blur(24px);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+            }
+            .glass-card:hover {
+                border: 1px solid rgba(255, 255, 255, 0.3);
             }
             /* Dark mode specific override */
             .dark .glass-card {
-                background: rgba(17, 24, 39, 0.7); /* Gray-900 con opacidad */
-                border: 1px solid rgba(255, 255, 255, 0.05);
+                background: rgba(255, 255, 255, 0.02);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+            }
+            .dark .glass-card:hover {
+                border: 1px solid rgba(255, 255, 255, 0.3);
             }
         </style>
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
              <div class="flex items-center gap-2 group">
-                <div class="p-2 bg-white dark:bg-gray-800 rounded-xl shadow-sm ring-1 ring-gray-900/5 dark:ring-gray-100/10 group-hover:scale-110 transition-transform duration-300">
+                <div class="p-2 bg-white/[0.02] backdrop-blur-xl rounded-xl shadow-sm ring-1 border border-white/20 group-hover:scale-110 group-hover:border-white/30 transition-all duration-300">
                      <svg class="w-6 h-6 text-purple-600 animate-float" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
                     </svg>
@@ -43,7 +132,7 @@
                     </span>
                 </h2>
             </div>
-             <nav class="flex px-5 py-3 text-gray-700 border border-gray-200 rounded-lg bg-gray-50 dark:bg-gray-800 dark:border-gray-700" aria-label="Breadcrumb">
+             <nav class="flex px-5 py-3 text-gray-300 border border-white/20 rounded-lg bg-white/[0.02] backdrop-blur-xl hover:border-white/30 transition-colors" aria-label="Breadcrumb">
                 <ol class="inline-flex items-center space-x-1 md:space-x-3">
                     <li class="inline-flex items-center">
                         <span class="inline-flex items-center text-sm font-medium text-gray-500 dark:text-gray-400">
@@ -57,7 +146,7 @@
     </x-slot>
 
     <!-- Main Container -->
-    <div class="relative min-h-screen bg-gray-50 dark:bg-gray-900 selection:bg-purple-500 selection:text-white pb-20 overflow-hidden">
+    <div class="relative z-10 min-h-screen selection:bg-purple-500 selection:text-white pb-20 overflow-hidden">
         
         <!-- Animated Background Blobs -->
         <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none -z-0">
@@ -70,7 +159,7 @@
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-12">
                 
                 <!-- Hero Section: Welcome & Status -->
-                <div class="relative overflow-hidden group rounded-[2.5rem] bg-white/70 dark:bg-gray-800/60 backdrop-blur-2xl border border-white/50 dark:border-gray-700/50 shadow-2xl p-8 sm:p-12 transition-all hover:shadow-purple-500/20">
+                <div class="relative overflow-hidden group rounded-[2.5rem] bg-white/[0.02] backdrop-blur-3xl border border-white/20 hover:border-white/30 shadow-2xl p-8 sm:p-12 transition-all">
                     <div class="absolute right-0 top-0 h-full w-1/2 bg-gradient-to-l from-purple-100/50 dark:from-purple-900/20 to-transparent"></div>
                     <div class="relative z-10 flex flex-col md:flex-row justify-between items-center gap-8">
                         <div>
@@ -91,12 +180,12 @@
                             </p>
                             <!-- Action Buttons -->
                              <div class="flex flex-wrap gap-4 mt-8">
-                                <a href="{{ route('profile.edit') }}" class="px-6 py-3 rounded-xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-bold hover:scale-105 transition-transform shadow-lg flex items-center gap-2">
+                                <a href="{{ route('profile.edit') }}" class="px-6 py-3 rounded-xl bg-white/[0.05] backdrop-blur-xl border border-white/30 text-white font-bold hover:scale-105 hover:border-white/40 transition-all shadow-lg flex items-center gap-2">
                                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
                                     Mi Perfil
                                 </a>
                                 @role('student')
-                                    <a href="{{ route('events.index') }}" class="px-6 py-3 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 font-bold hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center gap-2 shadow-sm">
+                                    <a href="{{ route('events.index') }}" class="px-6 py-3 rounded-xl bg-white/[0.02] backdrop-blur-xl text-white border border-white/20 font-bold hover:border-white/30 transition-all flex items-center gap-2 shadow-sm">
                                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                                         Explorar Eventos
                                     </a>
@@ -106,7 +195,7 @@
                         <!-- Hero Illustration / Icon -->
                         <div class="relative hidden md:block group-hover:scale-110 transition-transform duration-700 ease-in-out">
                             <div class="w-48 h-48 bg-gradient-to-tr from-purple-500 to-pink-500 rounded-[2rem] rotate-6 shadow-2xl opacity-80 blur-sm absolute top-4 left-4"></div>
-                            <div class="w-48 h-48 bg-gray-900 dark:bg-gray-800 rounded-[2rem] relative z-10 flex items-center justify-center border border-gray-100/10 shadow-2xl">
+                            <div class="w-48 h-48 bg-white/[0.02] backdrop-blur-xl rounded-[2rem] relative z-10 flex items-center justify-center border border-white/20 shadow-2xl">
                                 <span class="text-7xl">🚀</span>
                             </div>
                         </div>
@@ -320,7 +409,7 @@
                                             <!-- Steps -->
                                             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                                                  @foreach($data['team_progress']['steps'] as $key => $step)
-                                                    <div class="flex flex-col items-center text-center p-4 rounded-2xl border {{ $step['completed'] ? 'bg-green-50 dark:bg-green-900/10 border-green-200 dark:border-green-800' : 'bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700' }} transition-all">
+                                                    <div class="flex flex-col items-center text-center p-4 rounded-2xl border {{ $step['completed'] ? 'bg-green-500/10 backdrop-blur-xl border-green-500/30' : 'bg-white/[0.02] backdrop-blur-xl border-white/20' }} transition-all">
                                                         <div class="w-10 h-10 rounded-full flex items-center justify-center text-lg mb-2 {{ $step['completed'] ? 'bg-green-100 text-green-600' : 'bg-gray-200 text-gray-400' }}">
                                                             {{ $step['icon'] }}
                                                         </div>
@@ -331,7 +420,7 @@
                                                  @endforeach
                                             </div>
 
-                                            <div class="bg-gray-50 dark:bg-gray-800/50 rounded-2xl p-6 border border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                                            <div class="bg-white/[0.02] backdrop-blur-xl rounded-2xl p-6 border border-white/20 hover:border-white/30 transition-colors flex items-center justify-between">
                                                 <div>
                                                     <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Progreso General</p>
                                                     <p class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">{{ $data['team_progress']['percent'] }}%</p>
@@ -373,7 +462,7 @@
                                      </div>
                                 </div>
                             @elseif(empty($data['my_team']))
-                                <div class="col-span-3 bg-white dark:bg-gray-800 rounded-[2rem] p-12 text-center border-2 border-dashed border-gray-300 dark:border-gray-700">
+                                <div class="col-span-3 bg-white/[0.02] backdrop-blur-xl rounded-[2rem] p-12 text-center border-2 border-dashed border-white/20 hover:border-white/30 transition-colors">
                                     <div class="inline-flex p-4 bg-gray-100 dark:bg-gray-700 rounded-full mb-6">
                                         <svg class="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
                                     </div>

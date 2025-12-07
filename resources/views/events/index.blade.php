@@ -31,7 +31,7 @@
             @endif
 
             <!-- Barra de Búsqueda y Filtros -->
-            <div class="mb-6 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
+            <div class="mb-6 bg-white/[0.02] backdrop-blur-xl p-6 rounded-xl shadow-lg border border-white/20">
                 <form method="GET" action="{{ route('events.index') }}" class="space-y-4">
                     <!-- Fila 1: Búsqueda -->
                     <div class="w-full">
@@ -233,7 +233,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 @forelse ($events as $event)
                     <div
-                        class="bg-white dark:bg-gray-800 overflow-hidden shadow-lg rounded-xl border border-gray-100 dark:border-gray-700 hover:shadow-2xl transition duration-300 group">
+                        class="bg-white/[0.02] backdrop-blur-xl overflow-hidden shadow-lg rounded-xl border border-white/20 hover:shadow-2xl hover:border-white/30 transition duration-300 group">
 
                         <div class="h-2 bg-gradient-to-r from-tecnm-blue to-ito-orange"></div>
 

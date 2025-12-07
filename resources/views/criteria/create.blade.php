@@ -15,7 +15,7 @@
             </div>
 
             {{-- Formulario --}}
-            <div class="bg-gray-800 border border-gray-700 rounded-2xl overflow-hidden shadow-xl">
+            <div class="bg-white/[0.02] backdrop-blur-xl border border-white/20 rounded-2xl overflow-hidden shadow-xl hover:border-white/30 transition-colors">
                 <div class="px-6 py-5 border-b border-gray-700 flex items-center gap-3">
                     <div class="p-2 bg-ito-orange/10 rounded-lg">
                         <svg class="w-5 h-5 text-ito-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor">

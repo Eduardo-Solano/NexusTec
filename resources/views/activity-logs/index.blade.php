@@ -1,5 +1,88 @@
 <x-app-layout>
-    <div class="min-h-screen bg-gray-900 py-12">
+    <!-- Fondo animado -->
+    <div class="fixed inset-0 bg-gradient-to-br from-[#0a1128] via-[#0d1b2a] to-[#1b263b] -z-10">
+        <!-- Grid de circuitos -->
+        <div class="absolute inset-0 opacity-40">
+            <div class="absolute inset-0" style="
+                background-image: 
+                    linear-gradient(rgba(6, 182, 212, 0.1) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(6, 182, 212, 0.1) 1px, transparent 1px);
+                background-size: 80px 80px;
+                animation: circuit-flow-app 8s linear infinite;
+            "></div>
+        </div>
+
+        <!-- Partículas de luz -->
+        <div class="absolute inset-0 overflow-hidden">
+            <div class="absolute inset-0">
+                <svg class="absolute w-full h-full" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <filter id="glow-app">
+                            <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                            <feMerge>
+                                <feMergeNode in="coloredBlur"/>
+                                <feMergeNode in="SourceGraphic"/>
+                            </feMerge>
+                        </filter>
+                    </defs>
+                    @for ($i = 0; $i < 7; $i++)
+                        <circle 
+                            cx="{{ rand(0, 100) }}%" 
+                            cy="{{ rand(0, 100) }}%" 
+                            r="{{ rand(2, 4) }}" 
+                            fill="#06B6D4" 
+                            opacity="0.6"
+                            filter="url(#glow-app)"
+                            style="animation: particles-pulse-app 2s ease-in-out infinite {{ $i * 0.3 }}s, particles-move-app 12s ease-in-out infinite {{ $i * 1.5 }}s;"
+                        />
+                    @endfor
+                </svg>
+            </div>
+        </div>
+
+        <!-- Líneas de circuito flotantes horizontales -->
+        <div class="absolute inset-0 overflow-hidden opacity-30">
+            <div class="absolute h-px bg-gradient-to-r from-transparent via-cyan-400 to-transparent w-full top-1/4" 
+                 style="animation: line-flow-1-app 3s ease-in-out infinite;"></div>
+            <div class="absolute h-px bg-gradient-to-r from-transparent via-blue-400 to-transparent w-full top-2/4" 
+                 style="animation: line-flow-2-app 3.5s ease-in-out infinite 0.5s;"></div>
+            <div class="absolute h-px bg-gradient-to-r from-transparent via-cyan-400 to-transparent w-full top-3/4" 
+                 style="animation: line-flow-1-app 4s ease-in-out infinite 1s;"></div>
+        </div>
+    </div>
+
+    <style>
+        @keyframes circuit-flow-app {
+            0% { transform: translateX(0) translateY(0); }
+            100% { transform: translateX(80px) translateY(80px); }
+        }
+        
+        @keyframes particles-pulse-app {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.5); }
+        }
+        
+        @keyframes particles-move-app {
+            0%, 100% { transform: translate(0, 0); }
+            25% { transform: translate(100px, -100px); }
+            50% { transform: translate(-50px, -150px); }
+            75% { transform: translate(-100px, 50px); }
+        }
+        
+        @keyframes line-flow-1-app {
+            0%, 100% { transform: translateX(-100%); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateX(100%); }
+        }
+        
+        @keyframes line-flow-2-app {
+            0%, 100% { transform: translateX(100%); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateX(-100%); }
+        }
+    </style>
+
+    <div class="relative z-10 min-h-screen py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-8">
 
             {{-- Header --}}
@@ -26,7 +109,7 @@
             </div>
 
             {{-- Filtros --}}
-            <div class="bg-gray-800 border border-gray-700 rounded-2xl p-6 shadow-lg">
+            <div class="bg-white/[0.02] backdrop-blur-xl border border-white/20 rounded-2xl p-6 shadow-lg hover:border-white/30 transition-colors">
                 <form method="GET" action="{{ route('activity-logs.index') }}" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
                     
                     {{-- Búsqueda --}}
@@ -95,7 +178,7 @@
             </div>
 
             {{-- Lista de Actividades --}}
-            <div class="bg-gray-800 border border-gray-700 rounded-2xl shadow-lg overflow-hidden">
+            <div class="bg-white/[0.02] backdrop-blur-xl border border-white/20 rounded-2xl shadow-lg overflow-hidden hover:border-white/30 transition-colors">
                 @forelse($activities as $activity)
                     <div class="p-4 border-b border-gray-700 hover:bg-gray-700/30 transition group {{ $loop->last ? 'border-b-0' : '' }}">
                         <div class="flex items-start gap-4">
@@ -161,7 +244,7 @@
                                     <div class="mt-3 p-3 bg-gray-900/50 rounded-lg border border-gray-700">
                                         <div class="flex flex-wrap gap-2">
                                             @foreach($activity->properties as $key => $value)
-                                                <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs bg-gray-800 border border-gray-600">
+                                                <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs bg-white/[0.02] backdrop-blur-xl border border-white/20">
                                                     <span class="text-gray-500 mr-1.5">{{ str_replace('_', ' ', ucfirst($key)) }}:</span>
                                                     <span class="text-gray-300 font-medium">
                                                         @if(is_array($value))

@@ -36,7 +36,7 @@
             <div class="expanding-waves"></div>
             
             <!-- Logo NexusTec con efectos - Fuera del cuadro de login -->
-            <div class="flex justify-center -mb-32 -mt-16 relative z-20">
+            <div class="flex justify-center -mb-40 -mt-24 relative z-20">
                 <div class="logo-container-main relative">
                     <!-- Logo NexusTec SVG -->
                     <div class="logo-nexustec-main relative z-10" style="width: 800px; max-width: 90vw; height: auto;">
@@ -372,7 +372,7 @@
                 }
             </style>
             
-            <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-gray-900/95 backdrop-blur-md shadow-2xl overflow-hidden sm:rounded-lg relative z-10">
+            <div class="w-full sm:max-w-md mt-6 px-6 py-8 bg-white/[0.02] backdrop-blur-3xl border border-white/40 shadow-[0_8px_32px_0_rgba(31,38,135,0.37)] overflow-hidden sm:rounded-2xl relative z-10" style="box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37), 0 0 0 1.5px rgba(255, 255, 255, 0.25) inset, 0 4px 16px 0 rgba(255, 255, 255, 0.1) inset;">
                 {{ $slot }}
             </div>
         </div>

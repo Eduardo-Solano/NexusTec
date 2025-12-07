@@ -15,7 +15,7 @@
             </div>
 
             {{-- Formulario --}}
-            <div class="bg-gray-800 border border-gray-700 rounded-2xl overflow-hidden shadow-xl">
+            <div class="bg-white/[0.02] backdrop-blur-xl border border-white/20 rounded-2xl overflow-hidden shadow-xl hover:border-white/30 transition-colors">
                 <div class="px-6 py-5 border-b border-gray-700 flex items-center justify-between">
                     <div class="flex items-center gap-3">
                         <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-ito-orange to-orange-600 flex items-center justify-center text-white font-bold text-lg shadow-lg">
@@ -107,11 +107,11 @@
                             Estadísticas de uso
                         </h4>
                         <div class="grid grid-cols-2 gap-4">
-                            <div class="bg-gray-800 rounded-lg p-3">
+                            <div class="bg-white/[0.02] backdrop-blur-xl border border-white/10 rounded-lg p-3">
                                 <p class="text-xs text-gray-500">Eventos que lo usan</p>
                                 <p class="text-xl font-bold text-white">{{ $criterion->events->count() }}</p>
                             </div>
-                            <div class="bg-gray-800 rounded-lg p-3">
+                            <div class="bg-white/[0.02] backdrop-blur-xl border border-white/10 rounded-lg p-3">
                                 <p class="text-xs text-gray-500">Evaluaciones realizadas</p>
                                 <p class="text-xl font-bold text-white">{{ $criterion->evaluations->count() }}</p>
                             </div>
