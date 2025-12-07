@@ -17,7 +17,8 @@
 
                 <div class="flex items-center gap-3">
                     <button @click="showDevelopers = true" class="focus:outline-none cursor-pointer group">
-                        <x-application-logo class="h-10 w-auto transition-transform duration-500 group-hover:rotate-180" />
+                        <img src="{{ asset('img/logo-ito.png') }}" alt="Logo ITO" 
+                             class="h-10 w-auto transition-all duration-500 group-hover:scale-110 group-hover:rotate-6 group-hover:drop-shadow-[0_0_15px_rgba(255,255,255,0.8)] animate-pulse-slow" />
                     </button>
                     <span class="font-bold text-xl text-white tracking-tight">NexusTec</span>
                 </div>

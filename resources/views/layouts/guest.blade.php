@@ -36,34 +36,99 @@
             <div class="expanding-waves"></div>
             
             <!-- Logo NexusTec con efectos - Fuera del cuadro de login -->
-            <div class="flex justify-center -mb-40 -mt-24 relative z-20">
+            @if(!$hideLogo)
+            <div class="flex justify-center -mb-16 -mt-4 relative z-20">
                 <div class="logo-container-main relative">
-                    <!-- Logo NexusTec SVG -->
-                    <div class="logo-nexustec-main relative z-10" style="width: 800px; max-width: 90vw; height: auto;">
-                        <svg viewBox="0 0 7875 5560" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 0 30px rgba(59, 130, 246, 0.6));">
-                            <path d="M2470.75,3152.2l-106.709,-282.465l-24.062,-0l0,-88.924l34.524,-0l106.709,282.465l13.077,-0l-0,88.924l-23.539,-0Zm-166.341,-0l0,-371.389l54.401,-0l0,371.389l-54.401,-0Zm182.033,-0l0,-371.389l54.401,-0l0,371.389l-54.401,-0Z" style="fill:#cfe64d;fill-rule:nonzero;"/>
-                            <path d="M2760.53,3157.43c-47.252,-0 -83.737,-12.424 -109.455,-37.27c-25.718,-24.847 -38.577,-60.547 -38.577,-107.101c-0,-45.334 10.897,-80.555 32.692,-105.663c21.795,-25.108 52.57,-37.662 92.324,-37.662c37.488,-0 66.476,11.333 86.963,34c20.487,22.667 30.731,55.621 30.731,98.863c0,12.728 -0.523,24.585 -1.569,35.57l-194.587,-0l-0,-42.37l145.94,-0c0,-24.934 -5.928,-44.07 -17.785,-57.409c-11.856,-13.338 -28.246,-20.007 -49.169,-20.007c-23.539,-0 -41.804,8.02 -54.793,24.061c-12.99,16.042 -19.485,38.709 -19.485,68.001c-0,32.083 8.936,56.493 26.808,73.232c17.872,16.739 43.285,25.108 76.239,25.108c11.508,-0 22.841,-0.654 34.001,-1.962c11.159,-1.307 22.492,-3.095 34,-5.361l6.8,48.646c-16.39,3.139 -31.385,5.144 -44.985,6.016c-13.6,0.872 -25.631,1.308 -36.093,1.308Z" style="fill:#cfe64d;fill-rule:nonzero;"/>
-                            <path d="M2921.12,3152.2l110.37,-152.741l85.263,-124.493l62.77,-0l-114.555,157.448l-81.078,119.786l-62.77,-0Zm195.633,-0l-84.217,-119.786l-111.416,-157.448l62.77,-0l85.262,124.493l110.371,152.741l-62.77,-0Z" style="fill:#cfe64d;fill-rule:nonzero;"/>
-                            <path d="M3336.97,3157.43c-29.118,-0 -51.655,-8.675 -67.609,-26.024c-15.954,-17.349 -23.931,-41.803 -23.931,-73.362l0,-183.079l55.447,-0l0,183.079c0,15.867 4.534,28.115 13.6,36.746c9.067,8.631 21.795,12.947 38.185,12.947c20.226,-0 35.483,-6.408 45.77,-19.224c10.288,-12.815 15.431,-34.305 15.431,-64.47l14.123,74.801l-18.307,0c-4.36,18.831 -12.903,33.303 -25.632,43.416c-12.728,10.113 -28.42,15.17 -47.077,15.17Zm81.601,-2.616l-4.708,-66.431l0,-48.647l55.447,-0l0,62.247l38.185,5.754l0,44.462l-88.924,2.615Zm-4.708,-81.078l0,-198.771l55.447,-0l0,183.079l-55.447,15.692Z" style="fill:#cfe64d;fill-rule:nonzero;"/>
-                            <path d="M3656.58,3157.43c-20.924,-0 -38.839,-0.611 -53.747,-1.831c-14.908,-1.221 -28.552,-3.226 -40.931,-6.016l6.277,-50.216c18.308,2.79 34.48,4.882 48.516,6.277c14.036,1.395 27.331,2.093 39.885,2.093c28.072,-0 48.429,-2.747 61.07,-8.239c12.641,-5.492 18.962,-14.254 18.962,-26.285c-0,-8.369 -2.224,-14.603 -6.67,-18.7c-4.446,-4.098 -11.29,-7.28 -20.531,-9.546l-63.816,-16.216c-27.375,-6.974 -47.47,-15.605 -60.285,-25.893c-12.816,-10.287 -19.224,-25.892 -19.224,-46.815c0,-30.339 11.639,-52.309 34.916,-65.909c23.277,-13.6 60.809,-20.4 112.594,-20.4c13.426,-0 25.936,0.392 37.531,1.177c11.595,0.784 23.495,2.136 35.701,4.054l-5.754,48.123c-14.124,-1.395 -26.59,-2.354 -37.401,-2.877c-10.81,-0.523 -21.359,-0.784 -31.646,-0.784c-31.037,-0 -53.529,2.659 -67.478,7.977c-13.949,5.318 -20.923,13.992 -20.923,26.023c-0,8.021 2.877,13.818 8.63,17.393c5.754,3.574 14.56,6.843 26.416,9.807l51.262,12.554c29.119,6.975 50.434,16.303 63.947,27.985c13.513,11.683 20.27,28.683 20.27,51.001c-0,29.816 -10.898,51.48 -32.693,64.993c-21.795,13.513 -56.755,20.27 -104.878,20.27Z" style="fill:#cfe64d;fill-rule:nonzero;"/>
-                            <path d="M3964.67,3152.2l-0,-371.389l54.401,-0l-0,371.389l-54.401,-0Zm-108.801,-321.696l-0,-49.693l272.003,-0l-0,49.693l-272.003,-0Z" style="fill:#cfe64d;fill-rule:nonzero;"/>
-                            <path d="M4329.78,3157.43c-47.252,-0 -83.737,-12.424 -109.455,-37.27c-25.718,-24.847 -38.578,-60.547 -38.578,-107.101c0,-45.334 10.898,-80.555 32.693,-105.663c21.795,-25.108 52.57,-37.662 92.324,-37.662c37.488,-0 66.476,11.333 86.963,34c20.487,22.667 30.731,55.621 30.731,98.863c0,12.728 -0.523,24.585 -1.569,35.57l-194.587,-0l-0,-42.37l145.94,-0c0,-24.934 -5.928,-44.07 -17.785,-57.409c-11.856,-13.338 -28.246,-20.007 -49.17,-20.007c-23.538,-0 -41.803,8.02 -54.793,24.061c-12.989,16.042 -19.484,38.709 -19.484,68.001c-0,32.083 8.936,56.493 26.808,73.232c17.872,16.739 43.285,25.108 76.239,25.108c11.508,-0 22.841,-0.654 34,-1.962c11.16,-1.307 22.493,-3.095 34.001,-5.361l6.8,48.646c-16.39,3.139 -31.385,5.144 -44.985,6.016c-13.6,0.872 -25.631,1.308 -36.093,1.308Z" style="fill:#cfe64d;fill-rule:nonzero;"/>
-                            <path d="M4646.25,3157.43c-47.251,-0 -83.736,-12.424 -109.455,-37.27c-25.718,-24.847 -38.577,-60.547 -38.577,-107.101c-0,-45.334 12.162,-80.555 36.485,-105.663c24.323,-25.108 59.065,-37.662 104.224,-37.662c27.026,-0 50.173,5.013 69.44,15.038c19.266,10.026 32.997,24.193 41.192,42.501l-42.631,32.17c-7.846,-12.729 -17.872,-22.58 -30.077,-29.555c-12.205,-6.974 -25.544,-10.461 -40.016,-10.461c-26.154,-0 -46.467,7.89 -60.939,23.669c-14.472,15.78 -21.708,38.229 -21.708,67.347c-0,31.56 8.5,55.665 25.5,72.316c17,16.652 41.28,24.978 72.839,24.978c12.903,-0 25.806,-0.611 38.709,-1.831c12.902,-1.221 25.456,-2.877 37.662,-4.969l6.277,48.646c-14.298,3.139 -29.075,5.231 -44.332,6.277c-15.256,1.047 -30.121,1.57 -44.593,1.57Z" style="fill:#cfe64d;fill-rule:nonzero;"/>
-                            <path d="M4933.42,3157.43c-10.636,-0 -19.746,-3.793 -27.331,-11.377c-7.585,-7.585 -11.377,-16.696 -11.377,-27.332c0,-10.81 3.792,-19.964 11.377,-27.461c7.585,-7.498 16.695,-11.247 27.331,-11.247c10.811,0 19.965,3.749 27.462,11.247c7.498,7.497 11.246,16.651 11.246,27.461c0,10.636 -3.748,19.747 -11.246,27.332c-7.497,7.584 -16.651,11.377 -27.462,11.377Z" style="fill:#cfe64d;fill-rule:nonzero;"/>
-                            <path d="M5237.86,3152.2l-0,-261.542l55.446,0l0,261.542l-55.446,-0Zm-105.663,-0l-0,-48.647l110.893,0l0,48.647l-110.893,-0Zm155.879,-0l-0,-48.647l90.493,0l0,48.647l-90.493,-0Zm-140.187,-228.588l0,-48.646l145.417,-0l0,48.646l-145.417,0Zm115.863,-92.585c-10.636,-0 -19.746,-3.793 -27.331,-11.377c-7.585,-7.585 -11.377,-16.696 -11.377,-27.332c0,-10.81 3.792,-19.964 11.377,-27.461c7.585,-7.498 16.695,-11.247 27.331,-11.247c10.811,0 19.965,3.749 27.462,11.247c7.498,7.497 11.246,16.651 11.246,27.461c0,10.636 -3.748,19.747 -11.246,27.332c-7.497,7.584 -16.651,11.377 -27.462,11.377Z" style="fill:#cfe64d;fill-rule:nonzero;"/>
-                            <path d="M5618.66,3152.2l0,-180.464c0,-16.739 -4.359,-29.641 -13.077,-38.708c-8.718,-9.067 -20.923,-13.6 -36.616,-13.6c-43.59,-0 -65.385,25.631 -65.385,76.893l-16.216,-71.139l21.447,-0c1.569,-18.657 8.369,-32.562 20.4,-41.716c12.031,-9.154 29.641,-13.731 52.831,-13.731c29.293,-0 51.96,8.892 68.001,26.677c16.042,17.785 24.062,42.893 24.062,75.324l0,180.464l-55.447,-0Zm-170.525,-0l0,-277.234l50.216,-0l5.231,58.585l-0,218.649l-55.447,-0Z" style="fill:#cfe64d;fill-rule:nonzero;"/>
-                            <path d="M5901.65,3157.43c-47.251,-0 -83.737,-12.424 -109.455,-37.27c-25.718,-24.847 -38.577,-60.547 -38.577,-107.101c-0,-45.334 12.161,-80.555 36.485,-105.663c24.323,-25.108 59.065,-37.662 104.224,-37.662c27.026,-0 50.173,5.013 69.44,15.038c19.266,10.026 32.997,24.193 41.192,42.501l-42.631,32.17c-7.846,-12.729 -17.872,-22.58 -30.077,-29.555c-12.206,-6.974 -25.544,-10.461 -40.016,-10.461c-26.154,-0 -46.467,7.89 -60.939,23.669c-14.472,15.78 -21.708,38.229 -21.708,67.347c-0,31.56 8.5,55.665 25.5,72.316c17,16.652 41.28,24.978 72.839,24.978c12.903,-0 25.806,-0.611 38.709,-1.831c12.902,-1.221 25.456,-2.877 37.662,-4.969l6.277,48.646c-14.298,3.139 -29.075,5.231 -44.332,6.277c-15.256,1.047 -30.121,1.57 -44.593,1.57Z" style="fill:#cfe64d;fill-rule:nonzero;"/>
-                            <rect x="1637.68" y="2416.88" width="4598.65" height="54.98" style="fill:#3c8cc1;"/>
-                            <rect x="2131.56" y="2634.76" width="1492.88" height="38.605" style="fill:#3c8cc1;"/>
-                            <rect x="1908.04" y="2326.11" width="484.88" height="242.955" style="fill:#fbfbf9;"/>
-                            <rect x="3354.36" y="2326.11" width="512.527" height="242.955" style="fill:#fbfbf9;"/>
-                            <rect x="2747.5" y="2322.89" width="499.96" height="242.955" style="fill:#cfe64d;"/>
-                            <rect x="2131.56" y="2603.2" width="42.98" height="70.172" style="fill:#3c8cc1;"/>
-                            <rect x="3581.47" y="2603.2" width="42.98" height="70.172" style="fill:#3c8cc1;"/>
+                    <!-- Logo NexusTec SVG - Diseño de líneas con efecto neón sutil -->
+                    <div class="logo-nexustec-main relative z-10" style="width: 380px; max-width: 85vw; height: auto;">
+                        <svg viewBox="1000 200 5875 5360" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;">
+                            <defs>
+                                <!-- Filtros de neón mejorados - más auténticos y realistas -->
+                                <filter id="neon-cyan-main" x="-150%" y="-150%" width="400%" height="400%">
+                                    <!-- Capa externa muy difusa - resplandor lejano -->
+                                    <feGaussianBlur in="SourceGraphic" stdDeviation="40" result="blur1"/>
+                                    <!-- Capa media - brillo principal -->
+                                    <feGaussianBlur in="SourceGraphic" stdDeviation="20" result="blur2"/>
+                                    <!-- Capa interna - definición -->
+                                    <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur3"/>
+                                    <!-- Capa muy cercana - borde brillante -->
+                                    <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur4"/>
+                                    <!-- Composición con múltiples capas -->
+                                    <feMerge>
+                                        <feMergeNode in="blur1"/>
+                                        <feMergeNode in="blur1"/>
+                                        <feMergeNode in="blur2"/>
+                                        <feMergeNode in="blur2"/>
+                                        <feMergeNode in="blur2"/>
+                                        <feMergeNode in="blur3"/>
+                                        <feMergeNode in="blur3"/>
+                                        <feMergeNode in="blur4"/>
+                                        <feMergeNode in="SourceGraphic"/>
+                                        <feMergeNode in="SourceGraphic"/>
+                                    </feMerge>
+                                </filter>
+                                <filter id="neon-green-main" x="-150%" y="-150%" width="400%" height="400%">
+                                    <feGaussianBlur in="SourceGraphic" stdDeviation="40" result="blur1"/>
+                                    <feGaussianBlur in="SourceGraphic" stdDeviation="20" result="blur2"/>
+                                    <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur3"/>
+                                    <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur4"/>
+                                    <feMerge>
+                                        <feMergeNode in="blur1"/>
+                                        <feMergeNode in="blur1"/>
+                                        <feMergeNode in="blur2"/>
+                                        <feMergeNode in="blur2"/>
+                                        <feMergeNode in="blur2"/>
+                                        <feMergeNode in="blur3"/>
+                                        <feMergeNode in="blur3"/>
+                                        <feMergeNode in="blur4"/>
+                                        <feMergeNode in="SourceGraphic"/>
+                                        <feMergeNode in="SourceGraphic"/>
+                                    </feMerge>
+                                </filter>
+                                <filter id="neon-circle-main" x="-150%" y="-150%" width="400%" height="400%">
+                                    <feGaussianBlur in="SourceGraphic" stdDeviation="50" result="blur1"/>
+                                    <feGaussianBlur in="SourceGraphic" stdDeviation="25" result="blur2"/>
+                                    <feGaussianBlur in="SourceGraphic" stdDeviation="12" result="blur3"/>
+                                    <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur4"/>
+                                    <feMerge>
+                                        <feMergeNode in="blur1"/>
+                                        <feMergeNode in="blur1"/>
+                                        <feMergeNode in="blur1"/>
+                                        <feMergeNode in="blur2"/>
+                                        <feMergeNode in="blur2"/>
+                                        <feMergeNode in="blur3"/>
+                                        <feMergeNode in="blur3"/>
+                                        <feMergeNode in="blur4"/>
+                                        <feMergeNode in="SourceGraphic"/>
+                                        <feMergeNode in="SourceGraphic"/>
+                                    </feMerge>
+                                </filter>
+                            </defs>
+                            <g>
+                                <!-- Círculo exterior con efecto neón y animación de respiración -->
+                                <circle cx="3937.5" cy="2780" r="2400" class="breathing-circle-main" style="fill:none;stroke:#81cee0;stroke-width:50px;filter:url(#neon-circle-main);opacity:0.95;"/>
+                                <circle cx="3937.5" cy="2780" r="2480" class="breathing-circle-outer-main" style="fill:none;stroke:#b4e25c;stroke-width:40px;filter:url(#neon-circle-main);opacity:0.85;"/>
+                                
+                                <!-- Logo centrado -->
+                                <g>
+                                    <path d="M4219.78,2303.75c-52.193,-575.042 141.907,-788.482 397.887,-763.613c243.025,23.611 427.257,106.675 388.234,914.086" style="fill:none;stroke:#81cee0;stroke-width:116.67px;filter:url(#neon-cyan-main);"/>
+                                    <path d="M2505.92,3069.29c14.212,113.151 -122.361,902.204 351.625,911.717c150.994,3.031 484.114,-17.975 413.402,-765.71" style="fill:none;stroke:#b4e25c;stroke-width:116.67px;filter:url(#neon-green-main);"/>
+                                    <ellipse cx="2878.17" cy="3516.4" rx="107.567" ry="115.282" style="fill:#b4e25c;fill-opacity:0;stroke:#b4e25c;stroke-width:116.67px;filter:url(#neon-green-main);"/>
+                                    <path d="M2878.17,3379.99c9.512,-821.622 -50.041,-1297.49 79.536,-1344.63c120.207,-43.734 252.925,150.709 555.678,489.613" style="fill:none;stroke:#b4e25c;stroke-width:116.67px;filter:url(#neon-green-main);"/>
+                                    <ellipse cx="3737.01" cy="2762.82" rx="85.488" ry="91.619" style="fill:#b4e25c;stroke:#b4e25c;stroke-width:116.67px;filter:url(#neon-green-main);"/>
+                                    <ellipse cx="4985.36" cy="2762.82" rx="85.488" ry="91.619" style="fill:#81cee0;stroke:#81cee0;stroke-width:116.67px;filter:url(#neon-cyan-main);"/>
+                                    <path d="M3931.47,2969.75c362.072,382.068 497.994,559.345 614.323,481.022c139.761,-94.1 78.073,-505.158 60.185,-1251.31" style="fill:none;stroke:#81cee0;stroke-width:116.67px;filter:url(#neon-cyan-main);"/>
+                                    <ellipse cx="4617.66" cy="2006.55" rx="139.136" ry="149.114" style="fill:#81cee0;fill-opacity:0;stroke:#81cee0;stroke-width:116.67px;filter:url(#neon-cyan-main);"/>
+                                    <path d="M3276.75,2784.46c591.418,640.319 958.519,1176.65 1237.16,1194.26c328.275,20.742 564.786,-114.472 471.444,-1124.28" style="fill:none;stroke:#81cee0;stroke-width:116.67px;filter:url(#neon-cyan-main);"/>
+                                    <ellipse cx="2494.32" cy="2762.82" rx="138.139" ry="148.046" style="fill:#b4e25c;stroke:#b4e25c;stroke-width:116.67px;filter:url(#neon-green-main);"/>
+                                    <path d="M2494.32,2762.82c12.591,-715.081 -94.553,-1004.06 242.708,-1185.51c96.522,-51.929 260.876,-79.678 376.612,5.724c279.554,206.283 551.186,588.021 1117.61,1179.78" style="fill:none;stroke:#b4e25c;stroke-width:116.67px;filter:url(#neon-green-main);"/>
+                                </g>
+                            </g>
                         </svg>
                     </div>
                 </div>
             </div>
+            @endif
 
             <style>
                 /* Fondo de circuitos */
@@ -202,21 +267,80 @@
                 }
 
                 .logo-container-main {
-                    animation: pulse-glow-main 2s ease-in-out infinite;
-                    transition: transform 0.6s ease-in-out;
+                    transition: transform 0.3s ease-out, filter 0.3s ease;
+                    animation: gentle-pulse 3s ease-in-out infinite, neon-flicker 6s ease-in-out infinite;
                 }
 
                 .logo-container-main:hover {
-                    transform: rotate(360deg);
+                    transform: scale(1.08);
+                    filter: drop-shadow(0 0 40px rgba(129, 206, 224, 1)) 
+                            drop-shadow(0 0 60px rgba(180, 226, 92, 0.8))
+                            drop-shadow(0 0 80px rgba(129, 206, 224, 0.6));
                 }
-
-                @keyframes pulse-glow-main {
+                
+                /* Efecto de parpadeo sutil del neón - como neón real */
+                @keyframes neon-flicker {
                     0%, 100% {
-                        filter: drop-shadow(0 0 20px rgba(59, 130, 246, 0.6)) drop-shadow(0 0 40px rgba(59, 130, 246, 0.4));
+                        opacity: 1;
+                    }
+                    2%, 8%, 10%, 15%, 18%, 22%, 38%, 40% {
+                        opacity: 0.98;
+                    }
+                    4%, 12%, 20%, 42% {
+                        opacity: 0.95;
+                    }
+                    6%, 14%, 25%, 45% {
+                        opacity: 1;
+                    }
+                }
+                
+                /* Pulso suave y constante del resplandor */
+                @keyframes gentle-pulse {
+                    0%, 100% {
+                        filter: drop-shadow(0 0 25px rgba(129, 206, 224, 0.7)) 
+                                drop-shadow(0 0 50px rgba(180, 226, 92, 0.4))
+                                drop-shadow(0 0 75px rgba(129, 206, 224, 0.3));
                     }
                     50% {
-                        filter: drop-shadow(0 0 40px rgba(59, 130, 246, 0.9)) drop-shadow(0 0 60px rgba(59, 130, 246, 0.7)) drop-shadow(0 0 80px rgba(59, 130, 246, 0.5));
+                        filter: drop-shadow(0 0 35px rgba(129, 206, 224, 0.9)) 
+                                drop-shadow(0 0 70px rgba(180, 226, 92, 0.6))
+                                drop-shadow(0 0 100px rgba(129, 206, 224, 0.4));
                     }
+                }
+
+                /* Animación de respiración de los círculos - más intensa */
+                @keyframes breathing-main {
+                    0%, 100% {
+                        r: 2400px;
+                        opacity: 0.95;
+                        stroke-width: 50px;
+                    }
+                    50% {
+                        r: 2450px;
+                        opacity: 1;
+                        stroke-width: 60px;
+                    }
+                }
+                
+                @keyframes breathing-outer-main {
+                    0%, 100% {
+                        r: 2480px;
+                        opacity: 0.85;
+                        stroke-width: 40px;
+                    }
+                    50% {
+                        r: 2530px;
+                        opacity: 1;
+                        stroke-width: 50px;
+                    }
+                }
+                
+                .breathing-circle-main {
+                    animation: breathing-main 3s ease-in-out infinite;
+                }
+                
+                .breathing-circle-outer-main {
+                    animation: breathing-outer-main 3s ease-in-out infinite 0.5s;
                 }
 
                 /* Líneas verticales animadas */
@@ -372,7 +496,7 @@
                 }
             </style>
             
-            <div class="w-full sm:max-w-md mt-6 px-6 py-8 bg-white/[0.02] backdrop-blur-3xl border border-white/40 shadow-[0_8px_32px_0_rgba(31,38,135,0.37)] overflow-hidden sm:rounded-2xl relative z-10" style="box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37), 0 0 0 1.5px rgba(255, 255, 255, 0.25) inset, 0 4px 16px 0 rgba(255, 255, 255, 0.1) inset;">
+            <div class="w-full sm:max-w-md {{ $hideLogo ? 'mt-6' : 'mt-20' }} px-6 py-8 bg-white/[0.02] backdrop-blur-3xl border border-white/40 shadow-[0_8px_32px_0_rgba(31,38,135,0.37)] overflow-hidden sm:rounded-2xl relative z-10" style="box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37), 0 0 0 1.5px rgba(255, 255, 255, 0.25) inset, 0 4px 16px 0 rgba(255, 255, 255, 0.1) inset;">
                 {{ $slot }}
             </div>
         </div>

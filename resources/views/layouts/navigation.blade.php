@@ -8,10 +8,11 @@
             <div class="flex">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}">
-                        <x-application-logo class="block h-9 w-auto fill-current text-gray-800 dark:text-gray-200" />
+                    <a href="{{ route('dashboard') }}" class="group">
+                        <img src="{{ asset('img/logo-ito.png') }}" alt="Logo ITO" 
+                             class="block h-9 w-auto transition-all duration-500 ease-out group-hover:scale-110 group-hover:rotate-6 group-hover:drop-shadow-[0_0_15px_rgba(249,115,22,0.6)] hover:brightness-110" />
                     </a>
-
+                </div>
 
                 <!-- Desktop Navigation Links (Visible only on XL screens and up) -->
                 <div class="hidden space-x-8 xl:-my-px xl:ms-10 xl:flex">
