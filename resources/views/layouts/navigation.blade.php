@@ -11,7 +11,7 @@
                     <a href="{{ route('dashboard') }}">
                         <x-application-logo class="block h-9 w-auto fill-current text-gray-800 dark:text-gray-200" />
                     </a>
-                </div>
+
 
                 <!-- Desktop Navigation Links (Visible only on XL screens and up) -->
                 <div class="hidden space-x-8 xl:-my-px xl:ms-10 xl:flex">
@@ -90,6 +90,7 @@
             <div class="flex items-center">
                 
                 <!-- 🔔 Notification Bell -->
+                @auth
                 <div class="relative me-3 ms-6 group">
                      @php
                         $hasJoinRequests = $unreadNotifications->where('data.type', 'join_request')->count() > 0;
@@ -220,53 +221,65 @@
                                             <div class="text-2xl">🏆</div>
                                             <div class="flex-1">
                                                 <p class="text-sm font-bold text-gray-800 dark:text-gray-200">{{ $notification->data['award_category'] ?? 'Premio' }}</p>
-                                                <p class="text-xs text-gray-500 truncate">
-                                                    {{ $notification->data['team_name'] ?? 'Tu equipo' }} · {{ $notification->data['event_name'] ?? '' }}
-                                                </p>
-                                                <p class="text-xs text-yellow-600 mt-0.5">{{ $notification->created_at->diffForHumans() }}</p>
+                                                    <p class="text-xs text-gray-500 truncate">
+                                                        {{ $notification->data['team_name'] ?? 'Tu equipo' }} · {{ $notification->data['event_name'] ?? '' }}
+                                                    </p>
+                                                    <p class="text-xs text-yellow-600 mt-0.5">{{ $notification->created_at->diffForHumans() }}</p>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </a>
-                                @endif
-                            @endforeach
+                                        </a>
+                                    @endif
+                                @endforeach
 
-                            {{-- ESTADO VACÍO --}}
-                            @if ($totalNotifications === 0)
-                                <div class="px-4 py-8 text-center">
-                                    <div class="inline-flex p-3 bg-gray-100 dark:bg-gray-700 rounded-full mb-3">
-                                        <svg class="w-6 h-6 text-gray-400" fill="none" viewBox="0 0 24 24">
-                                            <path stroke="currentColor" stroke-width="2" d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 00-4-5.7V4a2 2 0 10-4 0v1.3A6 6 0 006 11v3.2a2 2 0 01-.6 1.4L4 17h5m6 0v1a3 3 0 11-6 0v-1" />
-                                        </svg>
+                                {{-- ESTADO VACÍO --}}
+                                @if ($totalNotifications === 0)
+                                    <div class="px-4 py-8 text-center">
+                                        <div class="inline-flex p-3 bg-gray-100 dark:bg-gray-700 rounded-full mb-3">
+                                            <svg class="w-6 h-6 text-gray-400" fill="none" viewBox="0 0 24 24">
+                                                <path stroke="currentColor" stroke-width="2" d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 00-4-5.7V4a2 2 0 10-4 0v1.3A6 6 0 006 11v3.2a2 2 0 01-.6 1.4L4 17h5m6 0v1a3 3 0 11-6 0v-1" />
+                                            </svg>
+                                        </div>
+                                        <p class="text-sm text-gray-500">No hay notificaciones</p>
+                                        <p class="text-xs text-gray-400 mt-1">Estás al día 🎉</p>
                                     </div>
-                                    <p class="text-sm text-gray-500">No hay notificaciones</p>
-                                    <p class="text-xs text-gray-400 mt-1">Estás al día 🎉</p>
-                                </div>
-                            @endif
+                                @endif
+                            </div>
                         </div>
-                     </div>
-                </div>
+                    </div>
+                 @endauth
 
                 <!-- User Dropdown (Visible on XL) -->
                 <div class="hidden xl:flex xl:items-center xl:ms-6">
-                    <x-dropdown align="right" width="48">
-                        <x-slot name="trigger">
-                            <button class="inline-flex items-center px-3 py-2 rounded-md text-sm text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
-                                <div>{{ Auth::user()->name }}</div>
-                                <svg class="ms-1 h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                                </svg>
-                            </button>
-                        </x-slot>
-                        <x-slot name="content">
-                            <x-dropdown-link :href="route('profile.edit')">Perfil</x-dropdown-link>
-                            <form method="POST" action="{{ route('logout') }}">
-                                @csrf
-                                <x-dropdown-link :href="route('logout')" onclick="event.preventDefault(); this.closest('form').submit();">
-                                    Cerrar Sesión
-                                </x-dropdown-link>
-                            </form>
-                        </x-slot>
-                    </x-dropdown>
+                    @auth
+                        <x-dropdown align="right" width="48">
+                            <x-slot name="trigger">
+                                <button class="inline-flex items-center px-3 py-2 rounded-md text-sm text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
+                                    <div>{{ Auth::user()->name }}</div>
+                                    <svg class="ms-1 h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                    </svg>
+                                </button>
+                            </x-slot>
+                            <x-slot name="content">
+                                <x-dropdown-link :href="route('profile.edit')">Perfil</x-dropdown-link>
+                                <form method="POST" action="{{ route('logout') }}">
+                                    @csrf
+                                    <x-dropdown-link :href="route('logout')" onclick="event.preventDefault(); this.closest('form').submit();">
+                                        Cerrar Sesión
+                                    </x-dropdown-link>
+                                </form>
+                            </x-slot>
+                        </x-dropdown>
+                    @else
+                        <div class="flex items-center gap-4">
+                            <a href="{{ route('login') }}" class="text-sm font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                                Iniciar Sesión
+                            </a>
+                            <a href="{{ route('register') }}" class="text-sm font-medium px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">
+                                Registrarse
+                            </a>
+                        </div>
+                    @endauth
                 </div>
 
                 <!-- HAMBURGER BUTTON (Visible on screens smaller than XL) -->

@@ -20,6 +20,11 @@ class TeamController extends Controller
      */
     public function index(Request $request)
     {
+        // ⛔ SEGURIDAD: Los jueces NO pueden ver el listado general de equipos
+        if (Auth::user()->hasRole('judge')) {
+            abort(403, 'Acceso denegado. Los jueces no tienen acceso al directorio de equipos.');
+        }
+
         // Obtener lista de eventos para el filtro
         $events = \App\Models\Event::orderBy('name')->get();
 

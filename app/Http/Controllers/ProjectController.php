@@ -16,6 +16,11 @@ class ProjectController extends Controller
      */
     public function index(Request $request)
     {
+        // ⛔ SEGURIDAD: Los jueces NO pueden ver el listado general de proyectos
+        if (Auth::user()->hasRole('judge')) {
+            abort(403, 'Acceso denegado. Los jueces solo pueden acceder a sus proyectos asignados desde el Dashboard.');
+        }
+
         // Obtener lista de eventos para el filtro
         $events = \App\Models\Event::orderBy('name')->get();
 
@@ -129,6 +134,14 @@ class ProjectController extends Controller
      */
     public function show(Project $project)
     {
+        // ⛔ SEGURIDAD: Jueces solo pueden ver proyectos asignados
+        if (Auth::user()->hasRole('judge')) {
+            $isAssigned = $project->judges()->where('judge_id', Auth::id())->exists();
+            if (!$isAssigned) {
+                abort(403, 'Acceso denegado. No tienes asignada la evaluación de este proyecto.');
+            }
+        }
+
         // Cargar relaciones para mostrar info del equipo, asesor y jueces asignados
         $project->load(['team.members', 'team.leader', 'team.event', 'team.advisor', 'judges.judgeProfile', 'evaluations']);
         
