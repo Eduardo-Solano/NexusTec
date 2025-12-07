@@ -35,9 +35,9 @@ class TeamController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhereHas('leader', function ($q) use ($search) {
-                      $q->where('name', 'like', "%{$search}%");
-                  });
+                    ->orWhereHas('leader', function ($q) use ($search) {
+                        $q->where('name', 'like', "%{$search}%");
+                    });
             });
         }
 
@@ -183,13 +183,13 @@ class TeamController extends Controller
         }
 
         $team->load(['event', 'members', 'leader', 'advisor', 'project']);
-        
+
         // Obtener asesores disponibles (docentes)
         $advisors = User::role('advisor')->orderBy('name')->get();
-        
+
         // Obtener eventos en período de inscripción o activos
         $events = Event::whereIn('status', [Event::STATUS_REGISTRATION, Event::STATUS_ACTIVE])->orderBy('name')->get();
-        
+
         return view('teams.edit', compact('team', 'advisors', 'events'));
     }
 

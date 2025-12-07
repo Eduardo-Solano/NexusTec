@@ -42,23 +42,35 @@
                         </x-nav-link>
                     @endcan
 
-                    @can('staff.view')
-                        <x-nav-link :href="route('staff.index')" :active="request()->routeIs('staff.*')">
-                            {{ __('Docentes') }}
-                        </x-nav-link>
-                    @endcan
-
-                    @can('students.view')
-                        <x-nav-link :href="route('students.index')" :active="request()->routeIs('students.*')">
-                            {{ __('Alumnos') }}
-                        </x-nav-link>
-                    @endcan
-
-                    @can('judges.view')
-                        <x-nav-link :href="route('judges.index')" :active="request()->routeIs('judges.*')">
-                            {{ __('Jueces') }}
-                        </x-nav-link>
-                    @endcan
+                    @if (
+                        auth()->user()?->can('students.view') ||
+                        auth()->user()?->can('staff.view') ||
+                        auth()->user()?->can('judges.view')
+                    )
+                        <div class="hidden xl:flex xl:items-center xl:ms-2">
+                            <x-dropdown align="left" width="48">
+                                <x-slot name="trigger">
+                                    <button class="inline-flex items-center px-3 py-2 text-sm border border-transparent rounded-md text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 transition ease-in-out duration-150">
+                                        <span>Usuarios</span>
+                                        <svg class="ms-2 -me-0.5 h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                        </svg>
+                                    </button>
+                                </x-slot>
+                                <x-slot name="content">
+                                    @can('students.view')
+                                        <x-dropdown-link :href="route('students.index')">Alumnos</x-dropdown-link>
+                                    @endcan
+                                    @can('staff.view')
+                                        <x-dropdown-link :href="route('staff.index')">Docentes</x-dropdown-link>
+                                    @endcan
+                                    @can('judges.view')
+                                        <x-dropdown-link :href="route('judges.index')">Jueces</x-dropdown-link>
+                                    @endcan
+                                </x-slot>
+                            </x-dropdown>
+                        </div>
+                    @endif
 
                     @role('admin')
                         <x-nav-link :href="route('activity-logs.index')" :active="request()->routeIs('activity-logs.*')">
@@ -366,23 +378,34 @@
                         </x-responsive-nav-link>
                     @endcan
 
-                    @can('staff.view')
-                        <x-responsive-nav-link :href="route('staff.index')" :active="request()->routeIs('staff.*')">
-                            {{ __('Docentes') }}
-                        </x-responsive-nav-link>
-                    @endcan
+                    @if (
+                        auth()->user()?->can('students.view') ||
+                        auth()->user()?->can('staff.view') ||
+                        auth()->user()?->can('judges.view')
+                    )
+                        <div class="border-t border-gray-200 dark:border-gray-700 my-2"></div>
+                        <div class="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            Usuarios
+                        </div>
 
-                    @can('students.view')
-                        <x-responsive-nav-link :href="route('students.index')" :active="request()->routeIs('students.*')">
-                            {{ __('Alumnos') }}
-                        </x-responsive-nav-link>
-                    @endcan
+                        @can('students.view')
+                            <x-responsive-nav-link :href="route('students.index')" :active="request()->routeIs('students.*')">
+                                {{ __('Alumnos') }}
+                            </x-responsive-nav-link>
+                        @endcan
 
-                    @can('judges.view')
-                        <x-responsive-nav-link :href="route('judges.index')" :active="request()->routeIs('judges.*')">
-                            {{ __('Jueces') }}
-                        </x-responsive-nav-link>
-                    @endcan
+                        @can('staff.view')
+                            <x-responsive-nav-link :href="route('staff.index')" :active="request()->routeIs('staff.*')">
+                                {{ __('Docentes') }}
+                            </x-responsive-nav-link>
+                        @endcan
+
+                        @can('judges.view')
+                            <x-responsive-nav-link :href="route('judges.index')" :active="request()->routeIs('judges.*')">
+                                {{ __('Jueces') }}
+                            </x-responsive-nav-link>
+                        @endcan
+                    @endif
 
                     @role('admin')
                         <div class="border-t border-gray-200 dark:border-gray-700 my-2"></div>
