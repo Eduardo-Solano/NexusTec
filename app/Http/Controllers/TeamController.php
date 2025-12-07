@@ -12,6 +12,9 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use App\Notifications\TeamInvitationNotification;
 use App\Notifications\TeamJoinRequestNotification;
+use App\Http\Requests\Team\StoreTeamRequest;
+use App\Http\Requests\Team\UpdateTeamRequest;
+use App\Http\Requests\Team\JoinTeamRequest;
 
 class TeamController extends Controller
 {
@@ -53,18 +56,8 @@ class TeamController extends Controller
 
 
 
-    public function store(Request $request)
+    public function store(StoreTeamRequest $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:50',
-            'event_id' => 'required|exists:events,id',
-            'leader_role' => 'required|string',
-            'members' => 'array|max:4',
-            'member_roles' => 'array',
-            'members.*' => 'nullable|email|distinct',
-            'advisor_id' => 'required|exists:users,id',
-        ]);
-
         // ⛔ Validar que el evento esté en período de inscripciones
         $event = Event::findOrFail($request->event_id);
         if (!$event->allowsTeamRegistration()) {
@@ -196,12 +189,8 @@ class TeamController extends Controller
     /**
      * Actualizar equipo
      */
-    public function update(Request $request, Team $team)
+    public function update(UpdateTeamRequest $request, Team $team)
     {
-        $request->validate([
-            'name' => 'required|string|max:50',
-        ]);
-
         // ⛔ SEGURIDAD: Solo el líder del equipo o admin/staff pueden editar
         if (Auth::id() !== $team->leader_id && !Auth::user()->hasRole(['admin', 'staff'])) {
             abort(403, 'No tienes permiso para actualizar este equipo.');
@@ -218,13 +207,9 @@ class TeamController extends Controller
     /**
      * Enviar solicitud para UNIRSE a un equipo
      */
-    public function requestJoin(Request $request, Team $team)
+    public function requestJoin(JoinTeamRequest $request, Team $team)
     {
         $user = Auth::user();
-
-        $request->validate([
-            'role' => 'required|string'
-        ]);
 
         // ⛔ Validar que el evento esté en período de inscripciones
         if (!$team->event->allowsTeamRegistration()) {

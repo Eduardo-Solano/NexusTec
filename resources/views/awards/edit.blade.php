@@ -30,35 +30,21 @@
                     @csrf
                     @method('PUT')
 
-                    {{-- Categoría del Premio --}}
+                    {{-- Posición del Premio --}}
                     <div>
-                        <label for="category" class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
-                            Categoría del Premio
+                        <label for="position" class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
+                            Posición del Premio
                         </label>
-                        <select name="category" id="category" required
-                                class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
-                                onchange="toggleCustomName(this.value)">
-                            <option value="">-- Selecciona una categoría --</option>
-                            @foreach($categories as $value => $label)
-                                <option value="{{ $value }}" {{ old('category', $award->category) === $value ? 'selected' : '' }}>
+                        <select name="position" id="position" required
+                                class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500">
+                            <option value="">-- Selecciona la posición --</option>
+                            @foreach(\App\Models\Award::POSITIONS as $key => $label)
+                                <option value="{{ $key }}" {{ old('position', $award->position) == $key ? 'selected' : '' }}>
                                     {{ $label }}
                                 </option>
                             @endforeach
                         </select>
-                        @error('category')
-                            <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    {{-- Nombre personalizado (solo si categoría es "Otro") --}}
-                    <div id="custom-name-wrapper" class="{{ $award->category === 'Otro' ? '' : 'hidden' }}">
-                        <label for="name" class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
-                            Nombre del Premio
-                        </label>
-                        <input type="text" name="name" id="name" value="{{ old('name', $award->name) }}"
-                               placeholder="Ej: Mejor Prototipo Funcional"
-                               class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500">
-                        @error('name')
+                        @error('position')
                             <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
                         @enderror
                     </div>
@@ -85,7 +71,7 @@
 
                     {{-- Info actual --}}
                     <div class="p-4 bg-gray-50 dark:bg-gray-700/30 rounded-lg text-sm text-gray-600 dark:text-gray-400">
-                        <p><strong>Otorgado:</strong> {{ $award->awarded_at->format('d/m/Y') }}</p>
+                        <p><strong>Otorgado:</strong> {{ $award->awarded_at->format('d/m/Y H:i') }}</p>
                     </div>
 
                     {{-- Botones --}}

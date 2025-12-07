@@ -30,35 +30,22 @@
                     @csrf
                     <input type="hidden" name="event_id" value="{{ $event->id }}">
 
-                    {{-- Categoría del Premio --}}
+                    {{-- Posición del Premio --}}
                     <div>
-                        <label for="category" class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
-                            Categoría del Premio
+                        <label for="position" class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
+                            Posición del Premio
                         </label>
-                        <select name="category" id="category" required
+                        <select name="position" id="position" required
                                 class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
-                                onchange="toggleCustomName(this.value)">
-                            <option value="">-- Selecciona una categoría --</option>
-                            @foreach($categories as $value => $label)
-                                <option value="{{ $value }}" {{ old('category') === $value ? 'selected' : '' }}>
-                                    {{ $label }}
+                                onchange="updatePreview()">
+                            <option value="">-- Selecciona la posición --</option>
+                            @foreach($positions as $key => $label)
+                                <option value="{{ $label }}" {{ old('position') === $label ? 'selected' : '' }}>
+                                    {{ $key === 1 ? '🥇' : ($key === 2 ? '🥈' : '🥉') }} {{ $label }}
                                 </option>
                             @endforeach
                         </select>
-                        @error('category')
-                            <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    {{-- Nombre personalizado (solo si categoría es "Otro") --}}
-                    <div id="custom-name-wrapper" class="hidden">
-                        <label for="name" class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
-                            Nombre del Premio
-                        </label>
-                        <input type="text" name="name" id="name" value="{{ old('name') }}"
-                               placeholder="Ej: Mejor Prototipo Funcional"
-                               class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500">
-                        @error('name')
+                        @error('position')
                             <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
                         @enderror
                     </div>
@@ -70,7 +57,8 @@
                         </label>
                         @if($teams->count() > 0)
                             <select name="team_id" id="team_id" required
-                                    class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500">
+                                    class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                                    onchange="updatePreview()">
                                 <option value="">-- Selecciona el equipo ganador --</option>
                                 @foreach($teams as $team)
                                     <option value="{{ $team->id }}" {{ old('team_id') == $team->id ? 'selected' : '' }}>
@@ -95,7 +83,7 @@
                         <div class="flex items-center gap-3">
                             <span id="preview-emoji" class="text-4xl">🏆</span>
                             <div>
-                                <p id="preview-category" class="font-bold text-gray-800 dark:text-white">-</p>
+                                <p id="preview-position" class="font-bold text-gray-800 dark:text-white">-</p>
                                 <p id="preview-team" class="text-sm text-gray-600 dark:text-gray-400">-</p>
                             </div>
                         </div>
@@ -126,38 +114,29 @@
         const emojis = {
             '1er Lugar': '🥇',
             '2do Lugar': '🥈',
-            '3er Lugar': '🥉',
-            'Mención Honorífica': '🏅',
-            'Mejor Innovación': '💡',
-            'Mejor Diseño': '🎨',
-            'Mejor Presentación': '🎤',
-            'Premio del Público': '👥',
-            'Otro': '🏆'
+            '3er Lugar': '🥉'
         };
 
-        function toggleCustomName(category) {
-            const wrapper = document.getElementById('custom-name-wrapper');
-            wrapper.classList.toggle('hidden', category !== 'Otro');
-            updatePreview();
-        }
-
         function updatePreview() {
-            const category = document.getElementById('category').value;
+            const position = document.getElementById('position').value;
             const teamSelect = document.getElementById('team_id');
             const teamText = teamSelect?.options[teamSelect?.selectedIndex]?.text || '-';
             const preview = document.getElementById('preview');
             
-            if (category) {
+            if (position) {
                 preview.classList.remove('hidden');
-                document.getElementById('preview-emoji').textContent = emojis[category] || '🏆';
-                document.getElementById('preview-category').textContent = category;
+                document.getElementById('preview-emoji').textContent = emojis[position] || '🏆';
+                document.getElementById('preview-position').textContent = position;
                 document.getElementById('preview-team').textContent = teamText !== '-- Selecciona el equipo ganador --' ? teamText : '-';
             } else {
                 preview.classList.add('hidden');
             }
         }
 
-        document.getElementById('category')?.addEventListener('change', updatePreview);
+        // Escuchar cambios en el select de equipo
         document.getElementById('team_id')?.addEventListener('change', updatePreview);
+        
+        // Inicializar preview si hay valores seleccionados
+        document.addEventListener('DOMContentLoaded', updatePreview);
     </script>
 </x-app-layout>

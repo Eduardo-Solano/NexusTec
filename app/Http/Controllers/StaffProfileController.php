@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\StaffProfile;
-use Illuminate\Http\Request;
 use App\Models\User;
+use App\Http\Requests\Staff\StoreStaffRequest;
+use App\Http\Requests\Staff\UpdateStaffRequest;
+use App\Http\Requests\Staff\ImportStaffCsvRequest;
+use Illuminate\Http\Request;
 
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
@@ -63,28 +66,21 @@ class StaffProfileController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreStaffRequest $request)
     {
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:'.User::class],
-            'employee_number' => ['required', 'string', 'unique:staff_profiles'],
-            'department' => ['required', 'string'],
-            'staff_type' => ['required', 'in:advisor,staff,both'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
-        ]);
+        $validated = $request->validated();
 
-        DB::transaction(function () use ($request) {
+        DB::transaction(function () use ($validated) {
             // 1. Crear Usuario
             $user = User::create([
-                'name' => $request->name,
-                'email' => $request->email,
-                'password' => Hash::make($request->password),
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'password' => Hash::make($validated['password']),
                 'is_active' => true,
             ]);
 
             // 2. Asignar Roles según el tipo seleccionado
-            $roles = match($request->staff_type) {
+            $roles = match($validated['staff_type']) {
                 'advisor' => ['advisor'],
                 'staff' => ['staff'],
                 'both' => ['staff', 'advisor'],
@@ -94,12 +90,12 @@ class StaffProfileController extends Controller
             // 3. Crear Perfil
             StaffProfile::create([
                 'user_id' => $user->id,
-                'employee_number' => $request->employee_number,
-                'department' => $request->department,
+                'employee_number' => $validated['employee_number'],
+                'department' => $validated['department'],
             ]);
         });
 
-        $typeLabel = match($request->staff_type) {
+        $typeLabel = match($validated['staff_type']) {
             'advisor' => 'Docente',
             'staff' => 'Organizador',
             'both' => 'Docente/Organizador',
@@ -130,22 +126,15 @@ class StaffProfileController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, User $staff)
+    public function update(UpdateStaffRequest $request, User $staff)
     {
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            // Validamos unique ignorando el ID actual para que no choque consigo mismo
-            'email' => ['required', 'email', 'max:255', 'unique:users,email,' . $staff->id],
-            'employee_number' => ['required', 'string'], // Podrías validar unique en staff_profiles ignorando ID
-            'department' => ['required', 'string'],
-            'staff_type' => ['required', 'in:advisor,staff,both'],
-        ]);
+        $validated = $request->validated();
 
-        DB::transaction(function () use ($request, $staff) {
+        DB::transaction(function () use ($request, $validated, $staff) {
             // 1. Actualizar Usuario Base
             $staff->update([
-                'name' => $request->name,
-                'email' => $request->email,
+                'name' => $validated['name'],
+                'email' => $validated['email'],
             ]);
 
             // 2. Si marcó el checkbox, resetear contraseña
@@ -161,7 +150,7 @@ class StaffProfileController extends Controller
             $staff->removeRole('advisor');
             
             // Asignar nuevos roles
-            $roles = match($request->staff_type) {
+            $roles = match($validated['staff_type']) {
                 'advisor' => ['advisor'],
                 'staff' => ['staff'],
                 'both' => ['staff', 'advisor'],
@@ -173,8 +162,8 @@ class StaffProfileController extends Controller
             $staff->staffProfile()->updateOrCreate(
                 ['user_id' => $staff->id],
                 [
-                    'employee_number' => $request->employee_number,
-                    'department' => $request->department,
+                    'employee_number' => $validated['employee_number'],
+                    'department' => $validated['department'],
                 ]
             );
         });
@@ -198,12 +187,10 @@ class StaffProfileController extends Controller
     /**
      * Importar docentes desde un archivo CSV
      */
-    public function importCsv(Request $request)
+    public function importCsv(ImportStaffCsvRequest $request)
     {
         try {
-            $request->validate([
-                'csv_file' => 'required|mimes:csv,txt'
-            ]);
+            $validated = $request->validated();
 
             $file = $request->file('csv_file');
             $handle = fopen($file, 'r');

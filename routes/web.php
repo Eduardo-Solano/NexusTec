@@ -164,6 +164,7 @@ Route::middleware('auth')->group(function () {
     /* PREMIOS - Solo admin/staff */
     Route::middleware(['role:admin|staff'])->group(function () {
         Route::resource('awards', AwardController::class);
+        Route::post('/events/{event}/generate-winners', [AwardController::class, 'generateWinners'])->name('events.generateWinners');
     });
 
     /* NOTIFICACIONES */

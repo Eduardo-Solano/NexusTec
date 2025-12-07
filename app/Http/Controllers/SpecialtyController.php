@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Specialty;
 use App\Models\ActivityLog;
+use App\Http\Requests\Specialty\StoreSpecialtyRequest;
+use App\Http\Requests\Specialty\UpdateSpecialtyRequest;
 use Illuminate\Http\Request;
 
 class SpecialtyController extends Controller
@@ -36,11 +38,9 @@ class SpecialtyController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreSpecialtyRequest $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:100|unique:specialties,name',
-        ]);
+        $validated = $request->validated();
 
         $specialty = Specialty::create($validated);
 
@@ -70,11 +70,9 @@ class SpecialtyController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Specialty $specialty)
+    public function update(UpdateSpecialtyRequest $request, Specialty $specialty)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:100|unique:specialties,name,' . $specialty->id,
-        ]);
+        $validated = $request->validated();
 
         $specialty->update($validated);
 
