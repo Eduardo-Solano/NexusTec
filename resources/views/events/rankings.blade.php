@@ -52,7 +52,7 @@
                         </a>
                     </div>
                 @endif
-                @if(!$event->is_active)
+                @if($event->isClosed())
                     <a href="{{ route('public.event-winners', $event) }}" 
                        target="_blank"
                        class="inline-flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-all duration-200 font-semibold shadow-sm hover:shadow-md">

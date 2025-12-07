@@ -24,10 +24,10 @@ class EvaluationController extends Controller
 
         $project = Project::with(['team.event.criteria'])->findOrFail($request->project_id);
 
-        // ⛔ Validar que el evento esté abierto
-        if ($project->team->event->isClosed()) {
+        // ⛔ Validar que el evento permita evaluaciones (estado activo)
+        if (!$project->team->event->allowsEvaluations()) {
             return redirect()->route('projects.show', $project)
-                ->with('error', 'No se pueden realizar evaluaciones porque el evento está cerrado o ha finalizado.');
+                ->with('error', 'No se pueden realizar evaluaciones porque el evento no está en curso.');
         }
 
         // 2. Seguridad: Verificar que el juez esté asignado a este proyecto
@@ -70,10 +70,10 @@ class EvaluationController extends Controller
 
         $project = Project::findOrFail($request->project_id);
 
-        // ⛔ Validar que el evento esté abierto
-        if ($project->team->event->isClosed()) {
+        // ⛔ Validar que el evento permita evaluaciones (estado activo)
+        if (!$project->team->event->allowsEvaluations()) {
             return redirect()->route('projects.show', $project)
-                ->with('error', 'No se pueden guardar evaluaciones porque el evento está cerrado o ha finalizado.');
+                ->with('error', 'No se pueden guardar evaluaciones porque el evento no está en curso.');
         }
 
         // Seguridad: Verificar que el juez esté asignado a este proyecto

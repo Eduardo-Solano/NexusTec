@@ -65,10 +65,10 @@ class TeamController extends Controller
             'advisor_id' => 'required|exists:users,id',
         ]);
 
-        // ⛔ Validar que el evento esté abierto
+        // ⛔ Validar que el evento esté en período de inscripciones
         $event = Event::findOrFail($request->event_id);
-        if ($event->isClosed()) {
-            return back()->with('error', 'No se pueden registrar equipos porque el evento está cerrado o ha finalizado.');
+        if (!$event->allowsTeamRegistration()) {
+            return back()->with('error', 'No se pueden registrar equipos porque el evento no está en período de inscripciones.');
         }
 
         // Validar correos
@@ -163,10 +163,10 @@ class TeamController extends Controller
         $event = Event::find($request->event_id);
         abort_unless($event, 404);
 
-        // Validar que el evento esté abierto
-        if ($event->isClosed()) {
+        // Validar que el evento esté en período de inscripciones
+        if (!$event->allowsTeamRegistration()) {
             return redirect()->route('events.show', $event)
-                ->with('error', 'No se pueden crear equipos porque el evento está cerrado o ha finalizado.');
+                ->with('error', 'No se pueden crear equipos porque el evento no está en período de inscripciones.');
         }
 
         return view('teams.create', compact('event'));
@@ -187,8 +187,8 @@ class TeamController extends Controller
         // Obtener asesores disponibles (docentes)
         $advisors = User::role('advisor')->orderBy('name')->get();
         
-        // Obtener eventos activos para el select
-        $events = Event::where('is_active', true)->orderBy('name')->get();
+        // Obtener eventos en período de inscripción o activos
+        $events = Event::whereIn('status', [Event::STATUS_REGISTRATION, Event::STATUS_ACTIVE])->orderBy('name')->get();
         
         return view('teams.edit', compact('team', 'advisors', 'events'));
     }
@@ -226,9 +226,9 @@ class TeamController extends Controller
             'role' => 'required|string'
         ]);
 
-        // ⛔ Validar que el evento esté abierto
-        if ($team->event->isClosed()) {
-            return back()->with('error', 'No se pueden unir al equipo porque el evento está cerrado o ha finalizado.');
+        // ⛔ Validar que el evento esté en período de inscripciones
+        if (!$team->event->allowsTeamRegistration()) {
+            return back()->with('error', 'No se pueden unir al equipo porque el evento no está en período de inscripciones.');
         }
 
         // Verificar si ya existe relación
@@ -261,9 +261,9 @@ class TeamController extends Controller
      */
     public function accept(Team $team, User $user, Request $request)
     {
-        // ⛔ Validar que el evento esté abierto
-        if ($team->event->isClosed()) {
-            return back()->with('error', 'No se pueden aceptar solicitudes porque el evento está cerrado o ha finalizado.');
+        // ⛔ Validar que el evento esté en período de inscripciones
+        if (!$team->event->allowsTeamRegistration()) {
+            return back()->with('error', 'No se pueden aceptar solicitudes porque el evento no está en período de inscripciones.');
         }
 
         if ($request->notification) {
@@ -299,9 +299,9 @@ class TeamController extends Controller
     {
         $user = Auth::user();
 
-        // ⛔ Validar que el evento esté abierto
-        if ($team->event->isClosed()) {
-            return back()->with('error', 'No se pueden aceptar invitaciones porque el evento está cerrado o ha finalizado.');
+        // ⛔ Validar que el evento esté en período de inscripciones
+        if (!$team->event->allowsTeamRegistration()) {
+            return back()->with('error', 'No se pueden aceptar invitaciones porque el evento no está en período de inscripciones.');
         }
 
         // Marcar notificación como leída
@@ -360,9 +360,9 @@ class TeamController extends Controller
     {
         $user = Auth::user();
 
-        // ⛔ Validar que el evento esté abierto (solo para aceptar)
-        if ($status === 'accepted' && $team->event->isClosed()) {
-            return back()->with('error', 'No se pueden aceptar solicitudes de asesoría porque el evento está cerrado o ha finalizado.');
+        // ⛔ Validar que el evento permita inscripciones (solo para aceptar)
+        if ($status === 'accepted' && !$team->event->allowsTeamRegistration()) {
+            return back()->with('error', 'No se pueden aceptar solicitudes de asesoría porque el evento no está en período de inscripciones.');
         }
 
         // Verificar que el usuario es el asesor solicitado

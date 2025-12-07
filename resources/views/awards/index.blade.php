@@ -13,7 +13,7 @@
                 </p>
             </div>
             <div class="flex items-center gap-3">
-                @if(!$event->is_active)
+                @if($event->isClosed())
                     <a href="{{ route('public.event-winners', $event) }}" 
                        target="_blank"
                        class="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-lg transition">
@@ -30,7 +30,7 @@
                     </svg>
                     Ver Rankings
                 </a>
-                @if(!$event->is_active)
+                @if($event->isClosed())
                     <a href="{{ route('awards.create', ['event_id' => $event->id]) }}" 
                        class="inline-flex items-center gap-2 px-4 py-2 bg-yellow-600 hover:bg-yellow-500 text-white rounded-lg transition font-bold">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -39,11 +39,11 @@
                         Asignar Premio
                     </a>
                 @else
-                    <span class="inline-flex items-center gap-2 px-4 py-2 bg-gray-400 text-gray-200 rounded-lg cursor-not-allowed" title="El evento debe estar cerrado">
+                    <span class="inline-flex items-center gap-2 px-4 py-2 bg-gray-400 text-gray-200 rounded-lg cursor-not-allowed" title="El evento debe estar cerrado para asignar premios">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                         </svg>
-                        Evento Activo
+                        {{ $event->status_label }}
                     </span>
                 @endif
             </div>
@@ -142,13 +142,13 @@
                     <div class="text-6xl mb-4">🏆</div>
                     <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-2">No hay premios asignados</h3>
                     <p class="text-gray-500 dark:text-gray-400 mb-6">
-                        @if($event->is_active)
+                        @if(!$event->isClosed())
                             Los premios se asignarán cuando el evento finalice.
                         @else
                             Aún no se han otorgado premios para este evento.
                         @endif
                     </p>
-                    @if(!$event->is_active)
+                    @if($event->isClosed())
                         <a href="{{ route('awards.create', ['event_id' => $event->id]) }}" 
                            class="inline-flex items-center gap-2 px-6 py-3 bg-yellow-600 hover:bg-yellow-500 text-white rounded-lg transition font-bold">
                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

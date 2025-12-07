@@ -133,7 +133,7 @@ class EventController extends Controller
             'description' => $validated['description'],
             'start_date' => $validated['start_date'],
             'end_date' => $validated['end_date'],
-            'is_active' => true, // Por defecto nace activo
+            'status' => Event::STATUS_REGISTRATION, // Por defecto nace en inscripciones
         ]);
 
         // MAGIA ELOQUENT: Guardar relación Muchos a Muchos
@@ -212,14 +212,19 @@ class EventController extends Controller
             return back()->withErrors(['criteria' => "La suma de los criterios seleccionados es $totalPoints. Debe ser exactamente 100 puntos."])->withInput();
         }
 
+        // Validar el status si se envía
+        $status = $request->input('status', $event->status);
+        if (!in_array($status, [Event::STATUS_REGISTRATION, Event::STATUS_ACTIVE, Event::STATUS_CLOSED])) {
+            $status = $event->status;
+        }
+
         // 2. Actualizar
         $event->update([
             'name' => $validated['name'],
             'description' => $validated['description'],
             'start_date' => $validated['start_date'],
             'end_date' => $validated['end_date'],
-            // Truco para checkbox: Si viene en el request es true, si no, false
-            'is_active' => $request->has('is_active'),
+            'status' => $status,
             'show_feedback_to_students' => $request->has('show_feedback_to_students'),
         ]);
 
@@ -249,7 +254,7 @@ class EventController extends Controller
     {
         // Validación de acceso: Staff/Admin siempre, otros solo si evento cerrado
         $user = Auth::user();
-        $canAccess = $user->hasAnyRole(['admin', 'staff']) || !$event->is_active;
+        $canAccess = $user->hasAnyRole(['admin', 'staff']) || $event->isClosed();
         
         if (!$canAccess) {
             return redirect()->route('events.show', $event)

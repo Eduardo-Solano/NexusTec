@@ -239,9 +239,16 @@
 
                         <div class="p-6">
                             <div class="flex justify-between items-start mb-4">
-                                <span
-                                    class="px-3 py-1 text-xs font-bold rounded-full {{ $event->isOpen() ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-red-100 text-red-800' }}">
-                                    {{ $event->isOpen() ? '🟢 Activo' : '🔴 Finalizado' }}
+                                @php
+                                    $statusClasses = match($event->status) {
+                                        'registration' => 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+                                        'active' => 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+                                        'closed' => 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
+                                        default => 'bg-gray-100 text-gray-800'
+                                    };
+                                @endphp
+                                <span class="px-3 py-1 text-xs font-bold rounded-full {{ $statusClasses }}">
+                                    {{ $event->status_icon ?? '' }} {{ $event->status_label }}
                                 </span>
 
                                 <div class="text-gray-400">
@@ -305,7 +312,7 @@
                                         </svg>
                                     </a>
                                     @can('events.edit')
-                                        @if($event->isOpen())
+                                        @if(!$event->isClosed())
                                             <a href="{{ route('events.edit', $event) }}"
                                                 class="text-gray-400 hover:text-blue-500 transition" title="Editar Evento">
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"

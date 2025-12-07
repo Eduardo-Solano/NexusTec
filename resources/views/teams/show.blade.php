@@ -27,8 +27,16 @@
 
                         <div class="bg-gray-900/50 rounded-xl p-4 border border-gray-700 text-left">
                             <p class="text-xs text-gray-500 font-bold uppercase mb-1">Evento</p>
+                            @php
+                                $eventDotColor = match($team->event->status) {
+                                    'registration' => 'bg-blue-500',
+                                    'active' => 'bg-green-500',
+                                    'closed' => 'bg-red-500',
+                                    default => 'bg-gray-500'
+                                };
+                            @endphp
                             <p class="text-white font-bold text-sm flex items-center">
-                                <span class="w-2 h-2 rounded-full {{ $team->event->is_active ? 'bg-green-500' : 'bg-red-500' }} mr-2"></span>
+                                <span class="w-2 h-2 rounded-full {{ $eventDotColor }} mr-2"></span>
                                 {{ $team->event->name }}
                             </p>
                         </div>

@@ -49,9 +49,23 @@
 
                 <div class="space-y-8 mb-12">
                     @foreach($monthEvents as $event)
+                        @php
+                            $statusBarColor = match($event->status) {
+                                'registration' => 'bg-blue-500',
+                                'active' => 'bg-green-500',
+                                'closed' => 'bg-gray-400',
+                                default => 'bg-gray-400'
+                            };
+                            $statusBadgeClasses = match($event->status) {
+                                'registration' => 'bg-blue-100 text-blue-800',
+                                'active' => 'bg-green-100 text-green-800',
+                                'closed' => 'bg-gray-100 text-gray-800',
+                                default => 'bg-gray-100 text-gray-800'
+                            };
+                        @endphp
                         <div class="group relative bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 hover:border-ito-orange/30 overflow-hidden">
                             
-                            <div class="absolute left-0 top-0 bottom-0 w-2 {{ $event->is_active ? 'bg-green-500' : 'bg-gray-400' }}"></div>
+                            <div class="absolute left-0 top-0 bottom-0 w-2 {{ $statusBarColor }}"></div>
 
                             <div class="flex flex-col md:flex-row gap-6 items-center">
                                 <div class="flex flex-col items-center justify-center bg-gray-100 rounded-xl p-4 min-w-[100px] border border-gray-200 text-center">
@@ -65,8 +79,8 @@
                                         <h3 class="text-xl font-bold text-gray-900 group-hover:text-tecnm-blue transition">
                                             {{ $event->name }}
                                         </h3>
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $event->is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
-                                            {{ $event->is_active ? 'Inscripciones Abiertas' : 'Finalizado' }}
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $statusBadgeClasses }}">
+                                            {{ $event->status_label }}
                                         </span>
                                     </div>
                                     

@@ -31,7 +31,7 @@
                                 {{-- Botón Rankings: Visible para staff/admin siempre, para otros solo si evento cerrado --}}
                                 @php
                                     $canSeeRankings =
-                                        Auth::user()->hasAnyRole(['admin', 'staff']) || !$event->is_active;
+                                        Auth::user()->hasAnyRole(['admin', 'staff']) || $event->isClosed();
                                 @endphp
 
                                 @if ($canSeeRankings)
@@ -46,7 +46,7 @@
                                             </svg>
                                         </div>
                                         Rankings
-                                        @if ($event->is_active)
+                                        @if (!$event->isClosed())
                                             <span
                                                 class="ml-1 text-[10px] bg-yellow-500/30 px-1.5 py-0.5 rounded text-yellow-300">(Preview)</span>
                                         @endif
@@ -54,12 +54,26 @@
                                 @endif
                             </div>
 
+                            @php
+                                $statusBadgeClasses = match($event->status) {
+                                    'registration' => 'bg-blue-500/10 border-blue-500/50 text-blue-400',
+                                    'active' => 'bg-green-500/10 border-green-500/50 text-green-400',
+                                    'closed' => 'bg-red-500/10 border-red-500/50 text-red-400',
+                                    default => 'bg-gray-500/10 border-gray-500/50 text-gray-400'
+                                };
+                                $statusDotClasses = match($event->status) {
+                                    'registration' => 'bg-blue-400 animate-pulse',
+                                    'active' => 'bg-green-400 animate-pulse',
+                                    'closed' => 'bg-red-400',
+                                    default => 'bg-gray-400'
+                                };
+                            @endphp
                             <div
-                                class="px-4 py-1.5 rounded-full border {{ $event->isOpen() ? 'bg-green-500/10 border-green-500/50 text-green-400' : 'bg-red-500/10 border-red-500/50 text-red-400' }} backdrop-blur-md shadow-[0_0_15px_rgba(0,0,0,0.5)]">
+                                class="px-4 py-1.5 rounded-full border {{ $statusBadgeClasses }} backdrop-blur-md shadow-[0_0_15px_rgba(0,0,0,0.5)]">
                                 <span class="flex items-center text-xs font-black uppercase tracking-widest gap-2">
                                     <span
-                                        class="w-2 h-2 rounded-full {{ $event->isOpen() ? 'bg-green-400 animate-pulse' : 'bg-red-400' }}"></span>
-                                    {{ $event->isOpen() ? 'Inscripciones Abiertas' : 'Inscripciones Cerradas' }}
+                                        class="w-2 h-2 rounded-full {{ $statusDotClasses }}"></span>
+                                    {{ $event->status_label }}
                                 </span>
                             </div>
                         </div>
@@ -75,7 +89,7 @@
                                 </p>
 
                                 @can('events.join')
-                                    @if ($event->isOpen())
+                                    @if ($event->isRegistrationOpen())
                                         <div class="mt-10">
                                             @if ($userHasTeam)
                                                 <div
@@ -745,8 +759,8 @@
                                                 class="w-full py-2 bg-gray-900 border border-gray-700 text-gray-600 text-xs font-bold uppercase rounded cursor-not-allowed">
                                                 🚫 Ya tienes equipo
                                             </button>
-                                        @elseif(!$event->is_active)
-                                            <div class="text-center text-gray-500 text-xs font-bold uppercase">Cerrado
+                                        @elseif(!$event->allowsTeamRegistration())
+                                            <div class="text-center text-gray-500 text-xs font-bold uppercase">Registro cerrado
                                             </div>
                                         @elseif($team->members->count() >= 5)
                                             <div

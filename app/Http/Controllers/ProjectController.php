@@ -61,9 +61,9 @@ class ProjectController extends Controller
 
         $team = Team::findOrFail($request->query('team_id'));
 
-        // ⛔ Validar que el evento esté abierto
-        if ($team->event->isClosed()) {
-            return back()->with('error', 'No se pueden entregar proyectos porque el evento está cerrado o ha finalizado.');
+        // ⛔ Validar que el evento permita acciones de proyecto (estado activo)
+        if (!$team->event->allowsProjectActions()) {
+            return back()->with('error', 'No se pueden entregar proyectos porque el evento no está en curso.');
         }
 
         // 2. Seguridad: Solo el LÍDER del equipo puede subir el proyecto
@@ -93,9 +93,9 @@ class ProjectController extends Controller
 
         $team = Team::findOrFail($request->team_id);
 
-        // ⛔ Validar que el evento esté abierto
-        if ($team->event->isClosed()) {
-            return back()->with('error', 'No se pueden entregar proyectos porque el evento está cerrado o ha finalizado.');
+        // ⛔ Validar que el evento permita acciones de proyecto (estado activo)
+        if (!$team->event->allowsProjectActions()) {
+            return back()->with('error', 'No se pueden entregar proyectos porque el evento no está en curso.');
         }
 
         // Seguridad: Solo el LÍDER del equipo puede entregar el proyecto
@@ -173,10 +173,10 @@ class ProjectController extends Controller
         // Cargar relaciones necesarias
         $project->load(['team.leader', 'team.event', 'evaluations']);
         
-        // ⛔ Validar que el evento esté abierto
-        if ($project->team->event->isClosed()) {
+        // ⛔ Validar que el evento permita acciones de proyecto
+        if (!$project->team->event->allowsProjectActions()) {
             return redirect()->route('projects.show', $project)
-                ->with('error', 'No se puede editar el proyecto porque el evento está cerrado o ha finalizado.');
+                ->with('error', 'No se puede editar el proyecto porque el evento no está en curso.');
         }
         
         // Verificar permisos: Solo líder del equipo o admin/staff
@@ -202,10 +202,10 @@ class ProjectController extends Controller
      */
     public function update(Request $request, Project $project)
     {
-        // ⛔ Validar que el evento esté abierto
-        if ($project->team->event->isClosed()) {
+        // ⛔ Validar que el evento permita acciones de proyecto
+        if (!$project->team->event->allowsProjectActions()) {
             return redirect()->route('projects.show', $project)
-                ->with('error', 'No se puede editar el proyecto porque el evento está cerrado o ha finalizado.');
+                ->with('error', 'No se puede editar el proyecto porque el evento no está en curso.');
         }
         
         // Verificar permisos: Solo líder del equipo o admin/staff
@@ -282,9 +282,9 @@ class ProjectController extends Controller
             abort(403);
         }
 
-        // ⛔ Validar que el evento esté abierto
-        if ($project->team->event->isClosed()) {
-            return back()->with('error', 'No se pueden asignar jueces porque el evento está cerrado o ha finalizado.');
+        // ⛔ Validar que el evento permita evaluaciones (estado activo)
+        if (!$project->team->event->allowsEvaluations()) {
+            return back()->with('error', 'No se pueden asignar jueces porque el evento no está en curso.');
         }
 
         $request->validate([

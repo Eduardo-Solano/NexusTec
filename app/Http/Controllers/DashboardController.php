@@ -24,14 +24,14 @@ class DashboardController extends Controller
             // Lógica para ADMIN / STAFF / ADVISOR
             $data = [
                 'total_students' => User::role('student')->count(),
-                'active_events' => Event::where('is_active', true)->count(),
+                'active_events' => Event::whereIn('status', [Event::STATUS_REGISTRATION, Event::STATUS_ACTIVE])->count(),
                 'total_teams' => Team::count(),
                 'projects_delivered' => Project::count(),
                 'recent_teams' => Team::with(['event', 'leader', 'members'])->latest()->take(5)->get(),
             ];
 
             // ========== NUEVO: Progreso del Evento Activo Principal ==========
-            $activeEvent = Event::where('is_active', true)
+            $activeEvent = Event::where('status', Event::STATUS_ACTIVE)
                 ->where('end_date', '>', now()) // IMPORTANTE: Filtrar expirados por hora exacta
                 ->withCount(['teams', 'criteria'])
                 ->with(['teams.project.judges', 'teams.project.evaluations', 'awards'])
@@ -150,7 +150,7 @@ class DashboardController extends Controller
             })->with(['event', 'project.evaluations', 'project.judges', 'members', 'awards'])->latest()->first();
 
             // Buscamos eventos próximos para mostrarle
-            $upcomingEvents = Event::where('is_active', true)
+            $upcomingEvents = Event::whereIn('status', [Event::STATUS_REGISTRATION, Event::STATUS_ACTIVE])
                                    ->where('start_date', '>', now())
                                    ->take(3)->get();
 

@@ -28,7 +28,7 @@ class EventSeeder extends Seeder
         // ==========================================
         /*
         $pastEvents = Event::factory(5)->create([
-            'is_active' => false,
+            'status' => Event::STATUS_CLOSED,
             'start_date' => now()->subMonths(6),
             'end_date' => now()->subMonths(5),
         ]);
@@ -56,7 +56,7 @@ class EventSeeder extends Seeder
         // ==========================================
 
         $activeEvents = Event::factory(5)->create([
-            'is_active' => true,
+            'status' => Event::STATUS_ACTIVE,
             'start_date' => now()->subDays(1), // Empezó ayer
             'end_date' => now()->addDays(5),   // Termina en 5 días
         ]);

@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Http\Controllers;
 
@@ -19,7 +19,7 @@ use ZipArchive;
 class ExportController extends Controller
 {
     /**
-     * Obtener datos de rankings para exportación
+     * Obtener datos de rankings para exportaciÃ³n
      */
     private function getRankingsData(Event $event)
     {
@@ -40,7 +40,7 @@ class ExportController extends Controller
             ])
             ->get();
 
-        // Calcular estadísticas para cada proyecto
+        // Calcular estadÃ­sticas para cada proyecto
         $projectsWithStats = $projects->map(function($project) use ($criteria) {
             $evaluations = $project->evaluations;
             
@@ -138,7 +138,7 @@ class ExportController extends Controller
     }
 
     /**
-     * Generar diploma de participación para un miembro del equipo
+     * Generar diploma de participaciÃ³n para un miembro del equipo
      */
     public function diplomaParticipation(Event $event, User $user)
     {
@@ -153,11 +153,11 @@ class ExportController extends Controller
         }
 
         if (!$isParticipant) {
-            abort(404, 'Este usuario no participó en el evento.');
+            abort(404, 'Este usuario no participÃ³ en el evento.');
         }
 
-        // ⛔ Validar que el evento haya finalizado
-        if ($event->isOpen()) {
+        // â›” Validar que el evento haya finalizado
+        if (!$event->allowsAwardsAndDiplomas()) {
             return back()->with('error', 'Los diplomas solo pueden generarse cuando el evento ha finalizado.');
         }
 
@@ -203,8 +203,8 @@ class ExportController extends Controller
             abort(404, 'Este usuario no es miembro del equipo ganador.');
         }
 
-        // ⛔ Validar que el evento haya finalizado
-        if ($event->isOpen()) {
+        // â›” Validar que el evento haya finalizado
+        if (!$event->allowsAwardsAndDiplomas()) {
             return back()->with('error', 'Los diplomas solo pueden generarse cuando el evento ha finalizado.');
         }
 
@@ -231,11 +231,11 @@ class ExportController extends Controller
     {
         $user = Auth::user();
         if (!$user->hasAnyRole(['admin', 'staff'])) {
-            abort(403, 'No tienes permiso para acceder a esta sección.');
+            abort(403, 'No tienes permiso para acceder a esta secciÃ³n.');
         }
 
-        // ⛔ Validar que el evento haya finalizado
-        if ($event->isOpen()) {
+        // â›” Validar que el evento haya finalizado
+        if (!$event->allowsAwardsAndDiplomas()) {
             return redirect()->route('events.rankings', $event)
                 ->with('error', 'Los diplomas solo pueden generarse cuando el evento ha finalizado.');
         }
@@ -256,7 +256,7 @@ class ExportController extends Controller
         }
 
         // Validar que el evento haya finalizado
-        if ($event->isOpen()) {
+        if (!$event->allowsAwardsAndDiplomas()) {
             return back()->with('error', 'Los diplomas solo pueden generarse cuando el evento ha finalizado.');
         }
 
@@ -313,7 +313,7 @@ class ExportController extends Controller
         }
 
         // Validar que el evento haya finalizado
-        if ($event->isOpen()) {
+        if (!$event->allowsAwardsAndDiplomas()) {
             return back()->with('error', 'Los diplomas solo pueden generarse cuando el evento ha finalizado.');
         }
 
@@ -333,7 +333,7 @@ class ExportController extends Controller
             return back()->with('error', 'No se pudo crear el archivo ZIP.');
         }
 
-        // 1. Diplomas de participación por equipo
+        // 1. Diplomas de participaciÃ³n por equipo
         foreach ($event->teams as $team) {
             $teamFolder = 'participacion/' . str_replace(['/', '\\', ':', '*', '?', '"', '<', '>', '|'], '_', $team->name);
             
@@ -381,7 +381,7 @@ class ExportController extends Controller
     }
 
     /**
-     * Enviar diploma por correo a un participante específico
+     * Enviar diploma por correo a un participante especÃ­fico
      */
     public function sendDiplomaToUser(Request $request, Event $event, User $user)
     {
@@ -391,7 +391,7 @@ class ExportController extends Controller
         }
 
         // Validar que el evento haya finalizado
-        if ($event->isOpen()) {
+        if (!$event->allowsAwardsAndDiplomas()) {
             return back()->with('error', 'Los diplomas solo pueden enviarse cuando el evento ha finalizado.');
         }
 
@@ -402,7 +402,7 @@ class ExportController extends Controller
             ->first();
 
         if (!$team) {
-            return back()->with('error', 'Este usuario no participó en el evento.');
+            return back()->with('error', 'Este usuario no participÃ³ en el evento.');
         }
 
         $type = $request->input('type', 'participation');
@@ -412,10 +412,10 @@ class ExportController extends Controller
             $award = Award::find($request->input('award_id'));
         }
 
-        // Enviar notificación con diploma
+        // Enviar notificaciÃ³n con diploma
         $user->notify(new DiplomaNotification($event, $team, $award, $type));
 
-        $tipoTexto = $type === 'winner' ? 'de ganador' : 'de participación';
+        $tipoTexto = $type === 'winner' ? 'de ganador' : 'de participaciÃ³n';
         return back()->with('success', "Diploma {$tipoTexto} enviado por correo a {$user->name}.");
     }
 
@@ -430,7 +430,7 @@ class ExportController extends Controller
         }
 
         // Validar que el evento haya finalizado
-        if ($event->isOpen()) {
+        if (!$event->allowsAwardsAndDiplomas()) {
             return back()->with('error', 'Los diplomas solo pueden enviarse cuando el evento ha finalizado.');
         }
 
@@ -447,7 +447,7 @@ class ExportController extends Controller
             $count++;
         }
 
-        return back()->with('success', "Diplomas de participación enviados por correo a {$count} miembros del equipo {$team->name}.");
+        return back()->with('success', "Diplomas de participaciÃ³n enviados por correo a {$count} miembros del equipo {$team->name}.");
     }
 
     /**
@@ -461,7 +461,7 @@ class ExportController extends Controller
         }
 
         // Validar que el evento haya finalizado
-        if ($event->isOpen()) {
+        if (!$event->allowsAwardsAndDiplomas()) {
             return back()->with('error', 'Los diplomas solo pueden enviarse cuando el evento ha finalizado.');
         }
 
@@ -470,7 +470,7 @@ class ExportController extends Controller
         $participationCount = 0;
         $winnerCount = 0;
 
-        // 1. Enviar diplomas de participación
+        // 1. Enviar diplomas de participaciÃ³n
         foreach ($event->teams as $team) {
             foreach ($team->members as $member) {
                 $member->notify(new DiplomaNotification($event, $team, null, 'participation'));
@@ -487,6 +487,7 @@ class ExportController extends Controller
         }
 
         $total = $participationCount + $winnerCount;
-        return back()->with('success', "Se enviaron {$total} diplomas por correo ({$participationCount} de participación + {$winnerCount} de ganadores).");
+        return back()->with('success', "Se enviaron {$total} diplomas por correo ({$participationCount} de participaciÃ³n + {$winnerCount} de ganadores).");
     }
 }
+

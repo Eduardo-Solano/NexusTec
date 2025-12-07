@@ -38,8 +38,8 @@ class AwardController extends Controller
     {
         $event = Event::with(['teams.project', 'teams.leader'])->findOrFail($request->event_id);
         
-        // Los premios SOLO se asignan cuando el evento ha finalizado
-        if ($event->isOpen()) {
+        // Los premios SOLO se asignan cuando el evento ha finalizado (estado cerrado)
+        if (!$event->allowsAwardsAndDiplomas()) {
             return redirect()->route('events.rankings', $event)
                 ->with('error', 'Solo puedes asignar premios cuando el evento haya finalizado.');
         }
@@ -75,9 +75,9 @@ class AwardController extends Controller
             'name' => 'nullable|string|max:255',
         ]);
 
-        // Los premios SOLO se asignan cuando el evento ha finalizado
+        // Los premios SOLO se asignan cuando el evento ha finalizado (estado cerrado)
         $event = Event::findOrFail($validated['event_id']);
-        if ($event->isOpen()) {
+        if (!$event->allowsAwardsAndDiplomas()) {
             return back()->with('error', 'Solo puedes asignar premios cuando el evento haya finalizado.');        
         }
 

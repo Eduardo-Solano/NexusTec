@@ -10,31 +10,33 @@ class Event extends Model
     /** @use HasFactory<\Database\Factories\EventFactory> */
     use HasFactory;
 
-    protected $fillable = ['name', 'description', 'start_date', 'end_date', 'is_active', 'show_feedback_to_students'];
+    // Constantes para los estados del evento
+    const STATUS_REGISTRATION = 'registration'; // Período de inscripciones
+    const STATUS_ACTIVE = 'active';             // Evento en curso (proyectos, evaluaciones)
+    const STATUS_CLOSED = 'closed';             // Evento cerrado (ganadores, diplomas)
+
+    protected $fillable = ['name', 'description', 'start_date', 'end_date', 'status', 'show_feedback_to_students'];
 
     protected $casts = [
         'start_date' => 'datetime',
         'end_date' => 'datetime',
-        'is_active' => 'boolean',
         'show_feedback_to_students' => 'boolean',
     ];
 
     /**
-     * Verificar si el evento está abierto para inscripciones/acciones
+     * Verificar si el evento está en período de inscripciones
      */
-    public function isOpen(): bool
+    public function isRegistrationOpen(): bool
     {
-        // El evento debe estar activo
-        if (!$this->is_active) {
-            return false;
-        }
+        return $this->status === self::STATUS_REGISTRATION;
+    }
 
-        // La fecha de fin no debe haber pasado
-        if ($this->end_date && $this->end_date->isPast()) {
-            return false;
-        }
-
-        return true;
+    /**
+     * Verificar si el evento está activo (en curso)
+     */
+    public function isActive(): bool
+    {
+        return $this->status === self::STATUS_ACTIVE;
     }
 
     /**
@@ -42,27 +44,65 @@ class Event extends Model
      */
     public function isClosed(): bool
     {
-        return !$this->isOpen();
+        return $this->status === self::STATUS_CLOSED;
     }
 
     /**
-     * Obtener el estado del evento como texto
+     * Verificar si el evento permite inscripciones de equipos
+     * Solo en estado "registration"
      */
-    public function getStatusAttribute(): string
+    public function allowsTeamRegistration(): bool
     {
-        if (!$this->is_active) {
-            return 'Inactivo';
-        }
+        return $this->isRegistrationOpen();
+    }
 
-        if ($this->end_date && $this->end_date->isPast()) {
-            return 'Finalizado';
-        }
+    /**
+     * Verificar si el evento permite acciones de proyecto (crear, editar, enviar)
+     * Solo en estado "active"
+     */
+    public function allowsProjectActions(): bool
+    {
+        return $this->isActive();
+    }
 
-        if ($this->start_date && $this->start_date->isFuture()) {
-            return 'Próximamente';
-        }
+    /**
+     * Verificar si el evento permite evaluaciones de jueces
+     * Solo en estado "active"
+     */
+    public function allowsEvaluations(): bool
+    {
+        return $this->isActive();
+    }
 
-        return 'En curso';
+    /**
+     * Verificar si el evento permite gestión de premios y diplomas
+     * Solo en estado "closed"
+     */
+    public function allowsAwardsAndDiplomas(): bool
+    {
+        return $this->isClosed();
+    }
+
+    /**
+     * Verificar si el evento está abierto para alguna acción (legacy support)
+     * Retorna true si NO está cerrado
+     */
+    public function isOpen(): bool
+    {
+        return !$this->isClosed();
+    }
+
+    /**
+     * Obtener el estado del evento como texto legible
+     */
+    public function getStatusLabelAttribute(): string
+    {
+        return match($this->status) {
+            self::STATUS_REGISTRATION => 'Inscripciones Abiertas',
+            self::STATUS_ACTIVE => 'En Curso',
+            self::STATUS_CLOSED => 'Finalizado',
+            default => 'Desconocido'
+        };
     }
 
     /**
@@ -71,12 +111,36 @@ class Event extends Model
     public function getStatusColorAttribute(): string
     {
         return match($this->status) {
-            'Inactivo' => 'gray',
-            'Finalizado' => 'red',
-            'Próximamente' => 'blue',
-            'En curso' => 'green',
+            self::STATUS_REGISTRATION => 'blue',
+            self::STATUS_ACTIVE => 'green',
+            self::STATUS_CLOSED => 'red',
             default => 'gray'
         };
+    }
+
+    /**
+     * Obtener el icono del estado
+     */
+    public function getStatusIconAttribute(): string
+    {
+        return match($this->status) {
+            self::STATUS_REGISTRATION => '📝',
+            self::STATUS_ACTIVE => '🚀',
+            self::STATUS_CLOSED => '🏆',
+            default => '❓'
+        };
+    }
+
+    /**
+     * Obtener todos los estados disponibles
+     */
+    public static function getStatuses(): array
+    {
+        return [
+            self::STATUS_REGISTRATION => 'Inscripciones Abiertas',
+            self::STATUS_ACTIVE => 'En Curso',
+            self::STATUS_CLOSED => 'Finalizado',
+        ];
     }
 
     public function getAvailableRolesAttribute()

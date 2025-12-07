@@ -24,7 +24,7 @@ class ReportController extends Controller
         // Estadísticas generales
         $stats = [
             'total_events' => Event::count(),
-            'active_events' => Event::where('is_active', true)->count(),
+            'active_events' => Event::whereIn('status', [Event::STATUS_REGISTRATION, Event::STATUS_ACTIVE])->count(),
             'total_teams' => Team::count(),
             'total_projects' => Project::count(),
             'total_students' => User::role('student')->count(),

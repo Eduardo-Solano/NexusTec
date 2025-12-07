@@ -14,7 +14,7 @@ class PublicController extends Controller
     public function winners()
     {
         // Obtener eventos cerrados que tienen premios
-        $eventsWithAwards = Event::where('is_active', false)
+        $eventsWithAwards = Event::where('status', Event::STATUS_CLOSED)
             ->whereHas('awards')
             ->with(['awards.team.project', 'awards.team.members', 'awards.team.leader'])
             ->orderBy('end_date', 'desc')
@@ -29,7 +29,7 @@ class PublicController extends Controller
     public function eventWinners(Event $event)
     {
         // Solo mostrar si el evento está cerrado
-        if ($event->is_active) {
+        if (!$event->isClosed()) {
             abort(404, 'Los resultados aún no están disponibles.');
         }
 
