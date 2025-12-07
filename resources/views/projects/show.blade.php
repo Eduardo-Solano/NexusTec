@@ -112,6 +112,89 @@
                         </div>
                     </div>
 
+                    {{-- SECCIÓN DE ARCHIVOS ADJUNTOS --}}
+                    @if($project->hasDocumentation() || $project->hasImage() || $project->hasVideo())
+                        <div class="bg-gray-800 rounded-2xl p-8 border border-gray-700 shadow-lg">
+                            <h3 class="text-lg font-bold text-white mb-6 flex items-center border-b border-gray-700 pb-4">
+                                <svg class="w-5 h-5 mr-3 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
+                                </svg>
+                                Material del Proyecto
+                            </h3>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {{-- Documentación PDF --}}
+                                @if($project->hasDocumentation())
+                                    <a href="{{ $project->documentation_url }}" target="_blank" 
+                                       class="group flex items-center gap-4 p-4 bg-gray-900/50 border border-gray-700 rounded-xl hover:border-blue-500/50 hover:bg-blue-500/5 transition">
+                                        <div class="w-14 h-14 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center group-hover:scale-105 transition">
+                                            <svg class="w-8 h-8 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                                            </svg>
+                                        </div>
+                                        <div class="flex-1">
+                                            <p class="text-white font-bold group-hover:text-blue-400 transition">Documentación</p>
+                                            <p class="text-gray-500 text-xs">Archivo PDF</p>
+                                        </div>
+                                        <svg class="w-5 h-5 text-gray-500 group-hover:text-blue-400 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                        </svg>
+                                    </a>
+                                @endif
+
+                                {{-- Imagen del Proyecto --}}
+                                @if($project->hasImage())
+                                    <a href="{{ $project->image_url }}" target="_blank" 
+                                       class="group flex items-center gap-4 p-4 bg-gray-900/50 border border-gray-700 rounded-xl hover:border-purple-500/50 hover:bg-purple-500/5 transition">
+                                        <div class="w-14 h-14 rounded-xl overflow-hidden border border-gray-600">
+                                            <img src="{{ $project->image_url }}" alt="Imagen del proyecto" class="w-full h-full object-cover">
+                                        </div>
+                                        <div class="flex-1">
+                                            <p class="text-white font-bold group-hover:text-purple-400 transition">Imagen/Logo</p>
+                                            <p class="text-gray-500 text-xs">Ver imagen completa</p>
+                                        </div>
+                                        <svg class="w-5 h-5 text-gray-500 group-hover:text-purple-400 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                        </svg>
+                                    </a>
+                                @endif
+                            </div>
+
+                            {{-- Video Embebido --}}
+                            @if($project->hasVideo())
+                                <div class="mt-6 pt-6 border-t border-gray-700">
+                                    <p class="text-gray-300 font-bold mb-4 flex items-center gap-2">
+                                        <svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/>
+                                        </svg>
+                                        Video Demostrativo
+                                    </p>
+                                    <div class="aspect-video rounded-xl overflow-hidden border border-gray-700 bg-black">
+                                        @if($project->embed_video_url)
+                                            <iframe 
+                                                src="{{ $project->embed_video_url }}" 
+                                                class="w-full h-full"
+                                                frameborder="0" 
+                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                                allowfullscreen>
+                                            </iframe>
+                                        @else
+                                            <div class="w-full h-full flex flex-col items-center justify-center text-gray-500 p-8">
+                                                <svg class="w-12 h-12 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                                </svg>
+                                                <p class="text-sm font-medium">Video externo</p>
+                                                <a href="{{ $project->video_url }}" target="_blank" class="text-blue-400 hover:text-blue-300 text-sm mt-1">
+                                                    Ver en sitio original →
+                                                </a>
+                                            </div>
+                                        @endif
+                                    </div>
+                                </div>
+                            @endif
+                        </div>
+                    @endif
+
                     {{-- SECCIÓN DE JUECES ASIGNADOS --}}
                     <div class="bg-gray-800 rounded-2xl border border-gray-700 shadow-lg overflow-hidden">
                         <div class="p-6 border-b border-gray-700 flex items-center justify-between">

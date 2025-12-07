@@ -42,7 +42,7 @@
                         </div>
                     </div>
 
-                    <form action="{{ route('projects.update', $project) }}" method="POST" class="space-y-8">
+                    <form action="{{ route('projects.update', $project) }}" method="POST" enctype="multipart/form-data" class="space-y-8">
                         @csrf
                         @method('PUT')
 
@@ -75,6 +75,82 @@
                                 class="block w-full bg-gray-900 border border-gray-600 text-white placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-sm"
                                 placeholder="Describe brevemente en qué consiste tu solución..." required>{{ old('description', $project->description) }}</textarea>
                             <x-input-error :messages="$errors->get('description')" class="mt-2" />
+                        </div>
+
+                        {{-- Sección de Archivos Adjuntos --}}
+                        <div class="border-t border-gray-700 pt-8">
+                            <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                                </svg>
+                                Archivos Adjuntos
+                            </h3>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {{-- Documentación PDF --}}
+                                <div>
+                                    <x-input-label for="documentation" :value="__('📄 Documentación (PDF)')" class="text-gray-300 font-bold mb-2" />
+                                    @if($project->hasDocumentation())
+                                        <div class="mb-3 p-3 bg-green-900/20 border border-green-500/30 rounded-lg flex items-center justify-between">
+                                            <div class="flex items-center gap-2 text-green-400">
+                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                                </svg>
+                                                <span class="text-sm font-bold">Archivo actual</span>
+                                            </div>
+                                            <div class="flex items-center gap-2">
+                                                <a href="{{ $project->documentation_url }}" target="_blank" class="text-xs text-blue-400 hover:text-blue-300">Ver PDF</a>
+                                                <label class="flex items-center gap-1 text-xs text-red-400 cursor-pointer">
+                                                    <input type="checkbox" name="remove_documentation" value="1" class="rounded border-gray-600 bg-gray-900 text-red-500">
+                                                    Eliminar
+                                                </label>
+                                            </div>
+                                        </div>
+                                    @endif
+                                    <input type="file" id="documentation" name="documentation" accept=".pdf"
+                                        class="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer bg-gray-900 border border-gray-600 rounded-lg p-2" />
+                                    <p class="text-xs text-gray-500 mt-1">Máximo 10MB. {{ $project->hasDocumentation() ? 'Subir nuevo archivo reemplazará el actual.' : '' }}</p>
+                                    <x-input-error :messages="$errors->get('documentation')" class="mt-2" />
+                                </div>
+
+                                {{-- Imagen del Proyecto --}}
+                                <div>
+                                    <x-input-label for="image" :value="__('🖼️ Imagen/Logo del Proyecto')" class="text-gray-300 font-bold mb-2" />
+                                    @if($project->hasImage())
+                                        <div class="mb-3 p-3 bg-purple-900/20 border border-purple-500/30 rounded-lg">
+                                            <div class="flex items-center justify-between mb-2">
+                                                <span class="text-purple-400 text-sm font-bold">Imagen actual</span>
+                                                <label class="flex items-center gap-1 text-xs text-red-400 cursor-pointer">
+                                                    <input type="checkbox" name="remove_image" value="1" class="rounded border-gray-600 bg-gray-900 text-red-500">
+                                                    Eliminar
+                                                </label>
+                                            </div>
+                                            <img src="{{ $project->image_url }}" alt="Imagen del proyecto" class="w-full h-24 object-cover rounded-lg">
+                                        </div>
+                                    @endif
+                                    <input type="file" id="image" name="image" accept="image/jpeg,image/png,image/jpg,image/webp"
+                                        class="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-purple-600 file:text-white hover:file:bg-purple-700 cursor-pointer bg-gray-900 border border-gray-600 rounded-lg p-2" />
+                                    <p class="text-xs text-gray-500 mt-1">Máximo 5MB. JPG, PNG o WebP.</p>
+                                    <x-input-error :messages="$errors->get('image')" class="mt-2" />
+                                </div>
+                            </div>
+
+                            {{-- Video URL --}}
+                            <div class="mt-6">
+                                <x-input-label for="video_url" :value="__('🎬 Video Demostrativo (YouTube/Vimeo)')" class="text-gray-300 font-bold mb-2" />
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <svg class="h-5 w-5 text-red-500" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/>
+                                        </svg>
+                                    </div>
+                                    <x-text-input id="video_url" 
+                                        class="block w-full pl-10 py-3 bg-gray-900 border border-gray-600 text-white placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500 rounded-md shadow-sm" 
+                                        type="url" name="video_url" :value="old('video_url', $project->video_url)" placeholder="https://www.youtube.com/watch?v=..." />
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">Opcional. Enlace a un video de demostración.</p>
+                                <x-input-error :messages="$errors->get('video_url')" class="mt-2" />
+                            </div>
                         </div>
 
                         <div class="flex items-center justify-between mt-12 pt-6 border-t border-gray-700">

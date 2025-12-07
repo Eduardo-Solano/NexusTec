@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class ProjectController extends Controller
 {
@@ -89,6 +90,9 @@ class ProjectController extends Controller
             'name' => 'required|string|max:100',
             'description' => 'required|string|max:1000',
             'repository_url' => 'required|url',
+            'documentation' => 'nullable|file|mimes:pdf|max:10240', // Máx 10MB
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120', // Máx 5MB
+            'video_url' => 'nullable|url',
         ]);
 
         $team = Team::findOrFail($request->team_id);
@@ -109,12 +113,33 @@ class ProjectController extends Controller
                 ->with('info', 'El proyecto ya fue entregado anteriormente.');
         }
 
+        // Procesar archivos subidos
+        $documentationPath = null;
+        $imagePath = null;
+
+        if ($request->hasFile('documentation')) {
+            $documentationPath = $request->file('documentation')->store(
+                "projects/{$team->event_id}/{$team->id}/docs", 
+                'public'
+            );
+        }
+
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store(
+                "projects/{$team->event_id}/{$team->id}/images", 
+                'public'
+            );
+        }
+
         // Crear el proyecto
         $project = Project::create([
             'name' => $request->name,
             'description' => $request->description,
             'repository_url' => $request->repository_url,
             'team_id' => $team->id,
+            'documentation_path' => $documentationPath,
+            'image_path' => $imagePath,
+            'video_url' => $request->video_url,
         ]);
 
         // Registrar actividad
@@ -227,9 +252,53 @@ class ProjectController extends Controller
             'name' => 'required|string|max:100',
             'description' => 'required|string|max:1000',
             'repository_url' => 'required|url',
+            'documentation' => 'nullable|file|mimes:pdf|max:10240', // Máx 10MB
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120', // Máx 5MB
+            'video_url' => 'nullable|url',
+            'remove_documentation' => 'nullable|boolean',
+            'remove_image' => 'nullable|boolean',
         ]);
-        
-        $project->update($validated);
+
+        // Manejar eliminación de archivos existentes
+        if ($request->boolean('remove_documentation') && $project->documentation_path) {
+            Storage::disk('public')->delete($project->documentation_path);
+            $project->documentation_path = null;
+        }
+
+        if ($request->boolean('remove_image') && $project->image_path) {
+            Storage::disk('public')->delete($project->image_path);
+            $project->image_path = null;
+        }
+
+        // Procesar nuevos archivos subidos
+        if ($request->hasFile('documentation')) {
+            // Eliminar archivo anterior si existe
+            if ($project->documentation_path) {
+                Storage::disk('public')->delete($project->documentation_path);
+            }
+            $project->documentation_path = $request->file('documentation')->store(
+                "projects/{$project->team->event_id}/{$project->team_id}/docs", 
+                'public'
+            );
+        }
+
+        if ($request->hasFile('image')) {
+            // Eliminar archivo anterior si existe
+            if ($project->image_path) {
+                Storage::disk('public')->delete($project->image_path);
+            }
+            $project->image_path = $request->file('image')->store(
+                "projects/{$project->team->event_id}/{$project->team_id}/images", 
+                'public'
+            );
+        }
+
+        // Actualizar campos básicos
+        $project->name = $validated['name'];
+        $project->description = $validated['description'];
+        $project->repository_url = $validated['repository_url'];
+        $project->video_url = $request->video_url;
+        $project->save();
         
         return redirect()->route('projects.show', $project)
             ->with('success', 'Proyecto actualizado correctamente.');
@@ -264,6 +333,9 @@ class ProjectController extends Controller
         
         // Primero remover jueces asignados (limpieza de tabla pivot)
         $project->judges()->detach();
+
+        // Eliminar archivos asociados
+        $project->deleteFiles();
         
         // Eliminar el proyecto
         $project->delete();
