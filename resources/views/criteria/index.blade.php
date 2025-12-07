@@ -9,7 +9,7 @@
                     <p class="text-gray-400 text-sm mt-1">Gestiona los criterios que se usarán para evaluar los proyectos</p>
                 </div>
                 <a href="{{ route('criteria.create') }}" 
-                    class="bg-ito-orange hover:bg-orange-600 text-white text-sm font-bold py-2.5 px-5 rounded-lg shadow-lg transition transform hover:-translate-y-0.5 flex items-center gap-2">
+                    class="bg-ito-orange/70 hover:bg-ito-orange text-white text-sm font-bold py-2.5 px-5 rounded-lg shadow-lg transition transform hover:-translate-y-0.5 flex items-center gap-2">
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                     </svg>

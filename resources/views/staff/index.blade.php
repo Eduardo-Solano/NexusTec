@@ -10,13 +10,13 @@
                 <div class="flex gap-3">
                     <!-- Botón Importar CSV -->
                     <button type="button" onclick="document.getElementById('csv-modal').classList.remove('hidden')" 
-                        class="bg-green-600 hover:bg-green-700 text-white text-sm font-bold py-2 px-4 rounded-lg shadow-lg transition flex items-center gap-2">
+                        class="bg-green-600/70 hover:bg-green-600 text-white text-sm font-bold py-2 px-4 rounded-lg shadow-lg transition flex items-center gap-2">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                         </svg>
                         Importar CSV
                     </button>
-                    <a href="{{ route('staff.create') }}" class="bg-ito-orange hover:bg-orange-600 text-white text-sm font-bold py-2 px-4 rounded-lg shadow-lg transition flex items-center gap-2">
+                    <a href="{{ route('staff.create') }}" class="bg-ito-orange/70 hover:bg-ito-orange text-white text-sm font-bold py-2 px-4 rounded-lg shadow-lg transition flex items-center gap-2">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                         </svg>
@@ -73,17 +73,17 @@
 
                     <!-- Botones -->
                     <div class="flex gap-2">
-                        <button type="submit" 
-                            class="px-4 py-2.5 bg-tecnm-blue hover:bg-blue-700 text-white font-bold rounded-lg transition flex items-center gap-2">
-                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <button type="submit"
+                            class="px-4 py-2 bg-tecnm-blue hover:bg-blue-700 text-white text-sm font-bold rounded-lg transition flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
                             </svg>
                             Filtrar
                         </button>
                         @if(request('search') || request('role_type'))
                             <a href="{{ route('staff.index') }}" 
-                                class="px-4 py-2.5 bg-gray-600 hover:bg-gray-500 text-white font-bold rounded-lg transition flex items-center gap-2">
-                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white text-sm font-bold rounded-lg transition flex items-center gap-2 border border-gray-600">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                 </svg>
                                 Limpiar

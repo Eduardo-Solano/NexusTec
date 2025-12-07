@@ -7,7 +7,7 @@
 
             @role('admin|staff')
                 <a href="{{ route('events.create') }}"
-                    class="bg-ito-orange hover:bg-orange-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition transform hover:scale-105 flex items-center gap-2">
+                    class="bg-ito-orange/70 hover:bg-ito-orange text-white font-bold py-2 px-4 rounded-lg shadow-md transition transform hover:scale-105 flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd"
                             d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
@@ -136,16 +136,16 @@
 
                     <!-- Fila 3: Botones -->
                     <div class="flex gap-3 justify-end pt-2">
-                        <button type="submit" 
-                            class="px-6 py-3 bg-gradient-to-r from-tecnm-blue to-blue-600 hover:from-blue-600 hover:to-tecnm-blue text-white font-bold rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-xl flex items-center gap-2">
-                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <button type="submit"
+                            class="px-4 py-2 bg-tecnm-blue hover:bg-blue-700 text-white text-sm font-bold rounded-lg transition flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
                             </svg>
                             Filtrar
                         </button>
                         @if(request('search') || request('status') || request('date') || request('month') || request('year'))
                             <a href="{{ route('events.index') }}" 
-                                class="px-6 py-3 bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white font-bold rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-xl flex items-center gap-2">
+                                class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white text-sm font-bold rounded-lg transition flex items-center gap-2 border border-gray-600">
                                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                 </svg>
