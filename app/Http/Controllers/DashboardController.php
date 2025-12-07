@@ -32,6 +32,7 @@ class DashboardController extends Controller
 
             // ========== NUEVO: Progreso del Evento Activo Principal ==========
             $activeEvent = Event::where('is_active', true)
+                ->where('end_date', '>', now()) // IMPORTANTE: Filtrar expirados por hora exacta
                 ->withCount(['teams', 'criteria'])
                 ->with(['teams.project.judges', 'teams.project.evaluations', 'awards'])
                 ->orderBy('end_date', 'asc')
@@ -71,6 +72,7 @@ class DashboardController extends Controller
                     'required_evaluations' => $requiredEvaluations,
                     'awards_count' => $activeEvent->awards->count(),
                     'days_remaining' => now()->diffInDays($activeEvent->end_date, false),
+                    'hours_remaining' => now()->diffInHours($activeEvent->end_date, false) + (now()->diffInMinutes($activeEvent->end_date, false) % 60) / 60, // Horas con decimales para precisión
                 ];
             }
 

@@ -330,21 +330,28 @@
                             </div>
                             
                             {{-- Countdown --}}
-                            @if($data['event_progress']['days_remaining'] > 0)
+                            @php
+                                $hoursRemaining = isset($data['event_progress']['hours_remaining']) ? $data['event_progress']['hours_remaining'] : (isset($data['event_progress']['days_remaining']) ? $data['event_progress']['days_remaining'] * 24 : 0);
+                                $daysRemaining = $data['event_progress']['days_remaining'];
+                            @endphp
+
+                            @if($daysRemaining > 1)
                                 <div class="flex items-center gap-2 px-4 py-2 bg-blue-500/10 border border-blue-500/20 rounded-xl">
                                     <svg class="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                     </svg>
-                                    <span class="text-blue-400 font-bold">{{ round($data['event_progress']['days_remaining']) }} días restantes</span>
+                                    <span class="text-blue-400 font-bold">{{ round($daysRemaining) }} días restantes</span>
                                 </div>
-                            @elseif($data['event_progress']['days_remaining'] == 0)
+                            @elseif($hoursRemaining > 0)
                                 <div class="flex items-center gap-2 px-4 py-2 bg-amber-500/10 border border-amber-500/20 rounded-xl animate-pulse">
                                     <svg class="w-5 h-5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                     </svg>
-                                    <span class="text-amber-400 font-bold">¡Último día!</span>
+                                    <span class="text-amber-400 font-bold">
+                                        {{ floor($hoursRemaining) }}h {{ round(($hoursRemaining - floor($hoursRemaining)) * 60) }}m restantes
+                                    </span>
                                 </div>
-                            @else
+                            @elseif($daysRemaining == 0 && $hoursRemaining <= 0)
                                 <div class="flex items-center gap-2 px-4 py-2 bg-red-500/10 border border-red-500/20 rounded-xl">
                                     <svg class="w-5 h-5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>

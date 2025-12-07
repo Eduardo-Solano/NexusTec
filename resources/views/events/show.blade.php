@@ -55,11 +55,11 @@
                             </div>
 
                             <div
-                                class="px-4 py-1.5 rounded-full border {{ $event->is_active ? 'bg-green-500/10 border-green-500/50 text-green-400' : 'bg-red-500/10 border-red-500/50 text-red-400' }} backdrop-blur-md shadow-[0_0_15px_rgba(0,0,0,0.5)]">
+                                class="px-4 py-1.5 rounded-full border {{ $event->isOpen() ? 'bg-green-500/10 border-green-500/50 text-green-400' : 'bg-red-500/10 border-red-500/50 text-red-400' }} backdrop-blur-md shadow-[0_0_15px_rgba(0,0,0,0.5)]">
                                 <span class="flex items-center text-xs font-black uppercase tracking-widest gap-2">
                                     <span
-                                        class="w-2 h-2 rounded-full {{ $event->is_active ? 'bg-green-400 animate-pulse' : 'bg-red-400' }}"></span>
-                                    {{ $event->is_active ? 'Inscripciones Abiertas' : 'Cerrado' }}
+                                        class="w-2 h-2 rounded-full {{ $event->isOpen() ? 'bg-green-400 animate-pulse' : 'bg-red-400' }}"></span>
+                                    {{ $event->isOpen() ? 'Inscripciones Abiertas' : 'Inscripciones Cerradas' }}
                                 </span>
                             </div>
                         </div>
@@ -75,7 +75,7 @@
                                 </p>
 
                                 @can('events.join')
-                                    @if ($event->is_active)
+                                    @if ($event->isOpen())
                                         <div class="mt-10">
                                             @if ($userHasTeam)
                                                 <div
@@ -104,6 +104,20 @@
                                                 <p class="mt-4 text-sm text-gray-500">¿Buscas equipo? Revisa la lista de
                                                     abajo y únete a uno.</p>
                                             @endif
+                                        </div>
+                                    @else
+                                        <div class="mt-10">
+                                            <div class="inline-flex items-center px-6 py-3 bg-red-500/10 border border-red-500/20 rounded-xl">
+                                                <div class="flex items-center gap-3">
+                                                    <div class="p-2 bg-red-500 rounded-full"></div>
+                                                    <div>
+                                                        <p class="text-red-400 font-bold text-sm uppercase tracking-wider">
+                                                            Evento Finalizado
+                                                        </p>
+                                                        <p class="text-gray-400 text-xs">Las inscripciones y participación han cerrado.</p>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     @endif
                                 @endcan
