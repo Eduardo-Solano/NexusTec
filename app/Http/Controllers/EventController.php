@@ -121,6 +121,12 @@ class EventController extends Controller
             'criteria.*' => 'exists:criteria,id', // Que el ID exista
         ]);
 
+        // VALIDACIÓN CUSTOM: Verificar que la suma de puntajes sea EXACTAMENTE 100
+        $totalPoints = Criterion::whereIn('id', $validated['criteria'])->sum('max_points');
+        if ($totalPoints != 100) {
+            return back()->withErrors(['criteria' => "La suma de los criterios seleccionados es $totalPoints. Debe ser exactamente 100 puntos."])->withInput();
+        }
+
         // 2. Crear el Evento
         $event = Event::create([
             'name' => $validated['name'],
@@ -199,6 +205,12 @@ class EventController extends Controller
             // El checkbox si no se marca no se envía, así que lo manejamos abajo
             'criteria' => 'required|array|min:1', // Debe elegir al menos uno
         ]);
+
+        // VALIDACIÓN CUSTOM: Verificar que la suma de puntajes sea EXACTAMENTE 100
+        $totalPoints = Criterion::whereIn('id', $validated['criteria'])->sum('max_points');
+        if ($totalPoints != 100) {
+            return back()->withErrors(['criteria' => "La suma de los criterios seleccionados es $totalPoints. Debe ser exactamente 100 puntos."])->withInput();
+        }
 
         // 2. Actualizar
         $event->update([
