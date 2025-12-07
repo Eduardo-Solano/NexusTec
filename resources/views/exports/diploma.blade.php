@@ -1,351 +1,321 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <title>Diploma - {{ $participant->name }}</title>
+    <title>Diploma</title>
     <style>
         @page {
+            size: A4 landscape;
             margin: 0;
-            size: 279mm 216mm landscape;
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
         }
         
         body {
-            font-family: 'DejaVu Sans', sans-serif;
-            background: #fff;
-            width: 279mm;
-            height: 216mm;
+            margin: 0;
+            padding: 0;
+            font-family: "DejaVu Sans", sans-serif;
+            width: 100%;
+            height: 100%;
         }
-        
-        .diploma {
-            width: 279mm;
-            height: 216mm;
-            padding: 10px;
+
+        .page-container {
             position: relative;
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            width: 297mm;
+            height: 210mm;
             overflow: hidden;
         }
-        
+
         .border-frame {
-            border: 5px double #1E3A5F;
-            padding: 12px 20px;
-            height: 100%;
-            position: relative;
-        }
-        
-        .corner-decoration {
             position: absolute;
-            width: 35px;
-            height: 35px;
+            top: 10mm;
+            left: 10mm;
+            width: 267mm;
+            height: 180mm;
+            border: 3px double #1E3A5F;
+            padding: 5mm;
+            box-sizing: border-box;
+        }
+
+        .corner {
+            position: absolute;
+            width: 20px;
+            height: 20px;
             border: 2px solid #F97316;
+            z-index: 10;
         }
-        
-        .corner-tl { top: 6px; left: 6px; border-right: none; border-bottom: none; }
-        .corner-tr { top: 6px; right: 6px; border-left: none; border-bottom: none; }
-        .corner-bl { bottom: 6px; left: 6px; border-right: none; border-top: none; }
-        .corner-br { bottom: 6px; right: 6px; border-left: none; border-top: none; }
-        
-        .header {
-            text-align: center;
-            margin-bottom: 5px;
-        }
-        
-        .logo-section {
-            display: table;
+        .corner-tl { top: -2px; left: -2px; border-right: none; border-bottom: none; }
+        .corner-tr { top: -2px; right: -2px; border-left: none; border-bottom: none; }
+        .corner-bl { bottom: -2px; left: -2px; border-right: none; border-top: none; }
+        .corner-br { bottom: -2px; right: -2px; border-left: none; border-top: none; }
+
+        .main-table {
             width: 100%;
-            margin-bottom: 3px;
+            height: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
         }
-        
-        .logo-left, .logo-right {
-            display: table-cell;
-            width: 15%;
-            vertical-align: middle;
-            text-align: center;
-        }
-        
-        .logo-left img, .logo-right img {
-            max-width: 55px;
-            max-height: 55px;
-        }
-        
-        .logo-center {
-            display: table-cell;
-            width: 70%;
+
+        .main-table td {
             text-align: center;
             vertical-align: middle;
         }
+
+        .header-row { height: 15%; }
         
-        .institution {
-            font-size: 9px;
+        .logo-img {
+            width: 80px;
+            height: auto;
+        }
+
+        .institution-text {
+            font-size: 12px;
             color: #1E3A5F;
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 1px;
             font-weight: bold;
+            line-height: 1.4;
         }
-        
-        .campus {
-            font-size: 10px;
-            color: #F97316;
-            font-weight: bold;
-            margin-top: 1px;
-        }
-        
-        .diploma-title {
-            text-align: center;
-            margin: 8px 0;
-        }
-        
-        .diploma-title h1 {
-            font-size: 28px;
-            color: #1E3A5F;
-            text-transform: uppercase;
-            letter-spacing: 5px;
-            font-weight: bold;
-        }
-        
-        .subtitle {
-            font-size: 10px;
-            color: #666;
-            margin-top: 2px;
-            letter-spacing: 2px;
-        }
-        
-        .content {
-            text-align: center;
-            margin: 8px 0;
-        }
-        
-        .otorgado {
-            font-size: 10px;
-            color: #666;
-            margin-bottom: 5px;
-        }
-        
-        .participant-name {
-            font-size: 22px;
-            color: #1E3A5F;
-            font-weight: bold;
-            padding: 4px 0;
-            border-bottom: 2px solid #F97316;
-            display: inline-block;
-            min-width: 300px;
-        }
-        
-        .recognition-text {
-            font-size: 10px;
-            color: #444;
-            margin: 8px auto;
-            max-width: 500px;
-            line-height: 1.5;
-        }
-        
-        .event-name {
+
+        .campus-text {
             font-size: 14px;
             color: #F97316;
             font-weight: bold;
-            margin: 5px 0;
+            margin-top: 5px;
         }
-        
-        .project-info {
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 5px;
-            padding: 6px 15px;
-            display: inline-block;
-            margin: 5px 0;
+
+        .title-row { height: 15%; }
+
+        .diploma-title {
+            font-size: 42px;
+            color: #1E3A5F;
+            text-transform: uppercase;
+            letter-spacing: 8px;
+            font-weight: bold;
+            margin: 0;
+            line-height: 1;
         }
-        
-        .project-label {
-            font-size: 7px;
+
+        .diploma-subtitle {
+            font-size: 14px;
             color: #666;
+            letter-spacing: 3px;
+            margin-top: 5px;
+            text-transform: uppercase;
+        }
+
+        .participant-row { height: 20%; }
+
+        .otorga-text {
+            font-size: 12px;
+            color: #555;
+            margin-bottom: 10px;
+        }
+
+        .participant-name {
+            font-size: 32px;
+            color: #1E3A5F;
+            font-weight: bold;
+            border-bottom: 2px solid #F97316;
+            display: inline-block;
+            padding: 0 30px 5px 30px;
+            margin: 0;
+        }
+
+        .details-row {
+            height: 25%;
+            vertical-align: top !important;
+            padding-top: 10px;
+        }
+
+        .recognition-text {
+            font-size: 13px;
+            color: #444;
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+
+        .event-name {
+            font-size: 20px;
+            color: #F97316;
+            font-weight: bold;
+        }
+
+        .project-container {
+            margin-top: 15px;
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 10px 20px;
+            display: inline-block;
+        }
+
+        .project-label {
+            font-size: 10px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: block;
+            margin-bottom: 3px;
+        }
+
+        .project-name {
+            font-size: 16px;
+            color: #1E3A5F;
+            font-weight: bold;
+            display: block;
+        }
+
+        .team-name {
+            font-size: 12px;
+            color: #666;
+            margin-top: 3px;
+            display: block;
+        }
+
+        .winner-badge { margin-top: 10px; }
+        .winner-text {
+            font-size: 18px;
+            color: #1E3A5F;
+            font-weight: bold;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
-        
-        .project-name {
-            font-size: 10px;
-            color: #1E3A5F;
-            font-weight: bold;
+
+        .signatures-row {
+            height: 25%;
+            vertical-align: bottom !important;
         }
-        
-        .team-name {
-            font-size: 9px;
-            color: #888;
-            margin-top: 1px;
-        }
-        
-        .award-section {
-            margin: 6px 0;
-            text-align: center;
-        }
-        
-        .medal {
-            font-size: 30px;
-            display: block;
-            margin-bottom: 2px;
-        }
-        
-        .award-category {
-            font-size: 13px;
-            color: #1E3A5F;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-        
-        .signatures {
-            display: table;
+
+        .signatures-table {
             width: 100%;
-            margin-top: 10px;
+            margin-bottom: 10px;
         }
-        
-        .signature-box {
-            display: table-cell;
+
+        .signature-cell {
             width: 33.33%;
             text-align: center;
+            vertical-align: bottom;
             padding: 0 10px;
         }
-        
+
         .signature-line {
-            border-top: 1px solid #333;
-            margin: 0 auto;
-            width: 140px;
-            padding-top: 4px;
+            border-top: 1px solid #999;
+            width: 80%;
+            margin: 0 auto 8px auto;
         }
-        
-        .signature-name {
-            font-size: 8px;
-            color: #333;
+
+        .signer-name {
+            font-size: 11px;
             font-weight: bold;
+            color: #333;
+            margin-bottom: 2px;
         }
-        
-        .signature-title {
-            font-size: 7px;
+
+        .signer-title {
+            font-size: 9px;
             color: #666;
         }
         
-        .footer {
-            text-align: center;
-            margin-top: 8px;
-        }
-        
-        .date-location {
-            font-size: 8px;
-            color: #666;
-        }
-        
-        .folio {
-            font-size: 7px;
+        .date-text {
+            font-size: 9px;
             color: #999;
-            margin-top: 3px;
+            margin-top: 5px;
         }
     </style>
 </head>
 <body>
-    <div class="diploma">
+    <div class="page-container">
         <div class="border-frame">
-            <div class="corner-decoration corner-tl"></div>
-            <div class="corner-decoration corner-tr"></div>
-            <div class="corner-decoration corner-bl"></div>
-            <div class="corner-decoration corner-br"></div>
-            
-            <div class="header">
-                <div class="logo-section">
-                    <div class="logo-left">
-                        <img src="{{ public_path('img/logo-tecnm.png') }}" alt="TecNM">
-                    </div>
-                    <div class="logo-center">
-                        <div class="institution">Tecnológico Nacional de México</div>
-                        <div class="campus">Instituto Tecnológico de Oaxaca</div>
-                    </div>
-                    <div class="logo-right">
-                        <img src="{{ public_path('img/logo-ito.png') }}" alt="ITO">
-                    </div>
-                </div>
-            </div>
-            
-            <div class="diploma-title">
-                <h1>Diploma</h1>
-                <p class="subtitle">de {{ $type === 'participation' ? 'Participación' : 'Reconocimiento' }}</p>
-            </div>
-            
-            <div class="content">
-                <p class="otorgado">Se otorga el presente diploma a:</p>
-                
-                <div class="participant-name">{{ $participant->name }}</div>
-                
-                <p class="recognition-text">
-                    @if($type === 'winner' && isset($award))
-                        Por haber obtenido el <strong>{{ $award->category }}</strong> 
-                        en el evento académico:
-                    @else
-                        Por su destacada participación en el evento académico:
-                    @endif
-                </p>
-                
-                <div class="event-name">« {{ $event->name }} »</div>
-                
-                @if(isset($project) && $project)
-                    <div class="project-info">
-                        <div class="project-label">Proyecto presentado</div>
-                        <div class="project-name">{{ $project->name ?? 'Sin nombre' }}</div>
-                        <div class="team-name">Equipo: {{ $team->name }}</div>
-                    </div>
-                @endif
-                
-                @if($type === 'winner' && isset($award))
-                    <div class="award-section">
-                        <span class="medal">
-                            @if(Str::contains(strtolower($award->category), ['oro', 'primer', '1er', '1°']))
-                                🥇
-                            @elseif(Str::contains(strtolower($award->category), ['plata', 'segundo', '2do', '2°']))
-                                🥈
-                            @elseif(Str::contains(strtolower($award->category), ['bronce', 'tercer', '3er', '3°']))
-                                🥉
+            <div class="corner corner-tl"></div>
+            <div class="corner corner-tr"></div>
+            <div class="corner corner-bl"></div>
+            <div class="corner corner-br"></div>
+
+            <table class="main-table">
+                <tr class="header-row">
+                    <td style="width: 15%;">
+                        <img src="{{ public_path('img/logo-tecnm.png') }}" class="logo-img" alt="TecNM">
+                    </td>
+                    <td style="width: 70%;">
+                        <div class="institution-text">Tecnológico Nacional de México</div>
+                        <div class="institution-text">Instituto Tecnológico de Oaxaca</div>
+                    </td>
+                    <td style="width: 15%;">
+                        <img src="{{ public_path('img/logo-ito.png') }}" class="logo-img" alt="ITO">
+                    </td>
+                </tr>
+
+                <tr class="title-row">
+                    <td colspan="3">
+                        <h1 class="diploma-title">DIPLOMA</h1>
+                        <div class="diploma-subtitle">
+                            @if($type === 'winner')
+                                DE GANADOR
                             @else
-                                🏆
+                                DE PARTICIPACIÓN
                             @endif
-                        </span>
-                        <div class="award-category">{{ $award->category }}</div>
-                    </div>
-                @endif
-            </div>
-            
-            <div class="signatures">
-                <div class="signature-box">
-                    <div class="signature-line">
-                        <div class="signature-name">Dr. Jesús Martínez García</div>
-                        <div class="signature-title">Director del Instituto</div>
-                    </div>
-                </div>
-                <div class="signature-box">
-                    <div class="signature-line">
-                        <div class="signature-name">Comité Organizador</div>
-                        <div class="signature-title">{{ $event->name }}</div>
-                    </div>
-                </div>
-                <div class="signature-box">
-                    <div class="signature-line">
-                        <div class="signature-name">Ing. María Fernanda López</div>
-                        <div class="signature-title">Jefa del Depto. de Sistemas</div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="footer">
-                <p class="date-location">
-                    Oaxaca de Juárez, Oaxaca, a {{ $event->end_date->format('d') }} de {{ $event->end_date->translatedFormat('F') }} de {{ $event->end_date->format('Y') }}
-                </p>
-                <p class="folio">
-                    Folio: {{ strtoupper(substr(md5($participant->id . $event->id . ($award->id ?? 0)), 0, 8)) }}-{{ $event->id }}
-                </p>
-            </div>
+                        </div>
+                    </td>
+                </tr>
+
+                <tr class="participant-row">
+                    <td colspan="3">
+                        <div class="otorga-text">Se otorga el presente diploma a:</div>
+                        <div class="participant-name">{{ $participant->name }}</div>
+                    </td>
+                </tr>
+
+                <tr class="details-row">
+                    <td colspan="3">
+                        <div class="recognition-text">
+                            Por su destacada participación en el evento académico:
+                        </div>
+                        <div class="event-name"> {{ $event->name }} </div>
+
+                        @if($type === 'winner' && isset($award))
+                            <div class="winner-badge">
+                                <div class="winner-text"> {{ $award->category }}</div>
+                            </div>
+                        @endif
+
+                        @if(isset($project))
+                            <div class="project-container">
+                                <span class="project-label">Proyecto Presentado</span>
+                                <span class="project-name">{{ $project->title }}</span>
+                                <span class="team-name">Equipo: {{ $team->name }}</span>
+                            </div>
+                        @endif
+                    </td>
+                </tr>
+
+                <tr class="signatures-row">
+                    <td colspan="3">
+                        <table class="signatures-table">
+                            <tr>
+                                <td class="signature-cell">
+                                    <div style="height: 40px;"></div>
+                                    <div class="signature-line"></div>
+                                    <div class="signer-name">Dr. Jesús Martínez García</div>
+                                    <div class="signer-title">Director del Instituto</div>
+                                </td>
+                                <td class="signature-cell">
+                                    <div class="date-text">
+                                        Oaxaca de Juárez, Oaxaca, a {{ \Carbon\Carbon::now()->isoFormat('D [de] MMMM [de] YYYY') }}
+                                        <br>
+                                        <span style="font-size: 7px; color: #ccc;">Folio: {{ substr(md5($participant->id . $event->id), 0, 8) }}</span>
+                                    </div>
+                                </td>
+                                <td class="signature-cell">
+                                    <div style="height: 40px;"></div>
+                                    <div class="signature-line"></div>
+                                    <div class="signer-name">Ing. María Fernanda López</div>
+                                    <div class="signer-title">Jefa del Depto. de Sistemas</div>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
         </div>
     </div>
 </body>
