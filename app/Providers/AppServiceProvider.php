@@ -27,8 +27,9 @@ class AppServiceProvider extends ServiceProvider
         // Configurar Carbon en español
         Carbon::setLocale('es');
 
-        // Registrar el View Composer para notificaciones
-        View::composer('*', NotificationComposer::class);
+        // Registrar el View Composer SOLO para el layout principal (no todas las vistas)
+        // Esto evita ejecutar consultas en cada componente/parcial
+        View::composer(['layouts.app', 'layouts.navigation'], NotificationComposer::class);
 
     }
 }

@@ -4,6 +4,7 @@ namespace App\Http\ViewComposers;
 
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use App\Models\Team;
 use App\Models\Project;
 
@@ -18,58 +19,64 @@ class NotificationComposer
 
         if (Auth::check()) {
             $user = Auth::user();
+            $userId = $user->id;
+            
+            // Cache de notificaciones por 30 segundos para evitar consultas repetidas
+            $cacheKey = "user_notifications_{$userId}";
+            
+            $notificationData = Cache::remember($cacheKey, 30, function () use ($user) {
+                $data = [
+                    'pendingMembers' => collect(),
+                    'pendingAdvisories' => collect(),
+                    'pendingEvaluations' => collect(),
+                    'unreadNotifications' => collect(),
+                ];
 
-            // ======================================
-            // 1. Equipos donde el usuario es líder
-            // ======================================
-            $teams = $user->teams()
-                ->where('leader_id', $user->id)
-                ->get();
+                // 1. Equipos donde el usuario es líder - Una sola consulta optimizada
+                $teamIds = $user->teams()
+                    ->where('leader_id', $user->id)
+                    ->pluck('teams.id');
 
-            // ===================================================
-            // 2. Solicitudes de unión (NO invitaciones del líder)
-            //    Solo mostrar usuarios que pidieron unirse:
-            //    requested_by_user = true
-            //    is_accepted = false
-            // ===================================================
-            foreach ($teams as $team) {
-                $pendingMembers = $pendingMembers->merge(
-                    $team->members()
-                        ->wherePivot('is_accepted', false)
-                        ->wherePivot('requested_by_user', true)  // ← FILTRO CLAVE
-                        ->get()
-                );
-            }
+                // 2. Solicitudes de unión pendientes - Una consulta
+                if ($teamIds->isNotEmpty()) {
+                    $data['pendingMembers'] = \App\Models\User::whereHas('teams', function ($q) use ($teamIds) {
+                        $q->whereIn('teams.id', $teamIds)
+                          ->wherePivot('is_accepted', false)
+                          ->wherePivot('requested_by_user', true);
+                    })->select('id', 'name', 'email')->get();
+                }
 
-            // =======================================================
-            // 3. Solicitudes de asesoría pendientes (staff / advisor)
-            // =======================================================
-            if ($user->hasAnyRole(['admin', 'staff', 'advisor'])) {
-                $pendingAdvisories = Team::where('advisor_id', $user->id)
-                    ->where('advisor_status', 'pending')
-                    ->with('event')
+                // 3. Solicitudes de asesoría pendientes
+                if ($user->hasAnyRole(['admin', 'staff', 'advisor'])) {
+                    $data['pendingAdvisories'] = Team::where('advisor_id', $user->id)
+                        ->where('advisor_status', 'pending')
+                        ->select('id', 'name', 'event_id')
+                        ->with('event:id,name')
+                        ->get();
+                }
+
+                // 4. Proyectos pendientes de evaluar
+                if ($user->hasRole('judge')) {
+                    $data['pendingEvaluations'] = $user->assignedProjects()
+                        ->wherePivot('is_completed', false)
+                        ->select('projects.id', 'projects.name', 'projects.team_id')
+                        ->with(['team:id,name,event_id', 'team.event:id,name'])
+                        ->get();
+                }
+
+                // 5. Notificaciones de BD (solo las últimas 10)
+                $data['unreadNotifications'] = $user->unreadNotifications()
+                    ->latest()
+                    ->take(10)
                     ->get();
-            }
 
-            // =================================================
-            // 4. Proyectos pendientes de evaluar (rol: judge)
-            // =================================================
-            if ($user->hasRole('judge')) {
-                $pendingEvaluations = $user->assignedProjects()
-                    ->wherePivot('is_completed', false)
-                    ->with(['team.event'])
-                    ->get();
-            }
+                return $data;
+            });
 
-            // =================================================
-            // 5. Notificaciones de BD (premios, invitaciones)
-            // =================================================
-            $unreadNotifications = $user->unreadNotifications()
-                ->where('type', '!=', 'App\Notifications\AwardNotification') // <-- Oculta premios
-                ->latest()
-                ->take(10)
-                ->get();
-
+            $pendingMembers = $notificationData['pendingMembers'];
+            $pendingAdvisories = $notificationData['pendingAdvisories'];
+            $pendingEvaluations = $notificationData['pendingEvaluations'];
+            $unreadNotifications = $notificationData['unreadNotifications'];
         }
 
         // Pasar datos a la vista
