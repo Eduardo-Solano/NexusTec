@@ -502,90 +502,103 @@
                 
                 <!-- STUDENT ROLE -->
                 @role('student')
-                    @if (isset($data['my_team']))
-                        <div class="grid lg:grid-cols-3 gap-8">
-                            <!-- Team Card -->
-                            <div class="lg:col-span-2 glass-card rounded-[2rem] p-8 relative overflow-hidden group">
-                                <div class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-purple-500/10 to-transparent -mr-16 -mt-16 rounded-full blur-3xl"></div>
-                                <div class="relative z-10">
-                                    <div class="flex justify-between items-start mb-6">
-                                        <div>
-                                            <span class="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-300 rounded-full text-xs font-bold uppercase tracking-wider border border-purple-200 dark:border-purple-700">Mi Equipo</span>
-                                            <h2 class="text-3xl font-black text-gray-900 dark:text-white mt-4">{{ $data['my_team']->name }}</h2>
-                                            <p class="text-gray-500 font-medium">Evento: {{ $data['my_team']->event->name }}</p>
-                                        </div>
-                                        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 flex items-center justify-center text-3xl shadow-inner">
-                                            🛡️
+                    @if (isset($data['my_teams']) && $data['my_teams']->count() > 0)
+                        <div class="space-y-8">
+                            @foreach($data['my_teams'] as $team)
+                                @php
+                                    $teamProgress = $data['teams_progress'][$team->id] ?? null;
+                                @endphp
+                                <div class="grid lg:grid-cols-3 gap-8">
+                                    <!-- Team Card -->
+                                    <div class="lg:col-span-2 glass-card rounded-[2rem] p-8 relative overflow-hidden group">
+                                        <div class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-purple-500/10 to-transparent -mr-16 -mt-16 rounded-full blur-3xl"></div>
+                                        <div class="relative z-10">
+                                            <div class="flex justify-between items-start mb-6">
+                                                <div>
+                                                    <span class="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-300 rounded-full text-xs font-bold uppercase tracking-wider border border-purple-200 dark:border-purple-700">Mi Equipo</span>
+                                                    <h2 class="text-3xl font-black text-gray-900 dark:text-white mt-4">{{ $team->name }}</h2>
+                                                    <p class="text-gray-500 font-medium">Evento: {{ $team->event->name }}</p>
+                                                </div>
+                                                <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 flex items-center justify-center text-3xl shadow-inner">
+                                                    🛡️
+                                                </div>
+                                            </div>
+
+                                            @if($teamProgress)
+                                                <div class="space-y-6">
+                                                    <!-- Steps -->
+                                                    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                                                         @foreach($teamProgress['steps'] as $key => $step)
+                                                            <div class="flex flex-col items-center text-center p-4 rounded-2xl border {{ $step['completed'] ? 'bg-green-500/10 backdrop-blur-xl border-green-500/30' : 'bg-white/[0.02] backdrop-blur-xl border-white/20' }} transition-all">
+                                                                <div class="w-10 h-10 rounded-full flex items-center justify-center text-lg mb-2 {{ $step['completed'] ? 'bg-green-100 text-green-600' : 'bg-gray-200 text-gray-400' }}">
+                                                                    {{ $step['icon'] }}
+                                                                </div>
+                                                                <p class="text-xs font-bold {{ $step['completed'] ? 'text-green-700 dark:text-green-400' : 'text-gray-400' }}">
+                                                                    {{ $step['label'] }}
+                                                                </p>
+                                                            </div>
+                                                         @endforeach
+                                                    </div>
+
+                                                    <div class="bg-white/[0.02] backdrop-blur-xl rounded-2xl p-6 border border-white/20 hover:border-white/30 transition-colors flex items-center justify-between">
+                                                        <div>
+                                                            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Progreso General</p>
+                                                            <p class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">{{ $teamProgress['percent'] }}%</p>
+                                                        </div>
+                                                        <div class="w-1/2">
+                                                            <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                                                                <div class="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full" style="width: {{ $teamProgress['percent'] }}%"></div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div class="grid grid-cols-2 gap-4">
+                                                        @if ($team->leader_id === Auth::id())
+                                                            @if($team->project)
+                                                                <a href="{{ route('projects.edit', $team->project) }}" class="flex justify-center items-center py-3 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-lg shadow-blue-500/30 transform hover:-translate-y-0.5 transition-all">
+                                                                    Editar Proyecto
+                                                                </a>
+                                                            @else
+                                                                <a href="{{ route('projects.create', ['team_id' => $team->id]) }}" class="flex justify-center items-center py-3 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-lg shadow-blue-500/30 transform hover:-translate-y-0.5 transition-all">
+                                                                    Entregar Proyecto
+                                                                </a>
+                                                            @endif
+                                                        @endif
+                                                        <a href="{{ route('events.show', $team->event_id) }}" class="flex justify-center items-center py-3 px-4 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600 font-bold rounded-xl hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors {{ $team->leader_id !== Auth::id() ? 'col-span-2' : '' }}">
+                                                            Ver Evento
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            @endif
                                         </div>
                                     </div>
 
-                                    @if(isset($data['team_progress']))
-                                        <div class="space-y-6">
-                                            <!-- Steps -->
-                                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                                 @foreach($data['team_progress']['steps'] as $key => $step)
-                                                    <div class="flex flex-col items-center text-center p-4 rounded-2xl border {{ $step['completed'] ? 'bg-green-500/10 backdrop-blur-xl border-green-500/30' : 'bg-white/[0.02] backdrop-blur-xl border-white/20' }} transition-all">
-                                                        <div class="w-10 h-10 rounded-full flex items-center justify-center text-lg mb-2 {{ $step['completed'] ? 'bg-green-100 text-green-600' : 'bg-gray-200 text-gray-400' }}">
-                                                            {{ $step['icon'] }}
-                                                        </div>
-                                                        <p class="text-xs font-bold {{ $step['completed'] ? 'text-green-700 dark:text-green-400' : 'text-gray-400' }}">
-                                                            {{ $step['label'] }}
-                                                        </p>
-                                                    </div>
-                                                 @endforeach
-                                            </div>
-
-                                            <div class="bg-white/[0.02] backdrop-blur-xl rounded-2xl p-6 border border-white/20 hover:border-white/30 transition-colors flex items-center justify-between">
-                                                <div>
-                                                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Progreso General</p>
-                                                    <p class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">{{ $data['team_progress']['percent'] }}%</p>
-                                                </div>
-                                                <div class="w-1/2">
-                                                    <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                                                        <div class="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full" style="width: {{ $data['team_progress']['percent'] }}%"></div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            
-                                            <div class="grid grid-cols-2 gap-4">
-                                                @if ($data['my_team']->leader_id === Auth::id())
-                                                    <a href="{{ route('projects.create', ['team_id' => $data['my_team']->id]) }}" class="flex justify-center items-center py-3 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-lg shadow-blue-500/30 transform hover:-translate-y-0.5 transition-all">
-                                                        {{ $data['my_team']->project ? 'Editar Proyecto' : 'Entregar Proyecto' }}
-                                                    </a>
-                                                @endif
-                                                <a href="{{ route('events.show', $data['my_team']->event_id) }}" class="flex justify-center items-center py-3 px-4 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600 font-bold rounded-xl hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
-                                                    Ver Evento
-                                                </a>
-                                            </div>
+                                    <!-- Score Card (if available) -->
+                                    @if(isset($teamProgress['score']) && $teamProgress['score'] > 0)
+                                        <div class="glass-card rounded-[2rem] p-8 flex flex-col items-center justify-center text-center relative overflow-hidden">
+                                             <div class="absolute inset-0 bg-gradient-to-b from-amber-500/10 to-transparent"></div>
+                                             <div class="relative z-10">
+                                                 <p class="text-sm font-bold text-amber-500 uppercase tracking-widest mb-4">Puntaje Final</p>
+                                                 <div class="text-6xl font-black text-gray-900 dark:text-white mb-2">{{ $teamProgress['score'] }}</div>
+                                                 <div class="flex items-center justify-center gap-1 text-yellow-400">
+                                                     <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                                     <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                                     <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                                 </div>
+                                             </div>
                                         </div>
                                     @endif
                                 </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <div class="bg-white/[0.02] backdrop-blur-xl rounded-[2rem] p-12 text-center border-2 border-dashed border-white/20 hover:border-white/30 transition-colors">
+                            <div class="inline-flex p-4 bg-gray-100 dark:bg-gray-700 rounded-full mb-6">
+                                <svg class="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
                             </div>
-
-                            <!-- Score Card (if available) -->
-                            @if(isset($data['team_progress']['score']) && $data['team_progress']['score'] > 0)
-                                <div class="glass-card rounded-[2rem] p-8 flex flex-col items-center justify-center text-center relative overflow-hidden">
-                                     <div class="absolute inset-0 bg-gradient-to-b from-amber-500/10 to-transparent"></div>
-                                     <div class="relative z-10">
-                                         <p class="text-sm font-bold text-amber-500 uppercase tracking-widest mb-4">Puntaje Final</p>
-                                         <div class="text-6xl font-black text-gray-900 dark:text-white mb-2">{{ $data['team_progress']['score'] }}</div>
-                                         <div class="flex items-center justify-center gap-1 text-yellow-400">
-                                             <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-                                             <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-                                             <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-                                         </div>
-                                     </div>
-                                </div>
-                            @elseif(empty($data['my_team']))
-                                <div class="col-span-3 bg-white/[0.02] backdrop-blur-xl rounded-[2rem] p-12 text-center border-2 border-dashed border-white/20 hover:border-white/30 transition-colors">
-                                    <div class="inline-flex p-4 bg-gray-100 dark:bg-gray-700 rounded-full mb-6">
-                                        <svg class="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
-                                    </div>
-                                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">No estás en ningún equipo</h3>
-                                    <p class="text-gray-500 mb-8 max-w-md mx-auto">Únete a un evento activo para comenzar a competir.</p>
-                                    <a href="{{ route('events.index') }}" class="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg shadow-blue-500/30 transition-all">Explorar Eventos</a>
-                                </div>
-                            @endif
+                            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">No estás en ningún equipo</h3>
+                            <p class="text-gray-500 mb-8 max-w-md mx-auto">Únete a un evento activo para comenzar a competir.</p>
+                            <a href="{{ route('events.index') }}" class="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg shadow-blue-500/30 transition-all">Explorar Eventos</a>
                         </div>
                     @endif
                 @endrole

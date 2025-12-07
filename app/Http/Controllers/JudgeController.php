@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\JudgeProfile;
 use App\Models\User;
 use App\Models\Specialty;
+use App\Http\Requests\Judge\StoreJudgeRequest;
+use App\Http\Requests\Judge\UpdateJudgeRequest;
+use App\Http\Requests\Judge\ImportJudgeCsvRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
@@ -58,21 +61,15 @@ class JudgeController extends Controller
     /**
      * Store a newly created judge in storage.
      */
-    public function store(Request $request)
+    public function store(StoreJudgeRequest $request)
     {
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:' . User::class],
-            'phone' => ['nullable', 'string', 'max:20'],
-            'company' => ['nullable', 'string', 'max:255'],
-            'specialty_id' => ['nullable', 'exists:specialties,id'],
-        ]);
+        $validated = $request->validated();
 
-        DB::transaction(function () use ($request) {
+        DB::transaction(function () use ($validated) {
             $user = User::create([
-                'name' => $request->name,
-                'email' => $request->email,
-                'phone' => $request->phone,
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'phone' => $validated['phone'] ?? null,
                 'password' => Hash::make('password'), // contraseña temporal
                 'is_active' => true,
             ]);
@@ -83,8 +80,8 @@ class JudgeController extends Controller
 
             JudgeProfile::create([
                 'user_id' => $user->id,
-                'specialty_id' => $request->specialty_id,
-                'company' => $request->company,
+                'specialty_id' => $validated['specialty_id'] ?? null,
+                'company' => $validated['company'] ?? null,
             ]);
         });
 
@@ -113,22 +110,16 @@ class JudgeController extends Controller
     /**
      * Update the specified judge in storage.
      */
-    public function update(Request $request, User $judge)
+    public function update(UpdateJudgeRequest $request, User $judge)
     {
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $judge->id],
-            'phone' => ['nullable', 'string', 'max:20'],
-            'company' => ['nullable', 'string', 'max:255'],
-            'specialty_id' => ['nullable', 'exists:specialties,id'],
-        ]);
+        $validated = $request->validated();
 
-        DB::transaction(function () use ($request, $judge) {
+        DB::transaction(function () use ($request, $validated, $judge) {
             // 1. Actualizar Usuario
             $userData = [
-                'name' => $request->name,
-                'email' => $request->email,
-                'phone' => $request->phone,
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'phone' => $validated['phone'] ?? null,
                 'is_active' => $request->has('is_active'),
             ];
 
@@ -141,8 +132,8 @@ class JudgeController extends Controller
 
             // 2. Actualizar Perfil de Juez
             $judge->judgeProfile->update([
-                'specialty_id' => $request->specialty_id,
-                'company' => $request->company,
+                'specialty_id' => $validated['specialty_id'] ?? null,
+                'company' => $validated['company'] ?? null,
             ]);
         });
 
@@ -152,12 +143,10 @@ class JudgeController extends Controller
     /**
      * Importar jueces desde un archivo CSV
      */
-    public function importCsv(Request $request)
+    public function importCsv(ImportJudgeCsvRequest $request)
     {
         try {
-            $request->validate([
-                'csv_file' => 'required|mimes:csv,txt'
-            ]);
+            $validated = $request->validated();
 
             $file = $request->file('csv_file');
             $handle = fopen($file, 'r');

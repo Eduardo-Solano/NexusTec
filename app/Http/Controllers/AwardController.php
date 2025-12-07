@@ -6,10 +6,13 @@ use App\Models\Award;
 use App\Models\Event;
 use App\Models\Team;
 use App\Models\ActivityLog;
+use App\Http\Requests\Award\StoreAwardRequest;
+use App\Http\Requests\Award\UpdateAwardRequest;
 use App\Notifications\AwardWonNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\DB;
 
 class AwardController extends Controller
 {
@@ -22,7 +25,9 @@ class AwardController extends Controller
         
         if ($eventId) {
             $event = Event::with(['awards.team.project', 'awards.team.leader'])->findOrFail($eventId);
-            $awards = $event->awards;
+            $awards = $event->awards->sortBy(function($award) {
+                return array_search($award->position, Award::POSITIONS) ?: 99;
+            });
             return view('awards.index', compact('awards', 'event'));
         }
 
@@ -47,33 +52,18 @@ class AwardController extends Controller
         // Solo equipos que tienen proyecto
         $teams = $event->teams()->has('project')->with(['project', 'leader'])->get();
         
-        // Categorías predefinidas
-        $categories = [
-            '1er Lugar' => '🥇 1er Lugar',
-            '2do Lugar' => '🥈 2do Lugar',
-            '3er Lugar' => '🥉 3er Lugar',
-            'Mención Honorífica' => '🏅 Mención Honorífica',
-            'Mejor Innovación' => '💡 Mejor Innovación',
-            'Mejor Diseño' => '🎨 Mejor Diseño',
-            'Mejor Presentación' => '🎤 Mejor Presentación',
-            'Premio del Público' => '👥 Premio del Público',
-            'Otro' => '🏆 Otro',
-        ];
+        // Solo 3 posiciones
+        $positions = Award::POSITIONS;
 
-        return view('awards.create', compact('event', 'teams', 'categories'));
+        return view('awards.create', compact('event', 'teams', 'positions'));
     }
 
     /**
      * Store a newly created award.
      */
-    public function store(Request $request)
+    public function store(StoreAwardRequest $request)
     {
-        $validated = $request->validate([
-            'event_id' => 'required|exists:events,id',
-            'team_id' => 'required|exists:teams,id',
-            'category' => 'required|string|max:100',
-            'name' => 'nullable|string|max:255',
-        ]);
+        $validated = $request->validated();
 
         // Los premios SOLO se asignan cuando el evento ha finalizado (estado cerrado)
         $event = Event::findOrFail($validated['event_id']);
@@ -81,16 +71,21 @@ class AwardController extends Controller
             return back()->with('error', 'Solo puedes asignar premios cuando el evento haya finalizado.');        
         }
 
-        // Si la categoría es "Otro", usar el nombre personalizado
-        $awardName = $validated['category'] === 'Otro' && $validated['name'] 
-            ? $validated['name'] 
-            : $validated['category'];
+        // Verificar que no exista ya este premio para el evento
+        $existingAward = Award::where('event_id', $validated['event_id'])
+            ->where('position', $validated['position'])
+            ->first();
+        
+        $positionLabel = Award::POSITIONS[$validated['position']] ?? 'Premio';
+        
+        if ($existingAward) {
+            return back()->with('error', "Ya existe un {$positionLabel} asignado para este evento.")->withInput();
+        }
 
         $award = Award::create([
             'event_id' => $validated['event_id'],
             'team_id' => $validated['team_id'],
-            'name' => $awardName,
-            'category' => $validated['category'],
+            'position' => $validated['position'],
             'awarded_at' => now(),
         ]);
 
@@ -104,16 +99,98 @@ class AwardController extends Controller
         Notification::send($teamMembers, new AwardWonNotification($award));
 
         // Registrar actividad
-        ActivityLog::log('awarded', "Premio '{$awardName}' asignado al equipo '{$award->team->name}'", $award, [
+        ActivityLog::log('awarded', "Premio '{$positionLabel}' asignado al equipo '{$award->team->name}'", $award, [
             'event_id' => $event->id,
             'event_name' => $event->name,
             'team_id' => $award->team_id,
             'team_name' => $award->team->name,
-            'category' => $awardName,
+            'position' => $award->position,
         ]);
 
         return redirect()->route('awards.index', ['event_id' => $validated['event_id']])
-            ->with('success', '¡Premio asignado exitosamente! 🏆 Se notificó a los ' . $teamMembers->count() . ' integrantes del equipo.');
+            ->with('success', "¡{$positionLabel} asignado exitosamente! 🏆 Se notificó a los " . $teamMembers->count() . ' integrantes del equipo.');
+    }
+
+    /**
+     * Generar ganadores automáticamente basado en puntajes
+     */
+    public function generateWinners(Event $event)
+    {
+        // Verificar que el evento esté cerrado
+        if (!$event->allowsAwardsAndDiplomas()) {
+            return back()->with('error', 'Solo puedes generar ganadores cuando el evento haya finalizado.');
+        }
+
+        // Verificar que no haya premios ya asignados
+        if ($event->awards()->count() > 0) {
+            return back()->with('error', 'Este evento ya tiene premios asignados. Elimínalos primero si deseas regenerarlos.');
+        }
+
+        // Obtener proyectos con sus puntajes promedio
+        $rankings = $event->teams()
+            ->has('project')
+            ->with(['project.evaluations', 'members'])
+            ->get()
+            ->map(function ($team) {
+                $evaluations = $team->project->evaluations ?? collect();
+                $avgScore = $evaluations->count() > 0 ? $evaluations->avg('score') : 0;
+                $totalScore = $evaluations->count() > 0 ? $evaluations->sum('score') : 0;
+                
+                return [
+                    'team' => $team,
+                    'avg_score' => round($avgScore, 2),
+                    'total_score' => $totalScore,
+                    'evaluations_count' => $evaluations->count(),
+                ];
+            })
+            ->filter(fn($item) => $item['evaluations_count'] > 0) // Solo equipos evaluados
+            ->sortByDesc('total_score')
+            ->take(3)
+            ->values();
+
+        if ($rankings->count() < 1) {
+            return back()->with('error', 'No hay suficientes equipos evaluados para generar ganadores.');
+        }
+
+        $createdAwards = [];
+
+        DB::transaction(function () use ($rankings, $event, &$createdAwards) {
+            foreach ($rankings as $index => $ranking) {
+                $positionKey = $index + 1; // 1, 2, 3
+                $positionLabel = Award::POSITIONS[$positionKey] ?? null;
+                if (!$positionLabel) continue;
+
+                $award = Award::create([
+                    'event_id' => $event->id,
+                    'team_id' => $ranking['team']->id,
+                    'position' => $positionKey,
+                    'awarded_at' => now(),
+                ]);
+
+                $award->load(['team.members', 'team.leader', 'team.project', 'event']);
+
+                // Notificar a todos los miembros del equipo
+                $teamMembers = $ranking['team']->members;
+                Notification::send($teamMembers, new AwardWonNotification($award));
+
+                // Registrar actividad
+                ActivityLog::log('awarded', "Premio '{$positionLabel}' asignado automáticamente al equipo '{$ranking['team']->name}' (Puntaje: {$ranking['total_score']})", $award, [
+                    'event_id' => $event->id,
+                    'event_name' => $event->name,
+                    'team_id' => $ranking['team']->id,
+                    'team_name' => $ranking['team']->name,
+                    'position' => $positionKey,
+                    'total_score' => $ranking['total_score'],
+                    'auto_generated' => true,
+                ]);
+
+                $createdAwards[] = $award;
+            }
+        });
+
+        $count = count($createdAwards);
+        return redirect()->route('awards.index', ['event_id' => $event->id])
+            ->with('success', "¡Se generaron {$count} ganadores automáticamente! 🏆🥈🥉 Se notificó a todos los equipos ganadores.");
     }
 
     /**
@@ -134,40 +211,33 @@ class AwardController extends Controller
         $event = $award->event;
         $teams = $event->teams()->has('project')->with(['project', 'leader'])->get();
         
-        $categories = [
-            '1er Lugar' => '🥇 1er Lugar',
-            '2do Lugar' => '🥈 2do Lugar',
-            '3er Lugar' => '🥉 3er Lugar',
-            'Mención Honorífica' => '🏅 Mención Honorífica',
-            'Mejor Innovación' => '💡 Mejor Innovación',
-            'Mejor Diseño' => '🎨 Mejor Diseño',
-            'Mejor Presentación' => '🎤 Mejor Presentación',
-            'Premio del Público' => '👥 Premio del Público',
-            'Otro' => '🏆 Otro',
-        ];
+        $positions = Award::POSITIONS;
 
-        return view('awards.edit', compact('award', 'event', 'teams', 'categories'));
+        return view('awards.edit', compact('award', 'event', 'teams', 'positions'));
     }
 
     /**
      * Update the specified award.
      */
-    public function update(Request $request, Award $award)
+    public function update(UpdateAwardRequest $request, Award $award)
     {
-        $validated = $request->validate([
-            'team_id' => 'required|exists:teams,id',
-            'category' => 'required|string|max:100',
-            'name' => 'nullable|string|max:255',
-        ]);
+        $validated = $request->validated();
 
-        $awardName = $validated['category'] === 'Otro' && $validated['name'] 
-            ? $validated['name'] 
-            : $validated['category'];
+        // Verificar que no exista ya este premio para el evento (excepto el actual)
+        $existingAward = Award::where('event_id', $award->event_id)
+            ->where('position', $validated['position'])
+            ->where('id', '!=', $award->id)
+            ->first();
+        
+        $positionLabel = Award::POSITIONS[$validated['position']] ?? 'Premio';
+        
+        if ($existingAward) {
+            return back()->with('error', "Ya existe un {$positionLabel} asignado para este evento.")->withInput();
+        }
 
         $award->update([
             'team_id' => $validated['team_id'],
-            'name' => $awardName,
-            'category' => $validated['category'],
+            'position' => $validated['position'],
         ]);
 
         return redirect()->route('awards.index', ['event_id' => $award->event_id])

@@ -62,10 +62,11 @@ class DiplomaNotification extends Notification implements ShouldQueue
 
         // Construir el mensaje según el tipo
         if ($this->type === 'winner') {
-            $subject = '🏆 ¡Felicidades! Diploma de ' . $this->award->category . ' - ' . $this->event->name;
+            $positionLabel = \App\Models\Award::POSITIONS[$this->award->position] ?? 'Ganador';
+            $subject = '🏆 ¡Felicidades! Diploma de ' . $positionLabel . ' - ' . $this->event->name;
             $greeting = '¡Felicidades, ' . $notifiable->name . '! 🎉';
             $introLines = [
-                'Es un honor informarte que tu equipo **' . $this->team->name . '** ha obtenido el reconocimiento de **' . $this->award->category . '** en el evento **' . $this->event->name . '**.',
+                'Es un honor informarte que tu equipo **' . $this->team->name . '** ha obtenido el reconocimiento de **' . $positionLabel . '** en el evento **' . $this->event->name . '**.',
                 'Adjunto encontrarás tu diploma de reconocimiento por este logro extraordinario.',
             ];
         } else {

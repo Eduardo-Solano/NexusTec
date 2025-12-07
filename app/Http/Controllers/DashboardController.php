@@ -147,31 +147,31 @@ class DashboardController extends Controller
         }
         elseif ($user->hasRole('student')) {
             // Lógica para ESTUDIANTE
-            // Buscamos si tiene equipo en algún evento activo
-            $myTeam = Team::whereHas('members', function($q) use ($user) {
+            // Buscamos TODOS los equipos en los que participa el estudiante
+            $myTeams = Team::whereHas('members', function($q) use ($user) {
                 $q->where('user_id', $user->id);
-            })->with(['event', 'project.evaluations', 'project.judges', 'members', 'awards'])->latest()->first();
+            })->with(['event', 'project.evaluations', 'project.judges', 'members', 'awards'])->latest()->get();
 
             // Buscamos eventos próximos para mostrarle
             $upcomingEvents = Event::whereIn('status', [Event::STATUS_REGISTRATION, Event::STATUS_ACTIVE])
                                    ->where('start_date', '>', now())
                                    ->take(3)->get();
 
-            // ========== NUEVO: Calcular progreso del equipo ==========
-            $teamProgress = null;
-            if ($myTeam) {
+            // ========== NUEVO: Calcular progreso de cada equipo ==========
+            $teamsProgress = [];
+            foreach ($myTeams as $team) {
                 $steps = [
                     'registered' => ['label' => 'Equipo Registrado', 'completed' => true, 'icon' => '👥'],
-                    'project' => ['label' => 'Proyecto Entregado', 'completed' => $myTeam->project !== null, 'icon' => '📋'],
-                    'judges' => ['label' => 'Jueces Asignados', 'completed' => $myTeam->project && $myTeam->project->judges()->count() > 0, 'icon' => '⚖️'],
+                    'project' => ['label' => 'Proyecto Entregado', 'completed' => $team->project !== null, 'icon' => '📋'],
+                    'judges' => ['label' => 'Jueces Asignados', 'completed' => $team->project && $team->project->judges()->count() > 0, 'icon' => '⚖️'],
                     'evaluated' => ['label' => 'Evaluación Completada', 'completed' => false, 'icon' => '✅'],
-                    'results' => ['label' => 'Resultados Publicados', 'completed' => $myTeam->awards->count() > 0, 'icon' => '🏆'],
+                    'results' => ['label' => 'Resultados Publicados', 'completed' => $team->awards->count() > 0, 'icon' => '🏆'],
                 ];
 
                 // Verificar si está completamente evaluado
-                if ($myTeam->project) {
-                    $judgesCount = $myTeam->project->judges()->count();
-                    $completedJudges = $myTeam->project->judges()->wherePivot('is_completed', true)->count();
+                if ($team->project) {
+                    $judgesCount = $team->project->judges()->count();
+                    $completedJudges = $team->project->judges()->wherePivot('is_completed', true)->count();
                     $steps['evaluated']['completed'] = $judgesCount > 0 && $completedJudges === $judgesCount;
                 }
 
@@ -187,24 +187,26 @@ class DashboardController extends Controller
                 ];
 
                 // Calcular puntaje si está evaluado
-                if ($myTeam->project && $myTeam->project->evaluations->count() > 0) {
-                    $avgScore = $myTeam->project->evaluations->avg('score');
+                if ($team->project && $team->project->evaluations->count() > 0) {
+                    $avgScore = $team->project->evaluations->avg('score');
                     $teamProgress['score'] = round($avgScore, 2);
-                    $teamProgress['score_percent'] = $myTeam->event->max_score > 0 
-                        ? round(($avgScore / $myTeam->event->max_score) * 100) 
+                    $teamProgress['score_percent'] = $team->event->max_score > 0 
+                        ? round(($avgScore / $team->event->max_score) * 100) 
                         : 0;
                 }
 
                 // Días restantes del evento
-                if ($myTeam->event) {
-                    $teamProgress['days_remaining'] = now()->diffInDays($myTeam->event->end_date, false);
+                if ($team->event) {
+                    $teamProgress['days_remaining'] = now()->diffInDays($team->event->end_date, false);
                 }
+
+                $teamsProgress[$team->id] = $teamProgress;
             }
 
             $data = [
-                'my_team' => $myTeam,
+                'my_teams' => $myTeams,
+                'teams_progress' => $teamsProgress,
                 'upcoming_events' => $upcomingEvents,
-                'team_progress' => $teamProgress,
             ];
         }
 

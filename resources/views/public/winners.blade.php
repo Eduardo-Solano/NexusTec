@@ -81,33 +81,31 @@
                     {{-- Awards Grid --}}
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         @php
-                            $displayAwards = $event->awards->sortBy(function ($award) {
-                                $order = ['1er Lugar' => 1, '2do Lugar' => 2, '3er Lugar' => 3];
-                                return $order[$award->category] ?? 10;
-                            })->take(3);
+                            $displayAwards = $event->awards->sortBy('position')->take(3);
                         @endphp
 
                         @foreach($displayAwards as $index => $award)
                             @php
-                                $medals = ['1er Lugar' => '🥇', '2do Lugar' => '🥈', '3er Lugar' => '🥉'];
-                                $medal = $medals[$award->category] ?? '🏆';
+                                $medals = [1 => '🥇', 2 => '🥈', 3 => '🥉'];
+                                $medal = $medals[$award->position] ?? '🏆';
                                 $gradients = [
-                                    '1er Lugar' => 'from-yellow-500/20 via-yellow-600/10 to-transparent border-yellow-500/30',
-                                    '2do Lugar' => 'from-gray-400/20 via-gray-500/10 to-transparent border-gray-400/30',
-                                    '3er Lugar' => 'from-amber-700/20 via-amber-800/10 to-transparent border-amber-600/30',
+                                    1 => 'from-yellow-500/20 via-yellow-600/10 to-transparent border-yellow-500/30',
+                                    2 => 'from-gray-400/20 via-gray-500/10 to-transparent border-gray-400/30',
+                                    3 => 'from-amber-700/20 via-amber-800/10 to-transparent border-amber-600/30',
                                 ];
-                                $gradient = $gradients[$award->category] ?? 'from-purple-500/20 via-purple-600/10 to-transparent border-purple-500/30';
+                                $gradient = $gradients[$award->position] ?? 'from-purple-500/20 via-purple-600/10 to-transparent border-purple-500/30';
+                                $positionLabel = \App\Models\Award::POSITIONS[$award->position] ?? 'Premio';
                             @endphp
 
                             <div class="relative group">
                                 <div class="absolute inset-0 bg-gradient-to-br {{ $gradient }} rounded-2xl opacity-50 group-hover:opacity-100 transition"></div>
                                 <div class="relative bg-gray-800/80 backdrop-blur border border-gray-700 rounded-2xl p-6 hover:border-gray-600 transition-all duration-300 hover:-translate-y-1">
                                     
-                                    {{-- Medal & Category --}}
+                                    {{-- Medal & Position --}}
                                     <div class="flex items-center justify-between mb-4">
                                         <span class="text-4xl">{{ $medal }}</span>
                                         <span class="px-3 py-1 bg-gray-900/50 rounded-lg text-xs font-bold text-gray-300">
-                                            {{ $award->category }}
+                                            {{ $positionLabel }}
                                         </span>
                                     </div>
 

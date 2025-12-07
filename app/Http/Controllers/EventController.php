@@ -6,6 +6,9 @@ use App\Models\Event;
 use App\Models\Criterion;
 use App\Models\Project;
 use App\Models\JudgeProfile;
+use App\Http\Requests\Event\StoreEventRequest;
+use App\Http\Requests\Event\UpdateEventRequest;
+use App\Http\Requests\Event\AssignJudgeRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -107,20 +110,9 @@ class EventController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreEventRequest $request)
     {
-        //
-        // 1. Validaciones Robustas
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string|max:1000',
-            'start_date' => 'required|date',
-            'registration_deadline' => 'required|date|after_or_equal:start_date',
-            // Regla 'after': La fecha fin debe ser POSTERIOR a la fecha de cierre de inscripciones
-            'end_date' => 'required|date|after:registration_deadline', 
-            'criteria' => 'required|array|min:1', // Debe elegir al menos uno
-            'criteria.*' => 'exists:criteria,id', // Que el ID exista
-        ]);
+        $validated = $request->validated();
 
         // VALIDACIÓN CUSTOM: Verificar que la suma de puntajes sea EXACTAMENTE 100
         $totalPoints = Criterion::whereIn('id', $validated['criteria'])->sum('max_points');
@@ -201,19 +193,9 @@ class EventController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Event $event)
+    public function update(UpdateEventRequest $request, Event $event)
     {
-        //
-        // 1. Validar (Igual que en store, pero a veces es bueno permitir no cambiar nada)
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string|max:1000',
-            'start_date' => 'required|date',
-            'registration_deadline' => 'required|date|after_or_equal:start_date',
-            'end_date' => 'required|date|after:registration_deadline',
-            // El checkbox si no se marca no se envía, así que lo manejamos abajo
-            'criteria' => 'required|array|min:1', // Debe elegir al menos uno
-        ]);
+        $validated = $request->validated();
 
         // VALIDACIÓN CUSTOM: Verificar que la suma de puntajes sea EXACTAMENTE 100
         $totalPoints = Criterion::whereIn('id', $validated['criteria'])->sum('max_points');
@@ -350,11 +332,9 @@ class EventController extends Controller
     /**
      * Asignar un juez a un evento
      */
-    public function assignJudge(Request $request, Event $event)
+    public function assignJudge(AssignJudgeRequest $request, Event $event)
     {
-        $validated = $request->validate([
-            'judge_id' => 'required|exists:judge_profiles,id',
-        ]);
+        $validated = $request->validated();
 
         // Evitar duplicados
         if ($event->judges()->where('judge_id', $validated['judge_id'])->exists()) {

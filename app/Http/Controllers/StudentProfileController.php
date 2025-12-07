@@ -3,9 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\StudentProfile;
-use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Career;
+use App\Http\Requests\Student\StoreStudentRequest;
+use App\Http\Requests\Student\UpdateStudentRequest;
+use App\Http\Requests\Student\ImportStudentCsvRequest;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 
@@ -58,22 +61,16 @@ class StudentProfileController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreStudentRequest $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users',
-            'control_number' => 'required|unique:student_profiles',
-            'career_id' => 'required|exists:careers,id',
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
-        ]);
+        $validated = $request->validated();
 
-        DB::transaction(function () use ($request) {
+        DB::transaction(function () use ($validated) {
             // 1. Crear Usuario
             $user = User::create([
-                'name' => $request->name,
-                'email' => $request->email,
-                'password' => Hash::make($request->password),
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'password' => Hash::make($validated['password']),
                 'is_active' => true,
             ]);
 
@@ -83,8 +80,8 @@ class StudentProfileController extends Controller
             // 3. Crear Perfil
             StudentProfile::create([
                 'user_id' => $user->id,
-                'control_number' => $request->control_number,
-                'career_id' => $request->career_id,
+                'control_number' => $validated['control_number'],
+                'career_id' => $validated['career_id'],
             ]);
         });
 
@@ -102,12 +99,10 @@ class StudentProfileController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function importCsv(Request $request)
+    public function importCsv(ImportStudentCsvRequest $request)
     {
         try {
-            $request->validate([
-                'csv_file' => 'required|mimes:csv,txt'
-            ]);
+            $validated = $request->validated();
 
             $file = $request->file('csv_file');
             $handle = fopen($file, 'r');
@@ -271,23 +266,16 @@ class StudentProfileController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, User $student)
+    public function update(UpdateStudentRequest $request, User $student)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $student->id,
-            'control_number' => 'required|unique:student_profiles,control_number,' . $student->studentProfile->id,
-            'career_id' => 'required|exists:careers,id',
-            'semester' => 'required|integer|min:1|max:12',
-            'phone' => 'nullable|string|max:20',
-        ]);
+        $validated = $request->validated();
 
-        DB::transaction(function () use ($request, $student) {
+        DB::transaction(function () use ($request, $validated, $student) {
             // 1. Actualizar Usuario
             $userData = [
-                'name' => $request->name,
-                'email' => $request->email,
-                'phone' => $request->phone,
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'phone' => $validated['phone'] ?? null,
                 'is_active' => $request->has('is_active'),
             ];
 
@@ -300,9 +288,9 @@ class StudentProfileController extends Controller
 
             // 2. Actualizar Perfil de Estudiante
             $student->studentProfile->update([
-                'control_number' => $request->control_number,
-                'career_id' => $request->career_id,
-                'semester' => $request->semester,
+                'control_number' => $validated['control_number'],
+                'career_id' => $validated['career_id'],
+                'semester' => $validated['semester'],
             ]);
         });
 

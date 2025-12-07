@@ -6,6 +6,9 @@ use App\Models\Project;
 use App\Models\Team;
 use App\Models\User;
 use App\Models\ActivityLog;
+use App\Http\Requests\Project\StoreProjectRequest;
+use App\Http\Requests\Project\UpdateProjectRequest;
+use App\Http\Requests\Project\AssignJudgeRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -83,19 +86,11 @@ class ProjectController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreProjectRequest $request)
     {
-        $request->validate([
-            'team_id' => 'required|exists:teams,id',
-            'name' => 'required|string|max:100',
-            'description' => 'required|string|max:1000',
-            'repository_url' => 'required|url',
-            'documentation' => 'nullable|file|mimes:pdf|max:10240', // Máx 10MB
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120', // Máx 5MB
-            'video_url' => 'nullable|url',
-        ]);
+        $validated = $request->validated();
 
-        $team = Team::findOrFail($request->team_id);
+        $team = Team::findOrFail($validated['team_id']);
 
         // ⛔ Validar que el evento permita acciones de proyecto (estado activo)
         if (!$team->event->allowsProjectActions()) {
@@ -225,7 +220,7 @@ class ProjectController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Project $project)
+    public function update(UpdateProjectRequest $request, Project $project)
     {
         // ⛔ Validar que el evento permita acciones de proyecto
         if (!$project->team->event->allowsProjectActions()) {
@@ -248,16 +243,7 @@ class ProjectController extends Controller
                 ->with('error', 'No se puede editar un proyecto que ya ha sido evaluado.');
         }
         
-        $validated = $request->validate([
-            'name' => 'required|string|max:100',
-            'description' => 'required|string|max:1000',
-            'repository_url' => 'required|url',
-            'documentation' => 'nullable|file|mimes:pdf|max:10240', // Máx 10MB
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120', // Máx 5MB
-            'video_url' => 'nullable|url',
-            'remove_documentation' => 'nullable|boolean',
-            'remove_image' => 'nullable|boolean',
-        ]);
+        $validated = $request->validated();
 
         // Manejar eliminación de archivos existentes
         if ($request->boolean('remove_documentation') && $project->documentation_path) {
@@ -347,7 +333,7 @@ class ProjectController extends Controller
     /**
      * Asignar un juez a un proyecto
      */
-    public function assignJudge(Request $request, Project $project)
+    public function assignJudge(AssignJudgeRequest $request, Project $project)
     {
         // Verificar permisos
         if (!Auth::user()->can('projects.edit')) {
@@ -359,12 +345,10 @@ class ProjectController extends Controller
             return back()->with('error', 'No se pueden asignar jueces porque el evento no está en curso.');
         }
 
-        $request->validate([
-            'judge_id' => 'required|exists:users,id'
-        ]);
+        $validated = $request->validated();
 
         // Verificar que el usuario sea juez
-        $judge = User::findOrFail($request->judge_id);
+        $judge = User::findOrFail($validated['judge_id']);
         if (!$judge->hasRole('judge')) {
             return back()->with('error', 'El usuario seleccionado no es un juez.');
         }

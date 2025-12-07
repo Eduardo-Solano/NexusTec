@@ -30,15 +30,19 @@
                     </svg>
                     Ver Rankings
                 </a>
-                @if($event->isClosed())
-                    <a href="{{ route('awards.create', ['event_id' => $event->id]) }}" 
-                       class="inline-flex items-center gap-2 px-4 py-2 bg-yellow-600 hover:bg-yellow-500 text-white rounded-lg transition font-bold">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                        </svg>
-                        Asignar Premio
-                    </a>
-                @else
+                @if($event->isClosed() && $awards->count() === 0)
+                    <form action="{{ route('events.generateWinners', $event) }}" method="POST" class="inline"
+                          onsubmit="return confirm('¿Generar los 3 ganadores automáticamente basado en los puntajes?');">
+                        @csrf
+                        <button type="submit" 
+                                class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600 text-white rounded-lg transition font-bold shadow-lg shadow-yellow-500/30">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+                            </svg>
+                            + Asignar Premio
+                        </button>
+                    </form>
+                @elseif(!$event->isClosed())
                     <span class="inline-flex items-center gap-2 px-4 py-2 bg-gray-400 text-gray-200 rounded-lg cursor-not-allowed" title="El evento debe estar cerrado para asignar premios">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
@@ -65,37 +69,30 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     @foreach($awards as $award)
                         @php
-                            $medalEmoji = match($award->category) {
-                                '1er Lugar' => '🥇',
-                                '2do Lugar' => '🥈',
-                                '3er Lugar' => '🥉',
-                                'Mención Honorífica' => '🏅',
-                                'Mejor Innovación' => '💡',
-                                'Mejor Diseño' => '🎨',
-                                'Mejor Presentación' => '🎤',
-                                'Premio del Público' => '👥',
+                            $medalEmoji = match($award->position) {
+                                1 => '🥇',
+                                2 => '🥈',
+                                3 => '🥉',
                                 default => '🏆'
                             };
-                            $bgClass = match($award->category) {
-                                '1er Lugar' => 'from-yellow-500/20 to-yellow-600/10 border-yellow-500/50',
-                                '2do Lugar' => 'from-gray-400/20 to-gray-500/10 border-gray-400/50',
-                                '3er Lugar' => 'from-orange-500/20 to-orange-600/10 border-orange-500/50',
+                            $bgClass = match($award->position) {
+                                1 => 'from-yellow-500/20 to-yellow-600/10 border-yellow-500/50',
+                                2 => 'from-gray-400/20 to-gray-500/10 border-gray-400/50',
+                                3 => 'from-orange-500/20 to-orange-600/10 border-orange-500/50',
                                 default => 'from-indigo-500/20 to-indigo-600/10 border-indigo-500/50'
                             };
+                            $positionLabel = \App\Models\Award::POSITIONS[$award->position] ?? 'Premio';
                         @endphp
                         <div class="bg-gradient-to-br {{ $bgClass }} border-2 rounded-2xl p-6 shadow-lg hover:shadow-xl transition relative overflow-hidden">
                             {{-- Emoji de fondo decorativo --}}
                             <div class="absolute -right-4 -top-4 text-8xl opacity-10">{{ $medalEmoji }}</div>
                             
                             <div class="relative">
-                                {{-- Categoría --}}
+                                {{-- Posición --}}
                                 <div class="flex items-center gap-2 mb-4">
                                     <span class="text-4xl">{{ $medalEmoji }}</span>
                                     <div>
-                                        <h3 class="font-black text-lg text-gray-800 dark:text-white">{{ $award->name }}</h3>
-                                        @if($award->category !== $award->name)
-                                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ $award->category }}</p>
-                                        @endif
+                                        <h3 class="font-black text-lg text-gray-800 dark:text-white">{{ $positionLabel }}</h3>
                                     </div>
                                 </div>
 
@@ -149,13 +146,17 @@
                         @endif
                     </p>
                     @if($event->isClosed())
-                        <a href="{{ route('awards.create', ['event_id' => $event->id]) }}" 
-                           class="inline-flex items-center gap-2 px-6 py-3 bg-yellow-600 hover:bg-yellow-500 text-white rounded-lg transition font-bold">
-                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                            </svg>
-                            Asignar Primer Premio
-                        </a>
+                        <form action="{{ route('events.generateWinners', $event) }}" method="POST" class="inline"
+                              onsubmit="return confirm('¿Generar los 3 ganadores automáticamente basado en los puntajes?');">
+                            @csrf
+                            <button type="submit" 
+                                    class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600 text-white rounded-lg transition font-bold shadow-lg shadow-yellow-500/30">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+                                </svg>
+                                🏆 Generar Ganadores Automáticamente
+                            </button>
+                        </form>
                     @else
                         <span class="inline-flex items-center gap-2 px-6 py-3 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded-lg">
                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

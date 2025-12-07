@@ -74,8 +74,7 @@
             
             {{-- Podium for top 3 --}}
             @php
-                $topAwards = $awards->filter(fn($a) => in_array($a->category, ['1er Lugar', '2do Lugar', '3er Lugar']))->values();
-                $otherAwards = $awards->filter(fn($a) => !in_array($a->category, ['1er Lugar', '2do Lugar', '3er Lugar']))->values();
+                $topAwards = $awards->whereIn('position', [1, 2, 3])->values();
             @endphp
 
             @if($topAwards->count() > 0)
@@ -90,7 +89,7 @@
                     <div class="flex flex-col md:flex-row items-end justify-center gap-4 md:gap-6">
                         
                         {{-- 2nd Place --}}
-                        @php $second = $topAwards->firstWhere('category', '2do Lugar'); @endphp
+                        @php $second = $topAwards->firstWhere('position', 2); @endphp
                         @if($second)
                             <div class="order-2 md:order-1 w-full md:w-80">
                                 <div class="bg-gradient-to-b from-gray-400/20 to-gray-800/50 border border-gray-600 rounded-t-2xl p-6 text-center">
@@ -115,7 +114,7 @@
                         @endif
 
                         {{-- 1st Place --}}
-                        @php $first = $topAwards->firstWhere('category', '1er Lugar'); @endphp
+                        @php $first = $topAwards->firstWhere('position', 1); @endphp
                         @if($first)
                             <div class="order-1 md:order-2 w-full md:w-80">
                                 <div class="bg-gradient-to-b from-yellow-500/30 to-gray-800/50 border border-yellow-500/40 rounded-t-2xl p-6 text-center relative overflow-hidden">
@@ -141,7 +140,7 @@
                         @endif
 
                         {{-- 3rd Place --}}
-                        @php $third = $topAwards->firstWhere('category', '3er Lugar'); @endphp
+                        @php $third = $topAwards->firstWhere('position', 3); @endphp
                         @if($third)
                             <div class="order-3 w-full md:w-80">
                                 <div class="bg-gradient-to-b from-amber-700/20 to-gray-800/50 border border-amber-700/30 rounded-t-2xl p-6 text-center">
@@ -164,66 +163,6 @@
                                 </div>
                             </div>
                         @endif
-                    </div>
-                </div>
-            @endif
-
-            {{-- Other Awards --}}
-            @if($otherAwards->count() > 0)
-                <div>
-                    <h2 class="text-xl font-bold mb-6 flex items-center gap-3">
-                        <span class="text-2xl">🎖️</span>
-                        Menciones y Reconocimientos Especiales
-                    </h2>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        @foreach($otherAwards as $award)
-                            @php
-                                $categoryIcons = [
-                                    'Mención Honorífica' => '📜',
-                                    'Mejor Innovación' => '💡',
-                                    'Mejor Diseño' => '🎨',
-                                    'Mejor Presentación' => '🎤',
-                                    'Premio del Público' => '👥',
-                                    'Otro' => '⭐',
-                                ];
-                                $icon = $categoryIcons[$award->category] ?? '🏆';
-                            @endphp
-
-                            <div class="bg-gray-800/50 border border-gray-700 rounded-xl p-6 hover:border-purple-500/30 transition group">
-                                <div class="flex items-center gap-3 mb-4">
-                                    <span class="text-3xl">{{ $icon }}</span>
-                                    <div>
-                                        <p class="text-xs text-purple-400 font-bold uppercase tracking-wider">{{ $award->category }}</p>
-                                        @if($award->name && $award->name !== $award->category)
-                                            <p class="text-gray-400 text-xs">{{ $award->name }}</p>
-                                        @endif
-                                    </div>
-                                </div>
-
-                                <h3 class="text-lg font-bold text-white mb-2 group-hover:text-purple-300 transition">
-                                    {{ $award->team->name ?? 'N/A' }}
-                                </h3>
-
-                                @if($award->team?->project)
-                                    <p class="text-gray-500 text-sm mb-4 line-clamp-2">
-                                        {{ $award->team->project->title }}
-                                    </p>
-                                @endif
-
-                                {{-- Team Members List --}}
-                                <div class="border-t border-gray-700 pt-4 mt-4">
-                                    <p class="text-xs text-gray-600 uppercase tracking-wider mb-2">Integrantes</p>
-                                    <div class="flex flex-wrap gap-2">
-                                        @foreach($award->team->members as $member)
-                                            <span class="px-2 py-1 bg-gray-900 rounded text-xs text-gray-400">
-                                                {{ $member->name }}
-                                            </span>
-                                        @endforeach
-                                    </div>
-                                </div>
-                            </div>
-                        @endforeach
                     </div>
                 </div>
             @endif
@@ -256,13 +195,14 @@
                                     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                                         <div class="flex items-center gap-4">
                                             @php
-                                                $medals = ['1er Lugar' => '🥇', '2do Lugar' => '🥈', '3er Lugar' => '🥉', 'Mención Honorífica' => '📜', 'Mejor Innovación' => '💡', 'Mejor Diseño' => '🎨', 'Mejor Presentación' => '🎤', 'Premio del Público' => '👥'];
-                                                $medal = $medals[$award->category] ?? '🏆';
+                                                $medals = [1 => '🥇', 2 => '🥈', 3 => '🥉'];
+                                                $medal = $medals[$award->position] ?? '🏆';
+                                                $positionLabel = \App\Models\Award::POSITIONS[$award->position] ?? 'Premio';
                                             @endphp
                                             <span class="text-4xl">{{ $medal }}</span>
                                             <div>
                                                 <h3 class="text-xl font-bold text-white">{{ $award->team->name ?? 'N/A' }}</h3>
-                                                <p class="text-sm text-gray-500">{{ $award->category }}</p>
+                                                <p class="text-sm text-gray-500">{{ $positionLabel }}</p>
                                             </div>
                                         </div>
                                         @if($award->team?->project)

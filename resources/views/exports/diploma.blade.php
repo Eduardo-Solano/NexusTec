@@ -274,7 +274,9 @@
 
                         @if($type === 'winner' && isset($award))
                             <div class="winner-badge">
-                                <div class="winner-text"> {{ $award->category }}</div>
+                                <div class="winner-text">
+                                    {{ \App\Models\Award::POSITIONS[$award->position] ?? 'Ganador' }}
+                                </div>
                             </div>
                         @endif
 

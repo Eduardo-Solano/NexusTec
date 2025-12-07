@@ -6,6 +6,7 @@ use App\Models\Evaluation;
 use App\Models\Project;
 use App\Models\Criterion;
 use App\Models\ActivityLog;
+use App\Http\Requests\Evaluation\StoreEvaluationRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth; // <--- VITAL
 use Illuminate\Support\Facades\DB;   // <--- VITAL
@@ -59,16 +60,11 @@ class EvaluationController extends Controller
     /**
      * Guardar los puntajes.
      */
-    public function store(Request $request)
+    public function store(StoreEvaluationRequest $request)
     {
-        $request->validate([
-            'project_id' => 'required|exists:projects,id',
-            'scores' => 'required|array', // Array de calificaciones [criterio_id => puntaje]
-            'scores.*' => 'required|integer|min:0', // Validación básica
-            'feedback' => 'nullable|string'
-        ]);
+        $validated = $request->validated();
 
-        $project = Project::findOrFail($request->project_id);
+        $project = Project::findOrFail($validated['project_id']);
 
         // ⛔ Validar que el evento permita evaluaciones (estado activo)
         if (!$project->team->event->allowsEvaluations()) {

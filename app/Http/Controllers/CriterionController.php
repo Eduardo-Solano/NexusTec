@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Criterion;
+use App\Http\Requests\Criterion\StoreCriterionRequest;
+use App\Http\Requests\Criterion\UpdateCriterionRequest;
 use Illuminate\Http\Request;
 
 class CriterionController extends Controller
@@ -30,12 +32,9 @@ class CriterionController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreCriterionRequest $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:criteria,name',
-            'max_points' => 'required|integer|min:1|max:100',
-        ]);
+        $validated = $request->validated();
 
         Criterion::create($validated);
 
@@ -62,12 +61,9 @@ class CriterionController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Criterion $criterion)
+    public function update(UpdateCriterionRequest $request, Criterion $criterion)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:criteria,name,' . $criterion->id,
-            'max_points' => 'required|integer|min:1|max:100',
-        ]);
+        $validated = $request->validated();
 
         $criterion->update($validated);
 

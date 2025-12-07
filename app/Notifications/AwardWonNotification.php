@@ -36,28 +36,25 @@ class AwardWonNotification extends Notification implements ShouldQueue
      */
     public function toMail(object $notifiable): MailMessage
     {
+        $positionLabel = \App\Models\Award::POSITIONS[$this->award->position] ?? 'Ganador';
+        
         $medals = [
-            '1er Lugar' => '🥇',
-            '2do Lugar' => '🥈',
-            '3er Lugar' => '🥉',
-            'Mención Honorífica' => '🏅',
-            'Mejor Innovación' => '💡',
-            'Mejor Diseño' => '🎨',
-            'Mejor Presentación' => '🎤',
-            'Premio del Público' => '👥',
+            1 => '🥇',
+            2 => '🥈',
+            3 => '🥉',
         ];
 
-        $medal = $medals[$this->award->category] ?? '🏆';
+        $medal = $medals[$this->award->position] ?? '🏆';
         $teamName = $this->award->team->name ?? 'Tu equipo';
         $eventName = $this->award->event->name ?? 'el evento';
-        $projectName = $this->award->team->project->title ?? 'tu proyecto';
+        $projectName = $this->award->team->project->name ?? 'tu proyecto';
 
         return (new MailMessage)
-            ->subject("¡Felicidades! {$medal} Tu equipo ganó un premio - NexusTec")
+            ->subject("¡Felicidades! {$medal} Tu equipo ganó {$positionLabel} - NexusTec")
             ->greeting("¡Felicidades, {$notifiable->name}!")
             ->line(new HtmlString('<div style="text-align: center; margin: 20px 0; padding: 30px; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 16px; border: 2px solid #f59e0b;">
                 <div style="font-size: 64px; margin-bottom: 15px;">' . $medal . '</div>
-                <h2 style="color: #92400e; margin: 0 0 10px 0; font-size: 24px;">' . htmlspecialchars($this->award->category) . '</h2>
+                <h2 style="color: #92400e; margin: 0 0 10px 0; font-size: 24px;">' . htmlspecialchars($positionLabel) . '</h2>
                 <p style="color: #78350f; margin: 0; font-size: 14px;">Premio otorgado a</p>
                 <p style="color: #92400e; font-weight: bold; font-size: 18px; margin: 5px 0;">' . htmlspecialchars($teamName) . '</p>
             </div>'))
@@ -73,16 +70,17 @@ class AwardWonNotification extends Notification implements ShouldQueue
      */
     public function toArray(object $notifiable): array
     {
+        $positionLabel = \App\Models\Award::POSITIONS[$this->award->position] ?? 'Ganador';
+        
         return [
             'type' => 'award_won',
             'award_id' => $this->award->id,
-            'award_category' => $this->award->category,
-            'award_name' => $this->award->name,
+            'award_position' => $this->award->position,
             'team_id' => $this->award->team_id,
             'team_name' => $this->award->team->name ?? null,
             'event_id' => $this->award->event_id,
             'event_name' => $this->award->event->name ?? null,
-            'message' => "¡Tu equipo \"{$this->award->team->name}\" ganó {$this->award->category}!",
+            'message' => "¡Tu equipo \"{$this->award->team->name}\" ganó {$positionLabel}!",
         ];
     }
 }
