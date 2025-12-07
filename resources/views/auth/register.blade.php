@@ -1,4 +1,4 @@
-<x-guest-layout>
+<x-guest-layout :hideLogo="true">
     <div class="flex justify-center items-center gap-6 mb-6">
         <img src="{{ asset('img/logo-tecnm.png') }}" class="h-10 w-auto filter brightness-0 invert opacity-90"
             alt="TecNM">

@@ -14,7 +14,8 @@
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex justify-between h-16 items-center">
                     <a href="/" class="flex items-center gap-3 text-white font-bold text-xl group">
-                        <x-application-logo class="h-10 w-auto transition-transform duration-500 group-hover:rotate-180" />
+                        <img src="{{ asset('img/logo-ito.png') }}" alt="Logo ITO" 
+                             class="h-10 w-auto transition-all duration-500 ease-out group-hover:scale-110 group-hover:rotate-6 group-hover:drop-shadow-[0_0_15px_rgba(255,255,255,0.8)] hover:brightness-110" />
                         <span class="hidden sm:block">NexusTec</span>
                     </a>
                     <div class="flex items-center gap-4">
