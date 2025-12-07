@@ -1,3 +1,5 @@
+@props(['hideLogo' => false, 'minimal' => false])
+
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
@@ -15,8 +17,8 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="font-sans text-gray-900 antialiased">
-        <div class="min-h-screen flex flex-col justify-center items-center bg-gradient-to-br from-[#0a1128] via-[#0d1b2a] to-[#1b263b] relative overflow-hidden">
-            
+        <div class="min-h-screen flex flex-col justify-center items-center {{ $minimal ? 'bg-gray-900' : 'bg-gradient-to-br from-[#0a1128] via-[#0d1b2a] to-[#1b263b] relative overflow-hidden' }}">
+            @unless($minimal)
             <!-- Fondo de circuitos animados -->
             <div class="circuit-background"></div>
             
@@ -34,9 +36,10 @@
             
             <!-- Ondas expansivas -->
             <div class="expanding-waves"></div>
+            @endunless
             
             <!-- Logo NexusTec con efectos - Fuera del cuadro de login -->
-            @if(!$hideLogo)
+            @if(!$hideLogo && !$minimal)
             <div class="flex justify-center -mb-16 -mt-4 relative z-20">
                 <div class="logo-container-main relative">
                     <!-- Logo NexusTec SVG - Diseño de líneas con efecto neón sutil -->
@@ -130,6 +133,7 @@
             </div>
             @endif
 
+            @unless($minimal)
             <style>
                 /* Fondo de circuitos */
                 .circuit-background {
@@ -495,8 +499,9 @@
                     }
                 }
             </style>
+            @endunless
             
-            <div class="w-full sm:max-w-md {{ $hideLogo ? 'mt-6' : 'mt-20' }} px-6 py-8 bg-white/[0.02] backdrop-blur-3xl border border-white/40 shadow-[0_8px_32px_0_rgba(31,38,135,0.37)] overflow-hidden sm:rounded-2xl relative z-10" style="box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37), 0 0 0 1.5px rgba(255, 255, 255, 0.25) inset, 0 4px 16px 0 rgba(255, 255, 255, 0.1) inset;">
+            <div class="w-full sm:max-w-md {{ $hideLogo ? 'mt-6' : 'mt-20' }} px-6 py-8 {{ $minimal ? 'bg-gray-900 border border-gray-700 shadow-xl sm:rounded-xl' : 'bg-white/[0.02] backdrop-blur-3xl border border-white/40 shadow-[0_8px_32px_0_rgba(31,38,135,0.37)] overflow-hidden sm:rounded-2xl relative z-10' }}" @unless($minimal) style="box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37), 0 0 0 1.5px rgba(255, 255, 255, 0.25) inset, 0 4px 16px 0 rgba(255, 255, 255, 0.1) inset;" @endunless>
                 {{ $slot }}
             </div>
         </div>
