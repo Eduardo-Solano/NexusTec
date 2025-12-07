@@ -284,126 +284,127 @@
     <!-- ============================================== -->
     <!-- OFF-CANVAS SIDEBAR (SLIDE-OVER MENU) -->
     <!-- ============================================== -->
-    
-    <!-- Backdrop (Fondo oscuro) -->
-    <div x-show="open" 
-         x-transition:enter="transition-opacity ease-linear duration-300"
-         x-transition:enter-start="opacity-0"
-         x-transition:enter-end="opacity-100"
-         x-transition:leave="transition-opacity ease-linear duration-300"
-         x-transition:leave-start="opacity-100"
-         x-transition:leave-end="opacity-0"
-         class="fixed inset-0 bg-gray-900/80 z-40 xl:hidden backdrop-blur-sm"
-         style="display: none;"
-         @click="open = false">
-    </div>
+    <template x-teleport="body">
+        <div x-show="open" class="relative z-50">
+             <!-- Backdrop (Fondo oscuro) -->
+            <div x-show="open" 
+                x-transition:enter="transition-opacity ease-linear duration-300"
+                x-transition:enter-start="opacity-0"
+                x-transition:enter-end="opacity-100"
+                x-transition:leave="transition-opacity ease-linear duration-300"
+                x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0"
+                class="fixed inset-0 bg-gray-900/80 backdrop-blur-sm"
+                @click="open = false">
+            </div>
 
-    <!-- Sidebar Panel -->
-    <div x-show="open"
-         x-transition:enter="transition ease-in-out duration-300 transform"
-         x-transition:enter-start="-translate-x-full"
-         x-transition:enter-end="translate-x-0"
-         x-transition:leave="transition ease-in-out duration-300 transform"
-         x-transition:leave-start="translate-x-0"
-         x-transition:leave-end="-translate-x-full"
-         class="fixed inset-y-0 left-0 z-50 w-72 bg-white dark:bg-gray-800 shadow-2xl overflow-y-auto xl:hidden"
-         style="display: none;">
+            <!-- Sidebar Panel -->
+            <div x-show="open"
+                x-transition:enter="transition ease-in-out duration-300 transform"
+                x-transition:enter-start="-translate-x-full"
+                x-transition:enter-end="translate-x-0"
+                x-transition:leave="transition ease-in-out duration-300 transform"
+                x-transition:leave-start="translate-x-0"
+                x-transition:leave-end="-translate-x-full"
+                class="fixed inset-y-0 left-0 w-72 bg-white dark:bg-gray-800 shadow-2xl overflow-y-auto">
 
-         <!-- Sidebar Header -->
-         <div class="flex items-center justify-between px-4 h-16 border-b border-gray-200 dark:border-gray-700">
-            <span class="text-lg font-bold text-gray-900 dark:text-gray-100">Menú</span>
-            <button @click="open = false" class="text-gray-500 hover:text-gray-700 dark:text-gray-400">
-                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-            </button>
-         </div>
-
-         <!-- User Info Mobile -->
-         <div class="px-4 py-4 bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700">
-            <div class="font-medium text-base text-gray-800 dark:text-gray-200">{{ Auth::user()->name }}</div>
-            <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>
-         </div>
-
-         <!-- Mobile Navigation Links -->
-         <div class="py-2 space-y-1">
-            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                {{ __('Dashboard') }}
-            </x-responsive-nav-link>
-
-            <x-responsive-nav-link :href="route('events.index')" :active="request()->routeIs('events.*')">
-                {{ __('Eventos') }}
-            </x-responsive-nav-link>
-
-            @can('teams.edit')
-                <x-responsive-nav-link :href="route('teams.index')" :active="request()->routeIs('teams.*')">
-                    {{ __('Equipos') }}
-                </x-responsive-nav-link>
-            @endcan
-
-            @can('projects.edit')
-                <x-responsive-nav-link :href="route('projects.index')" :active="request()->routeIs('projects.*')">
-                    {{ __('Proyectos') }}
-                </x-responsive-nav-link>
-            @endcan
-
-            @can('criteria.view')
-                <x-responsive-nav-link :href="route('criteria.index')" :active="request()->routeIs('criteria.*')">
-                    {{ __('Criterios') }}
-                </x-responsive-nav-link>
-            @endcan
-
-            @can('staff.view')
-                <x-responsive-nav-link :href="route('staff.index')" :active="request()->routeIs('staff.*')">
-                    {{ __('Docentes') }}
-                </x-responsive-nav-link>
-            @endcan
-
-            @can('students.view')
-                <x-responsive-nav-link :href="route('students.index')" :active="request()->routeIs('students.*')">
-                    {{ __('Alumnos') }}
-                </x-responsive-nav-link>
-            @endcan
-
-            @can('judges.view')
-                <x-responsive-nav-link :href="route('judges.index')" :active="request()->routeIs('judges.*')">
-                    {{ __('Jueces') }}
-                </x-responsive-nav-link>
-            @endcan
-
-            @role('admin')
-                <div class="border-t border-gray-200 dark:border-gray-700 my-2"></div>
-                <div class="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                    Administración
+                <!-- Sidebar Header -->
+                <div class="flex items-center justify-between px-4 h-16 border-b border-gray-200 dark:border-gray-700">
+                    <span class="text-lg font-bold text-gray-900 dark:text-gray-100">Menú</span>
+                    <button @click="open = false" class="text-gray-500 hover:text-gray-700 dark:text-gray-400">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
                 </div>
-                <x-responsive-nav-link :href="route('activity-logs.index')" :active="request()->routeIs('activity-logs.*')">
-                    Historial de Actividad
-                </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('careers.index')" :active="request()->routeIs('careers.*')">
-                    🎓 Carreras
-                </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('specialties.index')" :active="request()->routeIs('specialties.*')">
-                    ⚖️ Especialidades
-                </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('reports.index')" :active="request()->routeIs('reports.*')">
-                    📊 Reportes
-                </x-responsive-nav-link>
-            @endrole
-         </div>
 
-         <!-- Mobile Logout -->
-         <div class="border-t border-gray-200 dark:border-gray-700 pt-2 pb-4">
-            <x-responsive-nav-link :href="route('profile.edit')">
-                {{ __('Perfil') }}
-            </x-responsive-nav-link>
+                <!-- User Info Mobile -->
+                <div class="px-4 py-4 bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700">
+                    <div class="font-medium text-base text-gray-800 dark:text-gray-200">{{ Auth::user()->name }}</div>
+                    <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>
+                </div>
 
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <x-responsive-nav-link :href="route('logout')" onclick="event.preventDefault(); this.closest('form').submit();" class="text-red-600 dark:text-red-400">
-                    {{ __('Cerrar Sesión') }}
-                </x-responsive-nav-link>
-            </form>
-         </div>
-    </div>
+                <!-- Mobile Navigation Links -->
+                <div class="py-2 space-y-1">
+                    <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                        {{ __('Dashboard') }}
+                    </x-responsive-nav-link>
+
+                    <x-responsive-nav-link :href="route('events.index')" :active="request()->routeIs('events.*')">
+                        {{ __('Eventos') }}
+                    </x-responsive-nav-link>
+
+                    @can('teams.edit')
+                        <x-responsive-nav-link :href="route('teams.index')" :active="request()->routeIs('teams.*')">
+                            {{ __('Equipos') }}
+                        </x-responsive-nav-link>
+                    @endcan
+
+                    @can('projects.edit')
+                        <x-responsive-nav-link :href="route('projects.index')" :active="request()->routeIs('projects.*')">
+                            {{ __('Proyectos') }}
+                        </x-responsive-nav-link>
+                    @endcan
+
+                    @can('criteria.view')
+                        <x-responsive-nav-link :href="route('criteria.index')" :active="request()->routeIs('criteria.*')">
+                            {{ __('Criterios') }}
+                        </x-responsive-nav-link>
+                    @endcan
+
+                    @can('staff.view')
+                        <x-responsive-nav-link :href="route('staff.index')" :active="request()->routeIs('staff.*')">
+                            {{ __('Docentes') }}
+                        </x-responsive-nav-link>
+                    @endcan
+
+                    @can('students.view')
+                        <x-responsive-nav-link :href="route('students.index')" :active="request()->routeIs('students.*')">
+                            {{ __('Alumnos') }}
+                        </x-responsive-nav-link>
+                    @endcan
+
+                    @can('judges.view')
+                        <x-responsive-nav-link :href="route('judges.index')" :active="request()->routeIs('judges.*')">
+                            {{ __('Jueces') }}
+                        </x-responsive-nav-link>
+                    @endcan
+
+                    @role('admin')
+                        <div class="border-t border-gray-200 dark:border-gray-700 my-2"></div>
+                        <div class="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            Administración
+                        </div>
+                        <x-responsive-nav-link :href="route('activity-logs.index')" :active="request()->routeIs('activity-logs.*')">
+                            Historial de Actividad
+                        </x-responsive-nav-link>
+                        <x-responsive-nav-link :href="route('careers.index')" :active="request()->routeIs('careers.*')">
+                            🎓 Carreras
+                        </x-responsive-nav-link>
+                        <x-responsive-nav-link :href="route('specialties.index')" :active="request()->routeIs('specialties.*')">
+                            ⚖️ Especialidades
+                        </x-responsive-nav-link>
+                        <x-responsive-nav-link :href="route('reports.index')" :active="request()->routeIs('reports.*')">
+                            📊 Reportes
+                        </x-responsive-nav-link>
+                    @endrole
+                </div>
+
+                <!-- Mobile Logout -->
+                <div class="border-t border-gray-200 dark:border-gray-700 pt-2 pb-4">
+                    <x-responsive-nav-link :href="route('profile.edit')">
+                        {{ __('Perfil') }}
+                    </x-responsive-nav-link>
+
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <x-responsive-nav-link :href="route('logout')" onclick="event.preventDefault(); this.closest('form').submit();" class="text-red-600 dark:text-red-400">
+                            {{ __('Cerrar Sesión') }}
+                        </x-responsive-nav-link>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </template>
 
 </nav>
