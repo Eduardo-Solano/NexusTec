@@ -28,10 +28,10 @@
                             <x-input-error class="mt-2" :messages="$errors->get('description')" />
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
     
                             <div>
-                                <x-input-label for="start_date" :value="__('Fecha y Hora de Inicio')" class="text-gray-300" />
+                                <x-input-label for="start_date" :value="__('Fecha de Inicio')" class="text-gray-300" />
                                 
                                 <x-text-input id="start_date" name="start_date" type="datetime-local" 
                                     style="color-scheme: dark;"
@@ -42,13 +42,24 @@
                             </div>
 
                             <div>
-                                <x-input-label for="end_date" :value="__('Fecha y Hora de Cierre')" class="text-gray-300" />
+                                <x-input-label for="registration_deadline" :value="__('Cierre de Inscripciones')" class="text-gray-300" />
+                                
+                                <x-text-input id="registration_deadline" name="registration_deadline" type="datetime-local" 
+                                    style="color-scheme: dark;"
+                                    class="mt-1 block w-full bg-gray-900 border-gray-600 text-white focus:border-ito-orange focus:ring-ito-orange" 
+                                    :value="old('registration_deadline')" required />
+                                <p class="text-xs text-gray-500 mt-1">Después de esta fecha, el evento pasa a "En Curso"</p>
+                                <x-input-error class="mt-2" :messages="$errors->get('registration_deadline')" />
+                            </div>
+
+                            <div>
+                                <x-input-label for="end_date" :value="__('Fecha de Cierre')" class="text-gray-300" />
                                 
                                 <x-text-input id="end_date" name="end_date" type="datetime-local" 
                                     style="color-scheme: dark;"
                                     class="mt-1 block w-full bg-gray-900 border-gray-600 text-white focus:border-ito-orange focus:ring-ito-orange" 
                                     :value="old('end_date')" required />
-                                    
+                                <p class="text-xs text-gray-500 mt-1">Después de esta fecha, el evento pasa a "Finalizado"</p>
                                 <x-input-error class="mt-2" :messages="$errors->get('end_date')" />
                             </div>
                         </div>

@@ -29,9 +29,9 @@
                             <x-input-error class="mt-2" :messages="$errors->get('description')" />
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <div>
-                                <x-input-label for="start_date" :value="__('Fecha y Hora de Inicio')" class="text-gray-300" />
+                                <x-input-label for="start_date" :value="__('Fecha de Inicio')" class="text-gray-300" />
                                 <x-text-input id="start_date" name="start_date" type="datetime-local" style="color-scheme: dark;"
                                     class="mt-1 block w-full bg-gray-900 border-gray-600 text-white focus:border-ito-orange focus:ring-ito-orange" 
                                     :value="old('start_date', $event->start_date->format('Y-m-d\TH:i'))" required />
@@ -39,25 +39,33 @@
                             </div>
 
                             <div>
-                                <x-input-label for="end_date" :value="__('Fecha y Hora de Cierre')" class="text-gray-300" />
+                                <x-input-label for="registration_deadline" :value="__('Cierre de Inscripciones')" class="text-gray-300" />
+                                <x-text-input id="registration_deadline" name="registration_deadline" type="datetime-local" style="color-scheme: dark;"
+                                    class="mt-1 block w-full bg-gray-900 border-gray-600 text-white focus:border-ito-orange focus:ring-ito-orange" 
+                                    :value="old('registration_deadline', $event->registration_deadline?->format('Y-m-d\TH:i'))" required />
+                                <p class="text-xs text-gray-500 mt-1">Después de esta fecha → "En Curso"</p>
+                                <x-input-error class="mt-2" :messages="$errors->get('registration_deadline')" />
+                            </div>
+
+                            <div>
+                                <x-input-label for="end_date" :value="__('Fecha de Cierre')" class="text-gray-300" />
                                 <x-text-input id="end_date" name="end_date" type="datetime-local" style="color-scheme: dark;"
                                     class="mt-1 block w-full bg-gray-900 border-gray-600 text-white focus:border-ito-orange focus:ring-ito-orange" 
                                     :value="old('end_date', $event->end_date->format('Y-m-d\TH:i'))" required />
+                                <p class="text-xs text-gray-500 mt-1">Después de esta fecha → "Finalizado"</p>
                                 <x-input-error class="mt-2" :messages="$errors->get('end_date')" />
                             </div>
                         </div>
                         
                         <div class="block">
-                            <x-input-label for="status" :value="__('Estado del Evento')" class="text-gray-300 mb-2" />
+                            <x-input-label for="status" :value="__('Estado del Evento (Manual)')" class="text-gray-300 mb-2" />
                             <select id="status" name="status" class="mt-1 block w-full rounded-md bg-gray-900 border-gray-600 text-white focus:border-ito-orange focus:ring-ito-orange">
                                 <option value="registration" {{ $event->status === 'registration' ? 'selected' : '' }}>📝 Inscripciones Abiertas</option>
                                 <option value="active" {{ $event->status === 'active' ? 'selected' : '' }}>🚀 En Curso</option>
                                 <option value="closed" {{ $event->status === 'closed' ? 'selected' : '' }}>🏆 Finalizado</option>
                             </select>
                             <p class="mt-1 text-xs text-gray-500">
-                                <strong>Inscripciones:</strong> Los equipos pueden registrarse. | 
-                                <strong>En Curso:</strong> Proyectos y evaluaciones. | 
-                                <strong>Finalizado:</strong> Premios y diplomas.
+                                El estado cambia automáticamente según las fechas. Usa esta opción solo para forzar un cambio manual.
                             </p>
                         </div>
 

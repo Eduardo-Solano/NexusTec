@@ -115,8 +115,9 @@ class EventController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
             'start_date' => 'required|date',
-            // Regla 'after': La fecha fin debe ser POSTERIOR a la fecha inicio
-            'end_date' => 'required|date|after:start_date', 
+            'registration_deadline' => 'required|date|after_or_equal:start_date',
+            // Regla 'after': La fecha fin debe ser POSTERIOR a la fecha de cierre de inscripciones
+            'end_date' => 'required|date|after:registration_deadline', 
             'criteria' => 'required|array|min:1', // Debe elegir al menos uno
             'criteria.*' => 'exists:criteria,id', // Que el ID exista
         ]);
@@ -132,9 +133,13 @@ class EventController extends Controller
             'name' => $validated['name'],
             'description' => $validated['description'],
             'start_date' => $validated['start_date'],
+            'registration_deadline' => $validated['registration_deadline'],
             'end_date' => $validated['end_date'],
             'status' => Event::STATUS_REGISTRATION, // Por defecto nace en inscripciones
         ]);
+
+        // Sincronizar estado según fechas (por si la fecha de inscripción ya pasó)
+        $event->syncStatus();
 
         // MAGIA ELOQUENT: Guardar relación Muchos a Muchos
         $event->criteria()->sync($validated['criteria']);
@@ -148,7 +153,10 @@ class EventController extends Controller
      */
     public function show(Event $event)
     {
-       // Cargamos los equipos y criterios
+        // Sincronizar estado automáticamente según las fechas
+        $event->syncStatus();
+        
+        // Cargamos los equipos y criterios
         $event->load(['teams.leader', 'teams.members', 'teams.project', 'criteria']);
         
         // Cargar proyectos del evento (a través de los equipos)
@@ -201,7 +209,8 @@ class EventController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
             'start_date' => 'required|date',
-            'end_date' => 'required|date|after:start_date',
+            'registration_deadline' => 'required|date|after_or_equal:start_date',
+            'end_date' => 'required|date|after:registration_deadline',
             // El checkbox si no se marca no se envía, así que lo manejamos abajo
             'criteria' => 'required|array|min:1', // Debe elegir al menos uno
         ]);
@@ -212,7 +221,7 @@ class EventController extends Controller
             return back()->withErrors(['criteria' => "La suma de los criterios seleccionados es $totalPoints. Debe ser exactamente 100 puntos."])->withInput();
         }
 
-        // Validar el status si se envía
+        // Validar el status si se envía (permite override manual)
         $status = $request->input('status', $event->status);
         if (!in_array($status, [Event::STATUS_REGISTRATION, Event::STATUS_ACTIVE, Event::STATUS_CLOSED])) {
             $status = $event->status;
@@ -223,6 +232,7 @@ class EventController extends Controller
             'name' => $validated['name'],
             'description' => $validated['description'],
             'start_date' => $validated['start_date'],
+            'registration_deadline' => $validated['registration_deadline'],
             'end_date' => $validated['end_date'],
             'status' => $status,
             'show_feedback_to_students' => $request->has('show_feedback_to_students'),

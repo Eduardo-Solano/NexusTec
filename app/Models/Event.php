@@ -15,13 +15,58 @@ class Event extends Model
     const STATUS_ACTIVE = 'active';             // Evento en curso (proyectos, evaluaciones)
     const STATUS_CLOSED = 'closed';             // Evento cerrado (ganadores, diplomas)
 
-    protected $fillable = ['name', 'description', 'start_date', 'end_date', 'status', 'show_feedback_to_students'];
+    protected $fillable = ['name', 'description', 'start_date', 'registration_deadline', 'end_date', 'status', 'show_feedback_to_students'];
 
     protected $casts = [
         'start_date' => 'datetime',
+        'registration_deadline' => 'datetime',
         'end_date' => 'datetime',
         'show_feedback_to_students' => 'boolean',
     ];
+
+    /**
+     * Calcular el estado del evento basado en las fechas
+     * Retorna el estado que DEBERÍA tener según la fecha actual
+     */
+    public function calculateStatus(): string
+    {
+        $now = now();
+
+        // Si ya pasó la fecha de cierre → Cerrado
+        if ($this->end_date && $now->greaterThan($this->end_date)) {
+            return self::STATUS_CLOSED;
+        }
+
+        // Si hay fecha límite de inscripción y ya pasó → Activo
+        if ($this->registration_deadline && $now->greaterThan($this->registration_deadline)) {
+            return self::STATUS_ACTIVE;
+        }
+
+        // Si ya inició el evento pero no hay registration_deadline → Activo
+        if (!$this->registration_deadline && $this->start_date && $now->greaterThan($this->start_date)) {
+            return self::STATUS_ACTIVE;
+        }
+
+        // Por defecto → Inscripciones abiertas
+        return self::STATUS_REGISTRATION;
+    }
+
+    /**
+     * Actualizar el estado del evento si es necesario (basado en fechas)
+     * Retorna true si se actualizó el estado
+     */
+    public function syncStatus(): bool
+    {
+        $calculatedStatus = $this->calculateStatus();
+        
+        if ($this->status !== $calculatedStatus) {
+            $this->status = $calculatedStatus;
+            $this->save();
+            return true;
+        }
+        
+        return false;
+    }
 
     /**
      * Verificar si el evento está en período de inscripciones

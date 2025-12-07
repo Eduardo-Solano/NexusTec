@@ -79,13 +79,16 @@ class DashboardController extends Controller
             // Asesorías pendientes (solo para advisors)
             $data['pending_advisories'] = Team::where('advisor_id', $user->id)
                                             ->where('advisor_status', 'pending')
-                                            ->with('event') // Cargamos el evento para mostrar contexto
+                                            ->with(['event', 'leader', 'members', 'project'])
                                             ->get();
             
-            // 2. PROYECTOS ASESORADOS (Equipos aceptados)
-            $data['my_projects'] = Team::where('advisor_id', $user->id)
+            // 2. EQUIPOS ASESORADOS (Equipos aceptados con toda su info)
+            $data['advised_teams'] = Team::where('advisor_id', $user->id)
                 ->where('advisor_status', 'accepted')
-                ->count();
+                ->with(['event', 'leader', 'members', 'project.evaluations', 'project.judges', 'awards'])
+                ->get();
+            
+            $data['my_projects'] = $data['advised_teams']->count();
 
             // Datos para gráficas - Equipos por día (últimos 14 días)
             $data['teams_by_day'] = Team::selectRaw('DATE(created_at) as date, COUNT(*) as count')

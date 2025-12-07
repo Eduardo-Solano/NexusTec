@@ -310,8 +310,123 @@
                             </div>
                         </div>
                     </div>
+                @endif
+
+                {{-- SECCIÓN PARA DOCENTES/ASESORES: Equipos que asesoran --}}
+                @role('advisor')
+                    @if(isset($data['advised_teams']) && $data['advised_teams']->count() > 0)
+                        <div class="mt-8">
+                            <div class="glass-card rounded-3xl overflow-hidden border border-green-500/20">
+                                <div class="p-6 border-b border-gray-200/10 dark:border-gray-700/50 bg-gradient-to-r from-green-500/10 to-transparent">
+                                    <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                                        <span class="p-2 bg-green-500/20 text-green-500 rounded-lg">
+                                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
+                                            </svg>
+                                        </span>
+                                        Mis Equipos Asesorados
+                                        <span class="ml-2 px-2 py-0.5 bg-green-500/20 text-green-400 text-xs font-bold rounded-full">{{ $data['advised_teams']->count() }}</span>
+                                    </h3>
+                                </div>
+                                <div class="divide-y divide-gray-200/10 dark:divide-gray-700/50">
+                                    @foreach ($data['advised_teams'] as $team)
+                                        <div class="p-5 hover:bg-white/5 transition">
+                                            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                                                <div class="flex items-center gap-4">
+                                                    <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                                                        {{ strtoupper(substr($team->name, 0, 2)) }}
+                                                    </div>
+                                                    <div>
+                                                        <h4 class="font-bold text-gray-900 dark:text-white text-lg">{{ $team->name }}</h4>
+                                                        <div class="flex flex-wrap items-center gap-2 text-sm text-gray-500 mt-1">
+                                                            <span class="inline-flex items-center gap-1">
+                                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                                                {{ $team->event->name }}
+                                                            </span>
+                                                            <span>•</span>
+                                                            <span class="inline-flex items-center gap-1">
+                                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                                                                {{ $team->members->count() }} miembros
+                                                            </span>
+                                                            <span>•</span>
+                                                            <span class="inline-flex items-center gap-1">
+                                                                👑 {{ $team->leader->name ?? 'Sin líder' }}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="flex items-center gap-3">
+                                                    {{-- Estado del Proyecto --}}
+                                                    @if($team->project)
+                                                        <span class="px-3 py-1.5 bg-blue-500/20 text-blue-400 text-xs font-bold rounded-lg flex items-center gap-1">
+                                                            📋 Proyecto: {{ Str::limit($team->project->name, 20) }}
+                                                        </span>
+                                                        @if($team->project->judges->count() > 0)
+                                                            @php
+                                                                $completedEvals = $team->project->judges->where('pivot.is_completed', true)->count();
+                                                                $totalJudges = $team->project->judges->count();
+                                                            @endphp
+                                                            <span class="px-3 py-1.5 {{ $completedEvals === $totalJudges ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400' }} text-xs font-bold rounded-lg">
+                                                                ⚖️ {{ $completedEvals }}/{{ $totalJudges }} Evaluado
+                                                            </span>
+                                                        @endif
+                                                    @else
+                                                        <span class="px-3 py-1.5 bg-gray-500/20 text-gray-400 text-xs font-bold rounded-lg">
+                                                            📋 Sin proyecto
+                                                        </span>
+                                                    @endif
+                                                    {{-- Estado del Evento --}}
+                                                    <span class="px-3 py-1.5 text-xs font-bold rounded-lg
+                                                        @if($team->event->status === 'registration') bg-blue-500/20 text-blue-400
+                                                        @elseif($team->event->status === 'active') bg-green-500/20 text-green-400
+                                                        @else bg-red-500/20 text-red-400
+                                                        @endif">
+                                                        {{ $team->event->status_icon }} {{ $team->event->status_label }}
+                                                    </span>
+                                                    <a href="{{ route('teams.show', $team) }}" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-xs font-bold rounded-lg transition flex items-center gap-1">
+                                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                                        Ver Equipo
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+                    @elseif(isset($data['pending_advisories']) && $data['pending_advisories']->count() > 0)
+                        {{-- Mostrar solicitudes pendientes si no tiene equipos aceptados --}}
+                        <div class="mt-8">
+                            <div class="glass-card rounded-3xl overflow-hidden border border-yellow-500/20">
+                                <div class="p-6 border-b border-gray-200/10 dark:border-gray-700/50 bg-gradient-to-r from-yellow-500/10 to-transparent">
+                                    <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                                        <span class="p-2 bg-yellow-500/20 text-yellow-500 rounded-lg">🔔</span>
+                                        Solicitudes de Asesoría Pendientes
+                                        <span class="ml-2 px-2 py-0.5 bg-yellow-500/20 text-yellow-400 text-xs font-bold rounded-full animate-pulse">{{ $data['pending_advisories']->count() }}</span>
+                                    </h3>
+                                </div>
+                                <div class="p-6">
+                                    <p class="text-gray-400 mb-4">Tienes equipos esperando tu confirmación como asesor.</p>
+                                    <a href="{{ route('teams.index') }}" class="inline-flex items-center px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white font-bold rounded-lg transition">
+                                        Ver Solicitudes →
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    @else
+                        {{-- No tiene equipos ni solicitudes --}}
+                        <div class="mt-8">
+                            <div class="glass-card rounded-3xl p-8 text-center border border-gray-500/20">
+                                <div class="text-6xl mb-4">📚</div>
+                                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Sin equipos asesorados</h3>
+                                <p class="text-gray-500">Aún no tienes equipos bajo tu asesoría. Los estudiantes pueden solicitarte como asesor al crear sus equipos.</p>
+                            </div>
+                        </div>
+                    @endif
+                @endrole
 
                     <!-- Charts Section -->
+                @if(isset($data['event_progress']))
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-12">
                         <!-- Equipos Chart -->
                         <div class="glass-card p-6 rounded-3xl relative overflow-hidden">

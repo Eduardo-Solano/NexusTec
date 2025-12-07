@@ -119,7 +119,35 @@
                                                     abajo y únete a uno.</p>
                                             @endif
                                         </div>
+                                    @elseif ($event->isActive())
+                                        {{-- Evento en curso, inscripciones cerradas --}}
+                                        <div class="mt-10">
+                                            @if ($userHasTeam)
+                                                <div class="inline-flex items-center px-6 py-3 bg-green-500/10 border border-green-500/20 rounded-xl">
+                                                    <div class="flex items-center gap-3">
+                                                        <div class="p-2 bg-green-500 rounded-full animate-pulse"></div>
+                                                        <div>
+                                                            <p class="text-green-400 font-bold text-sm uppercase tracking-wider">
+                                                                Tu participación está activa</p>
+                                                            <p class="text-gray-400 text-xs">El evento está en curso. ¡Trabaja en tu proyecto!</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            @else
+                                                <div class="inline-flex items-center px-6 py-3 bg-yellow-500/10 border border-yellow-500/20 rounded-xl">
+                                                    <div class="flex items-center gap-3">
+                                                        <div class="p-2 bg-yellow-500 rounded-full"></div>
+                                                        <div>
+                                                            <p class="text-yellow-400 font-bold text-sm uppercase tracking-wider">
+                                                                Inscripciones Cerradas</p>
+                                                            <p class="text-gray-400 text-xs">El evento está en curso pero ya no se aceptan nuevos equipos.</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            @endif
+                                        </div>
                                     @else
+                                        {{-- Evento finalizado --}}
                                         <div class="mt-10">
                                             <div class="inline-flex items-center px-6 py-3 bg-red-500/10 border border-red-500/20 rounded-xl">
                                                 <div class="flex items-center gap-3">
@@ -128,7 +156,7 @@
                                                         <p class="text-red-400 font-bold text-sm uppercase tracking-wider">
                                                             Evento Finalizado
                                                         </p>
-                                                        <p class="text-gray-400 text-xs">Las inscripciones y participación han cerrado.</p>
+                                                        <p class="text-gray-400 text-xs">Este evento ha concluido. Revisa los resultados.</p>
                                                     </div>
                                                 </div>
                                             </div>
