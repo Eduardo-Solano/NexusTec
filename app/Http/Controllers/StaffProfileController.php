@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Http\Requests\Staff\StoreStaffRequest;
 use App\Http\Requests\Staff\UpdateStaffRequest;
 use App\Http\Requests\Staff\ImportStaffCsvRequest;
+use App\Notifications\StaffAccountCreatedNotification;
 use Illuminate\Http\Request;
 
 use Illuminate\Support\Facades\Hash;
@@ -198,6 +199,7 @@ class StaffProfileController extends Controller
             $rowNumber = 0;
             $imported = [];
             $failed = [];
+            $defaultPassword = 'password';
 
             while (($data = fgetcsv($handle, 2000, ',')) !== false) {
                 $rowNumber++;
@@ -223,6 +225,11 @@ class StaffProfileController extends Controller
                 if (!in_array($staffType, ['advisor', 'staff', 'both'])) {
                     $staffType = 'advisor';
                 }
+                $roleLabel = match ($staffType) {
+                    'advisor' => 'Docente',
+                    'staff' => 'Organizador',
+                    'both' => 'Docente / Organizador',
+                };
 
                 // Acumular errores
                 $errors = [];
@@ -265,11 +272,11 @@ class StaffProfileController extends Controller
 
                 // INSERTAR DOCENTE CORRECTO
                 try {
-                    DB::transaction(function () use ($name, $email, $employeeNumber, $department, $staffType, &$imported) {
+                    DB::transaction(function () use ($name, $email, $employeeNumber, $department, $staffType, $defaultPassword, $roleLabel, &$imported) {
                         $user = User::create([
                             'name' => $name,
                             'email' => $email,
-                            'password' => Hash::make('password'),
+                            'password' => Hash::make($defaultPassword),
                             'is_active' => true,
                         ]);
 
@@ -286,6 +293,9 @@ class StaffProfileController extends Controller
                             'employee_number' => $employeeNumber,
                             'department' => $department,
                         ]);
+
+                        // Enviar credenciales de acceso al correo del docente
+                        $user->notify(new StaffAccountCreatedNotification($defaultPassword, $roleLabel));
 
                         $imported[] = [
                             'name' => $name,
