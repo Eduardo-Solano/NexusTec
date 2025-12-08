@@ -70,17 +70,22 @@ class StaffProfileController extends Controller
     public function store(StoreStaffRequest $request)
     {
         $validated = $request->validated();
+        $plainPassword = $validated['password'];
+        $user = null;
+        $roleLabel = match($validated['staff_type']) {
+            'advisor' => 'Docente',
+            'staff' => 'Organizador',
+            'both' => 'Docente/Organizador',
+        };
 
-        DB::transaction(function () use ($validated) {
-            // 1. Crear Usuario
+        DB::transaction(function () use ($validated, $plainPassword, &$user) {
             $user = User::create([
                 'name' => $validated['name'],
                 'email' => $validated['email'],
-                'password' => Hash::make($validated['password']),
+                'password' => Hash::make($plainPassword),
                 'is_active' => true,
             ]);
 
-            // 2. Asignar Roles según el tipo seleccionado
             $roles = match($validated['staff_type']) {
                 'advisor' => ['advisor'],
                 'staff' => ['staff'],
@@ -88,7 +93,6 @@ class StaffProfileController extends Controller
             };
             $user->assignRole($roles);
 
-            // 3. Crear Perfil
             StaffProfile::create([
                 'user_id' => $user->id,
                 'employee_number' => $validated['employee_number'],
@@ -96,15 +100,13 @@ class StaffProfileController extends Controller
             ]);
         });
 
-        $typeLabel = match($validated['staff_type']) {
-            'advisor' => 'Docente',
-            'staff' => 'Organizador',
-            'both' => 'Docente/Organizador',
-        };
+        if ($user) {
+            $user->notify(new StaffAccountCreatedNotification($plainPassword, $roleLabel));
+        }
 
-        return redirect()->route('staff.index')->with('success', "$typeLabel registrado correctamente.");
-    
+        return redirect()->route('staff.index')->with('success', "$roleLabel registrado correctamente.");
     }
+
 
     /**
      * Display the specified resource.
