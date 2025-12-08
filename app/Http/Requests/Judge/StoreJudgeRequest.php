@@ -28,6 +28,7 @@ class StoreJudgeRequest extends FormRequest
             'phone' => ['nullable', 'string', 'max:20'],
             'company' => ['nullable', 'string', 'max:255'],
             'specialty_id' => ['nullable', 'exists:specialties,id'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
         ];
     }
 
@@ -45,6 +46,9 @@ class StoreJudgeRequest extends FormRequest
             'phone.max' => 'El teléfono no puede exceder 20 caracteres.',
             'company.max' => 'La empresa no puede exceder 255 caracteres.',
             'specialty_id.exists' => 'La especialidad seleccionada no existe.',
+            'password.required' => 'La contraseña es obligatoria.',
+            'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
+            'password.confirmed' => 'Las contraseñas no coinciden.',
         ];
     }
 }

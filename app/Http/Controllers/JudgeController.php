@@ -12,6 +12,8 @@ use App\Notifications\JudgeAccountCreatedNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role;
 
 class JudgeController extends Controller
@@ -66,14 +68,24 @@ class JudgeController extends Controller
     {
         $validated = $request->validated();
 
-        DB::transaction(function () use ($validated) {
-            $user = User::create([
+        $plainPassword = $validated['password'];
+        $mustChange = Schema::hasColumn('users', 'must_change_password');
+        $user = null;
+
+        DB::transaction(function () use ($validated, $plainPassword, $mustChange, &$user) {
+            $userData = [
                 'name' => $validated['name'],
                 'email' => $validated['email'],
                 'phone' => $validated['phone'] ?? null,
-                'password' => Hash::make('password'), // contraseña temporal
+                'password' => Hash::make($plainPassword),
                 'is_active' => true,
-            ]);
+            ];
+
+            if ($mustChange) {
+                $userData['must_change_password'] = true;
+            }
+
+            $user = User::create($userData);
 
             // asegurar rol
             Role::findOrCreate('judge');
@@ -86,7 +98,11 @@ class JudgeController extends Controller
             ]);
         });
 
-        return redirect()->route('judges.index')->with('success', 'Juez registrado correctamente. Contraseña temporal: "password"');
+        if ($user) {
+            $user->notify(new JudgeAccountCreatedNotification($plainPassword));
+        }
+
+        return redirect()->route('judges.index')->with('success', 'Juez registrado correctamente. Se envió un correo con sus credenciales y enlace de acceso.');
     }
 
     /**
