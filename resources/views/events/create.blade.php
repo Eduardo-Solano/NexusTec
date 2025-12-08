@@ -16,7 +16,7 @@
 
                         <div>
                             <x-input-label for="name" :value="__('Nombre del Evento')" class="text-gray-300" />
-                            <x-text-input id="name" name="name" type="text" class="mt-1 block w-full bg-gray-900 border-gray-600 text-white focus:border-ito-orange focus:ring-ito-orange" :value="old('name')" required autofocus placeholder="Ej: HackTec 2025" />
+                            <x-text-input id="name" name="name" type="text" class="mt-1 block w-full bg-gray-900 border-gray-600 text-white focus:border-ito-orange focus:ring-ito-orange" :value="old('name')" required autofocus placeholder="Ej: HackTec 2025" maxlength="255" />
                             <x-input-error class="mt-2" :messages="$errors->get('name')" />
                         </div>
 
@@ -79,7 +79,7 @@
                                     <label class="relative flex items-start p-4 rounded-xl border border-gray-700 bg-gray-800/50 cursor-pointer hover:bg-gray-800 hover:border-ito-orange transition group">
                                         <div class="flex items-center h-5">
                                             <input type="checkbox" name="criteria[]" value="{{ $criterion->id }}" data-points="{{ $criterion->max_points }}"
-                                                class="criterion-checkbox w-5 h-5 rounded border-gray-600 bg-gray-900 text-ito-orange focus:ring-ito-orange focus:ring-offset-gray-900">
+                                                class="criterion-checkbox w-5 h-5 rounded border-gray-600 bg-gray-900 text-ito-orange focus:ring-ito-orange focus:ring-offset-gray-900" {{ $loop->first ? 'required' : '' }}>
                                         </div>
                                         <div class="ml-3 text-sm">
                                             <span class="font-bold text-white group-hover:text-ito-orange transition">{{ $criterion->name }}</span>

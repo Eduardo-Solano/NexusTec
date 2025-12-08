@@ -65,13 +65,15 @@ class StudentProfileController extends Controller
     public function store(StoreStudentRequest $request)
     {
         $validated = $request->validated();
+        $plainPassword = $validated['password'];
+        $user = null;
 
-        DB::transaction(function () use ($validated) {
+        DB::transaction(function () use ($validated, $plainPassword, &$user) {
             // 1. Crear Usuario
             $user = User::create([
                 'name' => $validated['name'],
                 'email' => $validated['email'],
-                'password' => Hash::make($validated['password']),
+                'password' => Hash::make($plainPassword),
                 'is_active' => true,
             ]);
 
@@ -85,6 +87,10 @@ class StudentProfileController extends Controller
                 'career_id' => $validated['career_id'],
             ]);
         });
+
+        if ($user) {
+            $user->notify(new StudentAccountCreatedNotification($plainPassword));
+        }
 
         return redirect()->route('students.index')->with('success', 'Alumno registrado correctamente.');
     }
