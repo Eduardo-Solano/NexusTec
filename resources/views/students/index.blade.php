@@ -89,6 +89,26 @@
                 <div>
                     <h2 class="text-3xl font-bold text-white">Gestión de Alumnos</h2>
                     <p class="text-gray-400 text-sm mt-1">Administración de alumnos</p>
+                    @if (session('success'))
+                        <div class="mt-3 w-full bg-green-500/10 border border-green-500/30 text-green-100 rounded-xl shadow-lg shadow-green-900/20 px-5 py-4 flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-full bg-green-500/20 flex items-center justify-center">
+                                <svg class="w-5 h-5 text-green-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                            </div>
+                            <p class="text-sm font-semibold">{{ session('success') }}</p>
+                        </div>
+                    @endif
+                    @if (session('error'))
+                        <div class="mt-3 w-full bg-red-500/10 border border-red-500/30 text-red-100 rounded-xl shadow-lg shadow-red-900/20 px-5 py-4 flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-full bg-red-500/20 flex items-center justify-center">
+                                <svg class="w-5 h-5 text-red-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                            </div>
+                            <p class="text-sm font-semibold">{{ session('error') }}</p>
+                        </div>
+                    @endif
                 </div>
                 <div class="flex gap-3">
                     <!-- Botón Importar CSV -->
