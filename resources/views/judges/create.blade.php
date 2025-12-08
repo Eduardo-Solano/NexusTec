@@ -11,19 +11,19 @@
                     <div>
                         <x-input-label for="name" :value="__('Nombre Completo')" class="text-white" />
                         <x-text-input id="name" class="block mt-1 w-full bg-gray-900 border-gray-600 text-white"
-                            type="text" name="name" required />
+                            type="text" name="name" required maxlength="255" />
                     </div>
 
                     <div>
                         <x-input-label for="email" :value="__('Correo Electrónico')" class="text-white" />
                         <x-text-input id="email" class="block mt-1 w-full bg-gray-900 border-gray-600 text-white"
-                            type="email" name="email" required />
+                            type="email" name="email" required maxlength="255" autocomplete="email" />
                     </div>
 
                     <div>
                         <x-input-label for="phone" :value="__('Teléfono (opcional)')" class="text-white" />
                         <x-text-input id="phone" class="block mt-1 w-full bg-gray-900 border-gray-600 text-white"
-                            type="text" name="phone" />
+                            type="text" name="phone" maxlength="20" />
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
@@ -31,7 +31,7 @@
                             <x-input-label for="company" :value="__('Empresa / Institución')" class="text-white" />
                             <x-text-input id="company"
                                 class="block mt-1 w-full bg-gray-900 border-gray-600 text-white" type="text"
-                                name="company" />
+                                name="company" maxlength="255" />
                         </div>
                         <div>
                             <x-input-label for="specialty_id" :value="__('Especialidad')" class="text-white" />

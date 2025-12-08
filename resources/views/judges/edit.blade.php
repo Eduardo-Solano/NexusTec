@@ -87,14 +87,14 @@
                                     <div class="space-y-2">
                                         <x-input-label for="name" :value="__('Nombre Completo')" class="text-white font-bold text-xs uppercase tracking-wide" />
                                         <x-text-input id="name" class="block w-full bg-gray-900 border-gray-600 text-white focus:border-purple-500 focus:ring-purple-500 rounded-lg h-11 @error('name') border-red-500 @enderror" 
-                                                      type="text" name="name" :value="old('name', $judge->name)" required />
+                                                      type="text" name="name" :value="old('name', $judge->name)" required maxlength="255" />
                                         @error('name')<p class="text-red-400 text-sm mt-1">{{ $message }}</p>@enderror
                                     </div>
 
                                     <div class="space-y-2">
                                         <x-input-label for="email" :value="__('Correo Electrónico')" class="text-white font-bold text-xs uppercase tracking-wide" />
                                         <x-text-input id="email" class="block w-full bg-gray-900 border-gray-600 text-white focus:border-purple-500 focus:ring-purple-500 rounded-lg h-11 @error('email') border-red-500 @enderror" 
-                                                      type="email" name="email" :value="old('email', $judge->email)" required />
+                                                      type="email" name="email" :value="old('email', $judge->email)" required maxlength="255" autocomplete="email" />
                                         @error('email')<p class="text-red-400 text-sm mt-1">{{ $message }}</p>@enderror
                                     </div>
                                 </div>
@@ -102,7 +102,7 @@
                                 <div class="space-y-2">
                                     <x-input-label for="phone" :value="__('Teléfono')" class="text-white font-bold text-xs uppercase tracking-wide" />
                                     <x-text-input id="phone" class="block w-full bg-gray-900 border-gray-600 text-white focus:border-purple-500 focus:ring-purple-500 rounded-lg h-11 @error('phone') border-red-500 @enderror" 
-                                                  type="text" name="phone" :value="old('phone', $judge->phone)" placeholder="Ej: 951 123 4567" />
+                                                  type="text" name="phone" :value="old('phone', $judge->phone)" placeholder="Ej: 951 123 4567" maxlength="20" />
                                     @error('phone')<p class="text-red-400 text-sm mt-1">{{ $message }}</p>@enderror
                                 </div>
 
@@ -111,7 +111,7 @@
                                     <div class="space-y-2">
                                         <x-input-label for="company" :value="__('Empresa / Institución')" class="text-white font-bold text-xs uppercase tracking-wide" />
                                         <x-text-input id="company" class="block w-full bg-gray-900 border-gray-600 text-white focus:border-purple-500 focus:ring-purple-500 rounded-lg h-11 @error('company') border-red-500 @enderror" 
-                                                      type="text" name="company" :value="old('company', $judge->judgeProfile->company ?? '')" placeholder="Ej: Google, Microsoft..." />
+                                                      type="text" name="company" :value="old('company', $judge->judgeProfile->company ?? '')" placeholder="Ej: Google, Microsoft..." maxlength="255" />
                                         @error('company')<p class="text-red-400 text-sm mt-1">{{ $message }}</p>@enderror
                                     </div>
 

@@ -87,14 +87,14 @@
                                     <div class="space-y-2">
                                         <x-input-label for="name" :value="__('Nombre Completo')" class="text-white font-bold text-xs uppercase tracking-wide" />
                                         <x-text-input id="name" class="block w-full bg-gray-900 border-gray-600 text-white focus:border-blue-500 focus:ring-blue-500 rounded-lg h-11 @error('name') border-red-500 @enderror" 
-                                                      type="text" name="name" :value="old('name', $student->name)" required />
+                                                      type="text" name="name" :value="old('name', $student->name)" required maxlength="255" />
                                         @error('name')<p class="text-red-400 text-sm mt-1">{{ $message }}</p>@enderror
                                     </div>
 
                                     <div class="space-y-2">
                                         <x-input-label for="email" :value="__('Correo Institucional')" class="text-white font-bold text-xs uppercase tracking-wide" />
                                         <x-text-input id="email" class="block w-full bg-gray-900 border-gray-600 text-white focus:border-blue-500 focus:ring-blue-500 rounded-lg h-11 @error('email') border-red-500 @enderror" 
-                                                      type="email" name="email" :value="old('email', $student->email)" required />
+                                                      type="email" name="email" :value="old('email', $student->email)" required maxlength="255" autocomplete="email" />
                                         @error('email')<p class="text-red-400 text-sm mt-1">{{ $message }}</p>@enderror
                                     </div>
                                 </div>
@@ -102,7 +102,7 @@
                                 <div class="space-y-2">
                                     <x-input-label for="phone" :value="__('Teléfono')" class="text-white font-bold text-xs uppercase tracking-wide" />
                                     <x-text-input id="phone" class="block w-full bg-gray-900 border-gray-600 text-white focus:border-blue-500 focus:ring-blue-500 rounded-lg h-11 @error('phone') border-red-500 @enderror" 
-                                                  type="text" name="phone" :value="old('phone', $student->phone)" placeholder="Ej: 951 123 4567" />
+                                                  type="text" name="phone" :value="old('phone', $student->phone)" placeholder="Ej: 951 123 4567" maxlength="20" />
                                     @error('phone')<p class="text-red-400 text-sm mt-1">{{ $message }}</p>@enderror
                                 </div>
 
@@ -111,13 +111,13 @@
                                     <div class="space-y-2">
                                         <x-input-label for="control_number" :value="__('No. Control')" class="text-white font-bold text-xs uppercase tracking-wide" />
                                         <x-text-input id="control_number" class="block w-full bg-gray-900 border-gray-600 text-white focus:border-blue-500 focus:ring-blue-500 rounded-lg h-11 font-mono @error('control_number') border-red-500 @enderror" 
-                                                      type="text" name="control_number" :value="old('control_number', $student->studentProfile->control_number ?? '')" required placeholder="Ej: 21160000" />
+                                                      type="text" name="control_number" :value="old('control_number', $student->studentProfile->control_number ?? '')" required maxlength="255" placeholder="Ej: 21160000" />
                                         @error('control_number')<p class="text-red-400 text-sm mt-1">{{ $message }}</p>@enderror
                                     </div>
 
                                     <div class="space-y-2">
                                         <x-input-label for="semester" :value="__('Semestre')" class="text-white font-bold text-xs uppercase tracking-wide" />
-                                        <select name="semester" id="semester" class="block w-full bg-gray-900 border-gray-600 text-white rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 h-11 text-sm @error('semester') border-red-500 @enderror">
+                                        <select name="semester" id="semester" class="block w-full bg-gray-900 border-gray-600 text-white rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 h-11 text-sm @error('semester') border-red-500 @enderror" required>
                                             @for ($i = 1; $i <= 12; $i++)
                                                 <option value="{{ $i }}" @if(old('semester', $student->studentProfile->semester ?? '') == $i) selected @endif>{{ $i }}° Semestre</option>
                                             @endfor
@@ -128,7 +128,7 @@
 
                                 <div class="space-y-2">
                                     <x-input-label for="career_id" :value="__('Carrera')" class="text-white font-bold text-xs uppercase tracking-wide" />
-                                    <select name="career_id" id="career_id" class="block w-full bg-gray-900 border-gray-600 text-white rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 h-11 text-sm @error('career_id') border-red-500 @enderror">
+                                    <select name="career_id" id="career_id" class="block w-full bg-gray-900 border-gray-600 text-white rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 h-11 text-sm @error('career_id') border-red-500 @enderror" required>
                                         <option value="">Seleccionar carrera</option>
                                         @foreach ($careers as $career)
                                             <option value="{{ $career->id }}" @if(old('career_id', $student->studentProfile->career_id ?? '') == $career->id) selected @endif>{{ $career->name }}</option>                                  

@@ -21,25 +21,25 @@
                     
                     <div>
                         <x-input-label for="name" :value="__('Nombre Completo')" class="text-white" />
-                        <x-text-input id="name" class="block mt-1 w-full bg-gray-900 border-gray-600 text-white @error('name') border-red-500 @enderror" type="text" name="name" :value="old('name')" required />
+                        <x-text-input id="name" class="block mt-1 w-full bg-gray-900 border-gray-600 text-white @error('name') border-red-500 @enderror" type="text" name="name" :value="old('name')" required maxlength="255" />
                         @error('name')<p class="text-red-400 text-sm mt-1">{{ $message }}</p>@enderror
                     </div>
 
                     <div>
                         <x-input-label for="email" :value="__('Correo Institucional')" class="text-white" />
-                        <x-text-input id="email" class="block mt-1 w-full bg-gray-900 border-gray-600 text-white @error('email') border-red-500 @enderror" type="email" name="email" :value="old('email')" required />
+                        <x-text-input id="email" class="block mt-1 w-full bg-gray-900 border-gray-600 text-white @error('email') border-red-500 @enderror" type="email" name="email" :value="old('email')" required maxlength="255" autocomplete="email" />
                         @error('email')<p class="text-red-400 text-sm mt-1">{{ $message }}</p>@enderror
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <x-input-label for="control_number" :value="__('No. Control')" class="text-white" />
-                            <x-text-input id="control_number" class="block mt-1 w-full bg-gray-900 border-gray-600 text-white @error('control_number') border-red-500 @enderror" type="text" name="control_number" :value="old('control_number')" required placeholder="Ej: CTRL-005"/>
+                            <x-text-input id="control_number" class="block mt-1 w-full bg-gray-900 border-gray-600 text-white @error('control_number') border-red-500 @enderror" type="text" name="control_number" :value="old('control_number')" required maxlength="255" placeholder="Ej: CTRL-005"/>
                             @error('control_number')<p class="text-red-400 text-sm mt-1">{{ $message }}</p>@enderror
                         </div>
                         <div>
                             <x-input-label for="major" :value="__('Carrera')" class="text-white" />
-                            <select name="career_id" class="block mt-1 w-full bg-gray-900 border-gray-600 text-white rounded-md shadow-sm focus:border-ito-orange focus:ring-ito-orange @error('career_id') border-red-500 @enderror">
+                            <select name="career_id" required class="block mt-1 w-full bg-gray-900 border-gray-600 text-white rounded-md shadow-sm focus:border-ito-orange focus:ring-ito-orange @error('career_id') border-red-500 @enderror">
                                 <option value="">Seleccionar carrera</option>
                                 @foreach ($careers as $career)
                                     <option value="{{ $career->id }}" @if(old('career_id') == $career->id) selected @endif>{{ $career->name }}</option>                                  
@@ -52,12 +52,12 @@
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <x-input-label for="password" :value="__('Contraseña')" class="text-white" />
-                            <x-text-input id="password" class="block mt-1 w-full bg-gray-900 border-gray-600 text-white @error('password') border-red-500 @enderror" type="password" name="password" required />
+                            <x-text-input id="password" class="block mt-1 w-full bg-gray-900 border-gray-600 text-white @error('password') border-red-500 @enderror" type="password" name="password" minlength="8" autocomplete="new-password" />
                             @error('password')<p class="text-red-400 text-sm mt-1">{{ $message }}</p>@enderror
                         </div>
                         <div>
                             <x-input-label for="password_confirmation" :value="__('Confirmar Contraseña')" class="text-white" />
-                            <x-text-input id="password_confirmation" class="block mt-1 w-full bg-gray-900 border-gray-600 text-white @error('password_confirmation') border-red-500 @enderror" type="password" name="password_confirmation" required />
+                            <x-text-input id="password_confirmation" class="block mt-1 w-full bg-gray-900 border-gray-600 text-white @error('password_confirmation') border-red-500 @enderror" type="password" name="password_confirmation" minlength="8" autocomplete="new-password" />
                             @error('password_confirmation')<p class="text-red-400 text-sm mt-1">{{ $message }}</p>@enderror
                         </div>
                     </div>

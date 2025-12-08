@@ -70,13 +70,13 @@
                                     <div class="space-y-2">
                                         <x-input-label for="name" :value="__('Nombre Completo')" class="text-white font-bold text-xs uppercase tracking-wide" />
                                         <x-text-input id="name" class="block w-full bg-gray-900 border-gray-600 text-white focus:border-blue-500 focus:ring-blue-500 rounded-lg h-11" 
-                                                      type="text" name="name" :value="old('name', $staff->name)" required placeholder="Ej: EMP-005"/>
+                                                      type="text" name="name" :value="old('name', $staff->name)" required maxlength="255" />
                                     </div>
 
                                     <div class="space-y-2">
                                         <x-input-label for="email" :value="__('Correo Institucional')" class="text-white font-bold text-xs uppercase tracking-wide" />
                                         <x-text-input id="email" class="block w-full bg-gray-900 border-gray-600 text-white focus:border-blue-500 focus:ring-blue-500 rounded-lg h-11" 
-                                                      type="email" name="email" :value="old('email', $staff->email)" required />
+                                                      type="email" name="email" :value="old('email', $staff->email)" required maxlength="255" autocomplete="email" />
                                     </div>
                                 </div>
 
@@ -84,12 +84,12 @@
                                     <div class="space-y-2">
                                         <x-input-label for="employee_number" :value="__('No. Empleado')" class="text-white font-bold text-xs uppercase tracking-wide" />
                                         <x-text-input id="employee_number" class="block w-full bg-gray-900 border-gray-600 text-white focus:border-purple-500 focus:ring-purple-500 rounded-lg h-11 font-mono" 
-                                                      type="text" name="employee_number" :value="old('employee_number', $staff->staffProfile->employee_number ?? '')" required />
+                                                      type="text" name="employee_number" :value="old('employee_number', $staff->staffProfile->employee_number ?? '')" required maxlength="255" />
                                     </div>
 
                                     <div class="space-y-2">
                                         <x-input-label for="department" :value="__('Departamento')" class="text-white font-bold text-xs uppercase tracking-wide" />
-                                        <select name="department" class="block w-full bg-gray-900 border-gray-600 text-white rounded-lg shadow-sm focus:border-purple-500 focus:ring-purple-500 h-11 text-sm">
+                                        <select name="department" required class="block w-full bg-gray-900 border-gray-600 text-white rounded-lg shadow-sm focus:border-purple-500 focus:ring-purple-500 h-11 text-sm">
                                             @php
                                                 $currentDept = $staff->staffProfile->department ?? '';
                                                 $departments = ['Sistemas y Computación', 'Ciencias Básicas', 'Industrial', 'Económico-Administrativo'];
@@ -113,7 +113,7 @@
                                     @endphp
                                     <div class="grid grid-cols-3 gap-3">
                                         <label class="relative cursor-pointer">
-                                            <input type="radio" name="staff_type" value="advisor" class="peer sr-only" {{ old('staff_type', $currentType) == 'advisor' ? 'checked' : '' }}>
+                                            <input type="radio" name="staff_type" value="advisor" class="peer sr-only" {{ old('staff_type', $currentType) == 'advisor' ? 'checked' : '' }} required>
                                             <div class="p-4 bg-gray-900 border-2 border-gray-600 rounded-xl text-center transition peer-checked:border-blue-500 peer-checked:bg-blue-500/10 hover:border-gray-500">
                                                 <div class="text-2xl mb-2">👨‍🏫</div>
                                                 <p class="text-white font-bold text-sm">Docente</p>
