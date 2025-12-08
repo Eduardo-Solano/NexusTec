@@ -151,34 +151,70 @@
                             <div class="max-h-80 overflow-y-auto bg-white dark:bg-gray-800">
 
                                 {{-- 1. SOLICITUDES DE UNIÓN --}}
+                                {{-- 1. SOLICITUDES DE UNIÓN A EQUIPOS --}}
                                 @foreach ($unreadNotifications as $notification)
                                     @if (($notification->data['type'] ?? null) === 'join_request')
                                         <div
-                                            class="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 border-b dark:border-gray-700">
+                                            class="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/40 border-b dark:border-gray-700">
                                             <div class="flex items-start gap-3">
-                                                <div class="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
-                                                    <svg class="w-4 h-4 text-orange-600" fill="none" viewBox="0 0 24 24">
-                                                        <path stroke="currentColor" stroke-width="2"
-                                                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                                {{-- Icono --}}
+                                                <div class="p-2 bg-indigo-100 dark:bg-indigo-900/40 rounded-lg">
+                                                    <svg class="w-4 h-4 text-indigo-600" viewBox="0 0 24 24" fill="none">
+                                                        <path
+                                                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM4 19a4 4 0 014-4h8a4 4 0 014 4"
+                                                            stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                            stroke-linejoin="round" />
                                                     </svg>
                                                 </div>
+
                                                 <div class="flex-1">
-                                                    <p class="text-sm font-semibold text-gray-800 dark:text-gray-200">
-                                                        {{ $notification->data['message'] }}</p>
-                                                    <p class="text-[10px] text-gray-500">Rol solicitado:
-                                                        {{ $notification->data['role'] ?? 'Miembro' }}</p>
+                                                    {{-- 🔹 TEXTO PRINCIPAL: QUIÉN Y A QUÉ EQUIPO --}}
+                                                    <p class="text-sm font-semibold text-gray-800 dark:text-gray-100">
+                                                        {{ $notification->data['message'] ??
+                                                            ($notification->data['user_name'] ?? 'Un usuario') .
+                                                                ' quiere unirse al equipo "' .
+                                                                ($notification->data['team_name'] ?? 'Sin nombre') .
+                                                                '"' }}
+                                                    </p>
+
+                                                    <p class="text-[11px] text-gray-500 mt-0.5">
+                                                        Equipo: {{ $notification->data['team_name'] ?? 'Sin nombre' }}
+                                                    </p>
+
+                                                    <p class="text-[11px] text-gray-400">
+                                                        {{ $notification->created_at->diffForHumans() }}
+                                                    </p>
+
+                                                    {{-- BOTONES ACEPTAR / RECHAZAR --}}
                                                     <div class="flex gap-2 mt-3">
-                                                        <form action="{{ $notification->data['accept_url'] }}"
-                                                            method="POST">
+                                                        {{-- ACEPTAR SOLICITUD --}}
+                                                        <form method="POST"
+                                                            action="{{ route('teams.accept', [
+                                                                'team' => $notification->data['team_id'],
+                                                                'user' => $notification->data['user_id'],
+                                                            ]) }}">
                                                             @csrf
-                                                            <button
-                                                                class="px-3 py-1.5 text-xs font-bold bg-green-600 hover:bg-green-500 text-white rounded-lg">Aceptar</button>
+                                                            <input type="hidden" name="notification"
+                                                                value="{{ $notification->id }}">
+                                                            <button type="submit"
+                                                                class="px-3 py-1.5 text-xs font-bold rounded-lg bg-green-600 hover:bg-green-500 text-white">
+                                                                Aceptar
+                                                            </button>
                                                         </form>
-                                                        <form action="{{ $notification->data['reject_url'] }}"
-                                                            method="POST">
+
+                                                        {{-- RECHAZAR SOLICITUD --}}
+                                                        <form method="POST"
+                                                            action="{{ route('teams.reject', [
+                                                                'team' => $notification->data['team_id'],
+                                                                'user' => $notification->data['user_id'],
+                                                            ]) }}">
                                                             @csrf
-                                                            <button
-                                                                class="px-3 py-1.5 text-xs font-bold bg-red-600 hover:bg-red-500 text-white rounded-lg">Rechazar</button>
+                                                            <input type="hidden" name="notification"
+                                                                value="{{ $notification->id }}">
+                                                            <button type="submit"
+                                                                class="px-3 py-1.5 text-xs font-bold rounded-lg bg-red-600 hover:bg-red-500 text-white">
+                                                                Rechazar
+                                                            </button>
                                                         </form>
                                                     </div>
                                                 </div>
@@ -186,6 +222,8 @@
                                         </div>
                                     @endif
                                 @endforeach
+
+
                                 {{-- 2. INVITACIONES A EQUIPO --}}
                                 @foreach ($unreadNotifications as $notification)
                                     @if (($notification->data['type'] ?? null) === 'team_invitation')
@@ -235,10 +273,63 @@
                                         </div>
                                     @endif
                                 @endforeach
+                                {{-- 3. RESPUESTA A SOLICITUD DE UNIÓN (ACEPTADA / RECHAZADA) --}}
+                                @foreach ($unreadNotifications as $notification)
+                                    @if (($notification->data['type'] ?? null) === 'team_join_response')
+                                        @php
+                                            $status = $notification->data['status'] ?? 'accepted';
+                                            $accepted = $status === 'accepted';
+                                        @endphp
+
+                                        <a href="{{ $notification->data['team_url'] ?? '#' }}"
+                                            onclick="fetch('{{ route('notifications.markAsRead', $notification->id) }}', {
+    method: 'POST',
+    headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
+})"
+                                            class="block px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/40 border-b dark:border-gray-700">
+                                            <div class="flex items-start gap-3">
+                                                <div
+                                                    class="p-2 rounded-lg {{ $accepted ? 'bg-green-100 dark:bg-green-900/30' : 'bg-red-100 dark:bg-red-900/30' }}">
+                                                    {{-- Icono --}}
+                                                    @if ($accepted)
+                                                        {{-- Aceptado --}}
+                                                        <svg class="w-4 h-4 text-green-600" viewBox="0 0 24 24"
+                                                            fill="none">
+                                                            <path d="M5 13l4 4L19 7" stroke="currentColor"
+                                                                stroke-width="2" stroke-linecap="round"
+                                                                stroke-linejoin="round" />
+                                                        </svg>
+                                                    @else
+                                                        {{-- Rechazado --}}
+                                                        <svg class="w-4 h-4 text-red-600" viewBox="0 0 24 24"
+                                                            fill="none">
+                                                            <path d="M6 6l12 12M6 18L18 6" stroke="currentColor"
+                                                                stroke-width="2" stroke-linecap="round"
+                                                                stroke-linejoin="round" />
+                                                        </svg>
+                                                    @endif
+                                                </div>
+
+                                                <div class="flex-1">
+                                                    <p class="text-sm font-semibold text-gray-800 dark:text-gray-100">
+                                                        {{ $notification->data['message'] ?? 'Actualización sobre tu solicitud de equipo.' }}
+                                                    </p>
+                                                    <p class="text-[11px] text-gray-500 mt-0.5">
+                                                        Equipo: {{ $notification->data['team_name'] ?? 'Sin nombre' }}
+                                                    </p>
+                                                    <p class="text-[11px] text-gray-400">
+                                                        {{ $notification->created_at->diffForHumans() }}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    @endif
+                                @endforeach
 
                                 {{-- 2. SOLICITUDES DE ASESORÍA --}}
                                 @if ($pendingAdvisories->count() > 0)
-                                    <div class="px-4 py-2 bg-indigo-50 dark:bg-indigo-900/20 border-b dark:border-gray-700">
+                                    <div
+                                        class="px-4 py-2 bg-indigo-50 dark:bg-indigo-900/20 border-b dark:border-gray-700">
                                         <p class="text-xs font-bold text-indigo-600 uppercase">Solicitudes de Asesoría</p>
                                     </div>
                                     @foreach ($pendingAdvisories as $advisory)
@@ -246,7 +337,8 @@
                                             class="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 border-b dark:border-gray-700">
                                             <div class="flex items-start gap-3">
                                                 <div class="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
-                                                    <svg class="w-4 h-4 text-indigo-600" fill="none" viewBox="0 0 24 24">
+                                                    <svg class="w-4 h-4 text-indigo-600" fill="none"
+                                                        viewBox="0 0 24 24">
                                                         <path stroke="currentColor" stroke-width="2"
                                                             d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2M7 20H2v-2a3 3 0 015.356-1.857" />
                                                     </svg>
@@ -312,12 +404,12 @@
                                         $type = $notification->data['type'] ?? null;
                                     @endphp
 
-                                    @if ($type !== 'join_request' && $type !== 'team_invitation')
+                                    @if ($type !== 'join_request' && $type !== 'team_invitation' && $type !== 'team_join_response')
                                         <a href="{{ route('public.event-winners', $notification->data['event_id'] ?? 0) }}"
-                                            onclick="fetch('{{ route('notifications.read', $notification->id) }}', {
-                                                method: 'POST',
-                                                headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
-                                            })"
+                                            onclick="fetch('{{ route('notifications.markAsRead', $notification->id) }}', {
+    method: 'POST',
+    headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
+})"
                                             class="block px-4 py-3 hover:bg-yellow-50/50 dark:hover:bg-yellow-900/5 border-b dark:border-gray-700">
                                             <div class="flex items-center gap-3">
                                                 <div class="text-2xl">🏆</div>
@@ -335,6 +427,7 @@
                                         </a>
                                     @endif
                                 @endforeach
+
 
 
                                 {{-- ESTADO VACÍO --}}
