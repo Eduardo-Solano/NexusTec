@@ -15,6 +15,8 @@ use App\Notifications\TeamJoinRequestNotification;
 use App\Http\Requests\Team\StoreTeamRequest;
 use App\Http\Requests\Team\UpdateTeamRequest;
 use App\Http\Requests\Team\JoinTeamRequest;
+use App\Notifications\TeamJoinResponseNotification;
+
 
 class TeamController extends Controller
 {
@@ -251,16 +253,25 @@ class TeamController extends Controller
             return back()->with('error', 'No se pueden aceptar solicitudes porque el evento no está en período de inscripciones.');
         }
 
+        // Borrar la notificación del líder
         if ($request->notification) {
-            Auth::user()->notifications()->where('id', $request->notification)->update(['read_at' => now()]);
+            Auth::user()
+                ->notifications()
+                ->where('id', $request->notification)
+                ->first()?->delete();
         }
 
+        // Marcar como aceptado en el pivot
         $team->members()->updateExistingPivot($user->id, [
             'is_accepted' => true
         ]);
 
+        // 🔔 Notificar al usuario solicitante que fue ACEPTADO
+        $user->notify(new TeamJoinResponseNotification($team, 'accepted'));
+
         return back()->with('success', 'Miembro aceptado.');
     }
+
 
 
     /**
@@ -268,14 +279,24 @@ class TeamController extends Controller
      */
     public function reject(Team $team, User $user, Request $request)
     {
+        // Borrar la notificación del líder
         if ($request->notification) {
-            Auth::user()->notifications()->where('id', $request->notification)->update(['read_at' => now()]);
+            Auth::user()
+                ->notifications()
+                ->where('id', $request->notification)
+                ->first()?->delete();
         }
 
+        // Quitar al usuario de la tabla pivot (no se une)
         $team->members()->detach($user->id);
+
+        // 🔔 Notificar al usuario solicitante que fue RECHAZADO
+        $user->notify(new TeamJoinResponseNotification($team, 'rejected'));
 
         return back()->with('success', 'Solicitud rechazada.');
     }
+
+
 
     /**
      * Aceptar invitación (cuando el usuario actual es el invitado)
@@ -291,8 +312,11 @@ class TeamController extends Controller
 
         // Marcar notificación como leída
         if ($notification) {
-            $user->notifications()->where('id', $notification)->update(['read_at' => now()]);
+            $user->notifications()
+                ->where('id', $notification)
+                ->first()?->delete();
         }
+
 
         // Verificar que el usuario tiene una invitación pendiente
         $member = $team->members()->where('user_id', $user->id)->first();
@@ -322,8 +346,11 @@ class TeamController extends Controller
 
         // Marcar notificación como leída
         if ($notification) {
-            $user->notifications()->where('id', $notification)->update(['read_at' => now()]);
+            $user->notifications()
+                ->where('id', $notification)
+                ->first()?->delete();
         }
+
 
         // Verificar que el usuario tiene una invitación pendiente
         $member = $team->members()->where('user_id', $user->id)->first();
