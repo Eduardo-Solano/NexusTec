@@ -41,8 +41,8 @@ class NotificationComposer
                 if ($teamIds->isNotEmpty()) {
                     $data['pendingMembers'] = \App\Models\User::whereHas('teams', function ($q) use ($teamIds) {
                         $q->whereIn('teams.id', $teamIds)
-                          ->wherePivot('is_accepted', false)
-                          ->wherePivot('requested_by_user', true);
+                          ->where('team_user.is_accepted', false)
+                          ->where('team_user.requested_by_user', true);
                     })->select('id', 'name', 'email')->get();
                 }
 
