@@ -186,6 +186,55 @@
                                         </div>
                                     @endif
                                 @endforeach
+                                {{-- 2. INVITACIONES A EQUIPO --}}
+                                @foreach ($unreadNotifications as $notification)
+                                    @if (($notification->data['type'] ?? null) === 'team_invitation')
+                                        <div
+                                            class="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 border-b dark:border-gray-700">
+                                            <div class="flex items-start gap-3">
+                                                <div class="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                                                    {{-- Icono de equipo / invitación --}}
+                                                    <svg class="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24">
+                                                        <path stroke="currentColor" stroke-width="2"
+                                                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM4 19a4 4 0 014-4h8a4 4 0 014 4" />
+                                                    </svg>
+                                                </div>
+
+                                                <div class="flex-1">
+                                                    <p class="text-sm font-semibold text-gray-800 dark:text-gray-200">
+                                                        {{ $notification->data['message'] ?? 'Has sido invitado a un equipo' }}
+                                                    </p>
+                                                    <p class="text-[10px] text-gray-500">
+                                                        Equipo:
+                                                        {{ $notification->data['team_name'] ?? 'Sin nombre' }}
+                                                    </p>
+
+                                                    <div class="flex gap-2 mt-3">
+                                                        {{-- ACEPTAR --}}
+                                                        <form action="{{ $notification->data['accept_url'] ?? '#' }}"
+                                                            method="POST">
+                                                            @csrf
+                                                            <button type="submit"
+                                                                class="px-3 py-1.5 text-xs font-bold bg-green-600 hover:bg-green-500 text-white rounded-lg">
+                                                                Aceptar
+                                                            </button>
+                                                        </form>
+
+                                                        {{-- RECHAZAR --}}
+                                                        <form action="{{ $notification->data['reject_url'] ?? '#' }}"
+                                                            method="POST">
+                                                            @csrf
+                                                            <button type="submit"
+                                                                class="px-3 py-1.5 text-xs font-bold bg-red-600 hover:bg-red-500 text-white rounded-lg">
+                                                                Rechazar
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endif
+                                @endforeach
 
                                 {{-- 2. SOLICITUDES DE ASESORÍA --}}
                                 @if ($pendingAdvisories->count() > 0)
@@ -205,7 +254,8 @@
                                                 <div class="flex-1">
                                                     <p class="text-sm font-semibold text-gray-800 dark:text-gray-200">
                                                         {{ $advisory->name }}</p>
-                                                    <p class="text-xs text-gray-500">{{ $advisory->event->name ?? '' }}</p>
+                                                    <p class="text-xs text-gray-500">{{ $advisory->event->name ?? '' }}
+                                                    </p>
                                                     <div class="flex gap-2 mt-2">
                                                         <form
                                                             action="{{ route('teams.advisor.response', ['team' => $advisory, 'status' => 'accepted']) }}"
@@ -238,7 +288,8 @@
                                             class="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 border-b dark:border-gray-700">
                                             <div class="flex items-center gap-3">
                                                 <div class="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg">
-                                                    <svg class="w-4 h-4 text-amber-600" fill="none" viewBox="0 0 24 24">
+                                                    <svg class="w-4 h-4 text-amber-600" fill="none"
+                                                        viewBox="0 0 24 24">
                                                         <path stroke="currentColor" stroke-width="2"
                                                             d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7" />
                                                     </svg>
@@ -257,10 +308,17 @@
 
                                 {{-- 4. PREMIOS Y OTRAS NOTIFICACIONES --}}
                                 @foreach ($unreadNotifications as $notification)
-                                    @if (($notification->data['type'] ?? null) !== 'join_request')
+                                    @php
+                                        $type = $notification->data['type'] ?? null;
+                                    @endphp
+
+                                    @if ($type !== 'join_request' && $type !== 'team_invitation')
                                         <a href="{{ route('public.event-winners', $notification->data['event_id'] ?? 0) }}"
-                                            onclick="fetch('{{ route('notifications.markAsRead', $notification->id) }}', {method: 'POST', headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}'}})"
-                                            class="block px-4 py-3 hover:bg-yellow-50 dark:hover:bg-yellow-900/10 bg-yellow-50/50 dark:bg-yellow-900/5 border-b dark:border-gray-700">
+                                            onclick="fetch('{{ route('notifications.read', $notification->id) }}', {
+                                                method: 'POST',
+                                                headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
+                                            })"
+                                            class="block px-4 py-3 hover:bg-yellow-50/50 dark:hover:bg-yellow-900/5 border-b dark:border-gray-700">
                                             <div class="flex items-center gap-3">
                                                 <div class="text-2xl">🏆</div>
                                                 <div class="flex-1">
@@ -277,6 +335,7 @@
                                         </a>
                                     @endif
                                 @endforeach
+
 
                                 {{-- ESTADO VACÍO --}}
                                 @if ($totalNotifications === 0)

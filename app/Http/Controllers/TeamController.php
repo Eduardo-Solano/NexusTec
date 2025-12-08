@@ -252,8 +252,12 @@ class TeamController extends Controller
         }
 
         if ($request->notification) {
-            Auth::user()->notifications()->where('id', $request->notification)->update(['read_at' => now()]);
+            Auth::user()
+                ->notifications()
+                ->where('id', $request->notification)
+                ->first()?->delete();
         }
+
 
         $team->members()->updateExistingPivot($user->id, [
             'is_accepted' => true
@@ -269,8 +273,12 @@ class TeamController extends Controller
     public function reject(Team $team, User $user, Request $request)
     {
         if ($request->notification) {
-            Auth::user()->notifications()->where('id', $request->notification)->update(['read_at' => now()]);
+            Auth::user()
+                ->notifications()
+                ->where('id', $request->notification)
+                ->first()?->delete();
         }
+
 
         $team->members()->detach($user->id);
 
@@ -291,8 +299,11 @@ class TeamController extends Controller
 
         // Marcar notificación como leída
         if ($notification) {
-            $user->notifications()->where('id', $notification)->update(['read_at' => now()]);
+            $user->notifications()
+                ->where('id', $notification)
+                ->first()?->delete();
         }
+
 
         // Verificar que el usuario tiene una invitación pendiente
         $member = $team->members()->where('user_id', $user->id)->first();
@@ -322,8 +333,11 @@ class TeamController extends Controller
 
         // Marcar notificación como leída
         if ($notification) {
-            $user->notifications()->where('id', $notification)->update(['read_at' => now()]);
+            $user->notifications()
+                ->where('id', $notification)
+                ->first()?->delete();
         }
+
 
         // Verificar que el usuario tiene una invitación pendiente
         $member = $team->members()->where('user_id', $user->id)->first();
