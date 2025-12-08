@@ -5,42 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Calendario de Eventos - NexusTec</title>
         @vite(['resources/css/app.css', 'resources/js/app.js'])
-        <style>
-            /* Fondo de circuitos animados (Mismo que Dashboard/Error) */
-            .circuit-background-app {
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                opacity: 0.4;
-                background-image: 
-                    linear-gradient(90deg, transparent 48%, rgba(6, 182, 212, 0.1) 49%, rgba(6, 182, 212, 0.4) 50%, rgba(6, 182, 212, 0.1) 51%, transparent 52%),
-                    linear-gradient(0deg, transparent 48%, rgba(6, 182, 212, 0.1) 49%, rgba(6, 182, 212, 0.4) 50%, rgba(6, 182, 212, 0.1) 51%, transparent 52%);
-                background-size: 80px 80px;
-                animation: circuit-flow-app 8s linear infinite;
-                pointer-events: none;
-                z-index: 0;
-            }
 
-            @keyframes circuit-flow-app {
-                0% { background-position: 0 0; }
-                100% { background-position: 80px 80px; }
-            }
-
-            .glass-card {
-                background: rgba(255, 255, 255, 0.03);
-                backdrop-filter: blur(16px);
-                border: 1px solid rgba(255, 255, 255, 0.1);
-                box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-            }
-            
-            .glass-nav {
-                background: rgba(15, 23, 42, 0.6);
-                backdrop-filter: blur(12px);
-                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            }
-        </style>
     </head>
     <body class="antialiased font-sans text-gray-100 bg-[#0a1128]">
         

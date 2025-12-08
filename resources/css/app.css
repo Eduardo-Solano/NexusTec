@@ -1,3 +1,13 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Layouts */
+@import 'layouts/app.css';
+@import 'layouts/guest.css';
+@import 'layouts/error.css';
+
+/* Pages */
+@import 'pages/dashboard.css';
+@import 'pages/welcome.css';
+@import 'pages/calendar.css';

@@ -83,40 +83,7 @@
     </style>
 
     <x-slot name="header">
-        <style>
-             @keyframes blob {
-                0% { transform: translate(0px, 0px) scale(1); }
-                33% { transform: translate(30px, -50px) scale(1.1); }
-                66% { transform: translate(-20px, 20px) scale(0.9); }
-                100% { transform: translate(0px, 0px) scale(1); }
-            }
-            .animate-blob {
-                animation: blob 7s infinite;
-            }
-            .animation-delay-2000 {
-                animation-delay: 2s;
-            }
-            .animation-delay-4000 {
-                animation-delay: 4s;
-            }
-            .glass-card {
-                background: rgba(255, 255, 255, 0.02);
-                backdrop-filter: blur(24px);
-                -webkit-backdrop-filter: blur(24px);
-                border: 1px solid rgba(255, 255, 255, 0.2);
-            }
-            .glass-card:hover {
-                border: 1px solid rgba(255, 255, 255, 0.3);
-            }
-            /* Dark mode specific override */
-            .dark .glass-card {
-                background: rgba(255, 255, 255, 0.02);
-                border: 1px solid rgba(255, 255, 255, 0.2);
-            }
-            .dark .glass-card:hover {
-                border: 1px solid rgba(255, 255, 255, 0.3);
-            }
-        </style>
+
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
              <div class="flex items-center gap-2 group">
                 <div class="p-2 bg-white/[0.02] backdrop-blur-xl rounded-xl shadow-sm ring-1 border border-white/20 group-hover:scale-110 group-hover:border-white/30 transition-all duration-300">
