@@ -8,6 +8,7 @@ use App\Models\Specialty;
 use App\Http\Requests\Judge\StoreJudgeRequest;
 use App\Http\Requests\Judge\UpdateJudgeRequest;
 use App\Http\Requests\Judge\ImportJudgeCsvRequest;
+use App\Notifications\JudgeAccountCreatedNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
@@ -154,6 +155,7 @@ class JudgeController extends Controller
             $rowNumber = 0;
             $imported = [];
             $failed = [];
+            $defaultPassword = 'password';
 
             while (($data = fgetcsv($handle, 2000, ',')) !== false) {
                 $rowNumber++;
@@ -218,12 +220,12 @@ class JudgeController extends Controller
 
                 // INSERTAR JUEZ CORRECTO
                 try {
-                    DB::transaction(function () use ($name, $email, $phone, $company, $specialtyId, &$imported) {
+                    DB::transaction(function () use ($name, $email, $phone, $company, $specialtyId, $defaultPassword, &$imported) {
                         $user = User::create([
                             'name' => $name,
                             'email' => $email,
                             'phone' => $phone ?: null,
-                            'password' => Hash::make('password'),
+                            'password' => Hash::make($defaultPassword),
                             'is_active' => true,
                         ]);
 
@@ -235,6 +237,9 @@ class JudgeController extends Controller
                             'specialty_id' => $specialtyId,
                             'company' => $company ?: null,
                         ]);
+
+                        // Enviar credenciales de acceso al juez
+                        $user->notify(new JudgeAccountCreatedNotification($defaultPassword));
 
                         $imported[] = [
                             'name' => $name,

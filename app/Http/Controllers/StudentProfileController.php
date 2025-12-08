@@ -8,6 +8,7 @@ use App\Models\Career;
 use App\Http\Requests\Student\StoreStudentRequest;
 use App\Http\Requests\Student\UpdateStudentRequest;
 use App\Http\Requests\Student\ImportStudentCsvRequest;
+use App\Notifications\StudentAccountCreatedNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
@@ -110,6 +111,7 @@ class StudentProfileController extends Controller
             $rowNumber = 0;
             $imported = [];
             $failed = [];
+            $defaultPassword = 'password';
 
             while (($data = fgetcsv($handle, 2000, ',')) !== false) {
                 $rowNumber++;
@@ -175,12 +177,12 @@ class StudentProfileController extends Controller
 
                 // INSERTAR ALUMNO CORRECTO
                 try {
-                    DB::transaction(function () use ($name, $email, $controlNumber, $careerId, &$imported) {
+                    DB::transaction(function () use ($name, $email, $controlNumber, $careerId, $defaultPassword, &$imported) {
                         // 1. Crear usuario
                         $user = \App\Models\User::create([
                             'name' => $name,
                             'email' => $email,
-                            'password' => \Illuminate\Support\Facades\Hash::make('password'),
+                            'password' => \Illuminate\Support\Facades\Hash::make($defaultPassword),
                             'is_active' => true,
                         ]);
 
@@ -195,6 +197,9 @@ class StudentProfileController extends Controller
                             'control_number' => $controlNumber,
                             'career_id' => $careerId,
                         ]);
+
+                        // Enviar credenciales de acceso al estudiante
+                        $user->notify(new StudentAccountCreatedNotification($defaultPassword));
 
                         // 4. Registrar como importado
                         $imported[] = [
