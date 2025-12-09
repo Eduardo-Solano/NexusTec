@@ -75,9 +75,35 @@
 
             @if (session('success'))
                 <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded shadow-sm"
-                    role="alert">
-                    <p class="font-bold">¡Éxito!</p>
-                    <p>{{ session('success') }}</p>
+                    role="alert" x-data="{ show: true }" x-show="show" x-transition>
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="font-bold">¡Éxito!</p>
+                            <p>{{ session('success') }}</p>
+                        </div>
+                        <button @click="show = false" class="text-green-600 hover:text-green-800">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            @endif
+
+            @if (session('error'))
+                <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded shadow-sm"
+                    role="alert" x-data="{ show: true }" x-show="show" x-transition>
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="font-bold">Error</p>
+                            <p>{{ session('error') }}</p>
+                        </div>
+                        <button @click="show = false" class="text-red-600 hover:text-red-800">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
             @endif
 

@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-error-layout>
     <div class="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
         <div class="absolute top-0 left-0 w-full h-full overflow-hidden -z-10">
              <div class="absolute top-[30%] left-[30%] w-[40%] h-[40%] bg-amber-500/20 rounded-full blur-[120px] animate-pulse"></div>
@@ -35,4 +35,4 @@
             </div>
         </div>
     </div>
-</x-app-layout>
+</x-error-layout>

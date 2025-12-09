@@ -179,7 +179,7 @@ class StaffProfileController extends Controller
      */
     public function destroy(User $staff)
     {
-        // Cambio: De auth()->id() a Auth::id()
+        // No puedes eliminar tu propia cuenta
         if ($staff->id === Auth::id()) {
             return back()->with('error', 'No puedes eliminar tu propia cuenta.');
         }
@@ -189,6 +189,18 @@ class StaffProfileController extends Controller
             return back()->with('error', 'No se puede eliminar el docente porque es asesor de uno o más equipos.');
         }
 
+        
+        // Regla de integridad: No eliminar docentes que asesoran equipos en eventos activos
+        $activeTeams = \App\Models\Team::where('advisor_id', $staff->id)
+            ->whereHas('event', function ($q) {
+                $q->where('status', '!=', 'closed');
+            })
+            ->exists();
+            
+        if ($activeTeams) {
+            return back()->with('error', 'No se puede eliminar el docente porque asesora equipos en eventos que aún no han finalizado.');
+        }
+        
         $staff->delete();
         return back()->with('success', 'Docente eliminado del sistema.');
     }
