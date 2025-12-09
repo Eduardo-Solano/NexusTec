@@ -30,7 +30,14 @@ Route::get('/', function () {
 
 // Dashboard
 Route::get('/dashboard', function () {
-    return view('dashboard');
+    $user = Auth::user();
+
+    // Solo equipos donde el usuario YA aceptó (is_accepted = true)
+    $team = $user->activeTeams()
+        ->with(['event']) // opcional, por si quieres el evento en la vista
+        ->first();
+
+    return view('dashboard', compact('team'));
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 // Calendario Público

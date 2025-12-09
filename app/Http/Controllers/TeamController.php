@@ -162,8 +162,29 @@ class TeamController extends Controller
     {
         $team->load(['event', 'members', 'leader', 'advisor', 'project']);
         $event = $team->event;
-        return view('teams.show', compact('team', 'event'));
+
+        $user = Auth::user();
+
+        // Base: relación de miembros con campos del pivot
+        $membersQuery = $team->members()->withPivot(['is_accepted', 'role', 'requested_by_user']);
+
+        // Líder, admin y staff pueden ver pendientes
+        $canSeePending = $user && (
+            $user->id === $team->leader_id ||
+            $user->hasRole(['admin', 'staff'])
+        );
+
+        // Si NO es líder ni admin/staff → solo miembros aceptados
+        if (!$canSeePending) {
+            $membersQuery->wherePivot('is_accepted', true);
+        }
+
+        $members = $membersQuery->get();
+
+        return view('teams.show', compact('team', 'event', 'members'));
     }
+
+
 
     public function create(Request $request)
     {
@@ -373,7 +394,22 @@ class TeamController extends Controller
                 ->withInput();
         }
 
-        // Verificar si ya es miembro o tiene algo pendiente
+        // 🔎 Validar si ya está en ALGÚN equipo de este mismo evento
+        $alreadyInEventTeam = DB::table('team_user')
+            ->join('teams', 'team_user.team_id', '=', 'teams.id')
+            ->where('teams.event_id', $team->event_id)
+            ->where('team_user.user_id', $invitedUser->id)
+            ->exists();
+
+        if ($alreadyInEventTeam) {
+            return back()
+                ->withErrors([
+                    'email' => 'Este usuario ya pertenece a un equipo de este mismo evento.',
+                ])
+                ->withInput();
+        }
+
+        // Verificar si ya es miembro o tiene algo pendiente en ESTE equipo
         $existing = $team->members()->where('user_id', $invitedUser->id)->first();
 
         if ($existing) {
@@ -428,6 +464,7 @@ class TeamController extends Controller
 
 
 
+
     /**
      * Aceptar invitación (cuando el usuario actual es el invitado)
      */
@@ -440,15 +477,37 @@ class TeamController extends Controller
             return back()->with('error', 'No se pueden aceptar invitaciones porque el evento no está en período de inscripciones.');
         }
 
-        // Marcar notificación como leída
+        // 🔎 Verificar si el usuario ya es miembro ACEPTADO de OTRO equipo del mismo evento
+        $alreadyInOtherTeam = DB::table('team_user')
+            ->join('teams', 'team_user.team_id', '=', 'teams.id')
+            ->where('teams.event_id', $team->event_id)
+            ->where('team_user.user_id', $user->id)
+            ->where('team_user.team_id', '!=', $team->id)
+            ->where('team_user.is_accepted', true)
+            ->exists();
+
+        if ($alreadyInOtherTeam) {
+            return back()->with('error', 'Ya perteneces a otro equipo de este mismo evento. No puedes aceptar esta invitación.');
+        }
+
+        // 🔒 Validar límite de integrantes (solo miembros aceptados)
+        $maxMembers = $team->event->max_team_members ?? 5;
+        $currentAccepted = $team->members()
+            ->wherePivot('is_accepted', true)
+            ->count();
+
+        if ($currentAccepted >= $maxMembers) {
+            return back()->with('error', "No puedes unirte a este equipo. Ya alcanzó el máximo de {$maxMembers} integrantes.");
+        }
+
+        // Marcar notificación como leída (si viene el id)
         if ($notification) {
             $user->notifications()
                 ->where('id', $notification)
                 ->first()?->delete();
         }
 
-
-        // Verificar que el usuario tiene una invitación pendiente
+        // Verificar que el usuario TIENE una invitación pendiente en este equipo
         $member = $team->members()->where('user_id', $user->id)->first();
 
         if (!$member) {
@@ -459,13 +518,14 @@ class TeamController extends Controller
             return back()->with('success', 'Ya eres miembro de este equipo.');
         }
 
-        // Aceptar invitación
+        // ✅ Aceptar invitación: aquí es donde REALMENTE entra al equipo
         $team->members()->updateExistingPivot($user->id, [
-            'is_accepted' => true
+            'is_accepted' => true,
         ]);
 
         return back()->with('success', '¡Te has unido al equipo exitosamente!');
     }
+
 
     /**
      * Rechazar invitación (cuando el usuario actual es el invitado)

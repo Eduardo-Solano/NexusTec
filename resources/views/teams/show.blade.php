@@ -186,9 +186,18 @@
 
                 {{-- COLUMNA DERECHA: Detalles del equipo --}}
                 <div class="lg:col-span-2">
-                    <div class="bg-gray-800 border border-gray-700 rounded-2xl overflow-hidden shadow-xl"
-                        x-data="{ showInvite: {{ $errors->has('email') || session()->has('invite_check_success') ? 'true' : 'false' }} }">
+                    @php
+                        $maxMembers = $team->event->max_team_members ?? 5;
+                        $currentMembers = $team->members->count();
+                        // 🔒 Solo se puede invitar cuando el evento permite inscripciones
+                        $canInvite =
+                            $team->event->allowsTeamRegistration() &&
+                            auth()->id() === $team->leader_id &&
+                            $currentMembers < $maxMembers;
+                    @endphp
 
+                    <div class="bg-gray-800 border border-gray-700 rounded-2xl overflow-hidden shadow-xl"
+                        x-data="{ showInvite: {{ $canInvite && ($errors->has('email') || session()->has('invite_check_success')) ? 'true' : 'false' }} }">
 
                         {{-- Header --}}
                         <div class="p-6 border-b border-gray-700 flex justify-between items-center">
@@ -201,19 +210,14 @@
                                 Detalles del Equipo
                             </h3>
 
-                            @php
-                                $maxMembers = $team->event->max_team_members ?? 5;
-                                $currentMembers = $team->members->count();
-                            @endphp
-
                             <div class="flex items-center gap-3">
                                 <span
                                     class="bg-gray-900 text-gray-300 text-xs px-3 py-1 rounded-full border border-gray-600">
                                     {{ $currentMembers }} / {{ $maxMembers }}
                                 </span>
 
-                                {{-- Botón Invitar más miembros (solo líder, evento abierto y si aún hay espacio) --}}
-                                @if ($team->event->isOpen() && auth()->id() === $team->leader_id && $currentMembers < $maxMembers)
+                                {{-- Botón Invitar más miembros (solo líder, solo en registro, y si hay espacio) --}}
+                                @if ($canInvite)
                                     <button type="button" @click="showInvite = !showInvite"
                                         class="inline-flex items-center gap-2 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg transition">
                                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24"
@@ -247,55 +251,58 @@
                             </div>
                         </div>
 
-                        {{-- CUADRO: input de correo (solo UI, sin enviar aún) --}}
-                        <div class="px-6 pt-0 pb-4 border-b border-gray-700" x-show="showInvite" x-transition>
-                            <div class="mt-4">
+                        {{-- CUADRO: input de correo (solo si se puede invitar) --}}
+                        @if ($canInvite)
+                            <div class="px-6 pt-0 pb-4 border-b border-gray-700" x-show="showInvite" x-transition>
+                                <div class="mt-4">
 
-                                {{-- Mensaje de éxito de la validación --}}
-                                @if (session('invite_check_success'))
-                                    <div class="mb-3 text-xs text-green-400">
-                                        {{ session('invite_check_success') }}
-                                    </div>
-                                @endif
+                                    {{-- Mensaje de éxito de la validación --}}
+                                    @if (session('invite_check_success'))
+                                        <div class="mb-3 text-xs text-green-400">
+                                            {{ session('invite_check_success') }}
+                                        </div>
+                                    @endif
 
-                                {{-- Mensaje de error específico del campo email --}}
-                                @error('email')
-                                    <div class="mb-2 text-xs text-red-400">
-                                        {{ $message }}
-                                    </div>
-                                @enderror
+                                    {{-- Mensaje de error específico del campo email --}}
+                                    @error('email')
+                                        <div class="mb-2 text-xs text-red-400">
+                                            {{ $message }}
+                                        </div>
+                                    @enderror
 
-                                <form method="POST" action="{{ route('teams.invitations.check', $team) }}"
-                                    class="space-y-3">
-                                    @csrf
+                                    <form method="POST" action="{{ route('teams.invitations.check', $team) }}"
+                                        class="space-y-3">
+                                        @csrf
 
-                                    <div>
-                                        <label class="block text-xs font-semibold text-gray-400 uppercase mb-1">
-                                            Correo electrónico del miembro a invitar
-                                        </label>
-                                        <input type="email" name="email" value="{{ old('email') }}" required
-                                            class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100
-                           focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                                            placeholder="nombre.apellido@ejemplo.com">
-                                        <p class="text-[11px] text-gray-500 mt-1">
-                                            Debe ser un correo de un usuario ya registrado en el sistema.
-                                        </p>
-                                    </div>
+                                        <div>
+                                            <label class="block text-xs font-semibold text-gray-400 uppercase mb-1">
+                                                Correo electrónico del miembro a invitar
+                                            </label>
+                                            <input type="email" name="email" value="{{ old('email') }}"
+                                                required
+                                                class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100
+                               focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                                placeholder="nombre.apellido@ejemplo.com">
+                                            <p class="text-[11px] text-gray-500 mt-1">
+                                                Debe ser un correo de un usuario ya registrado en el sistema.
+                                            </p>
+                                        </div>
 
-                                    <div class="flex justify-end">
-                                        <button type="submit"
-                                            class="px-4 py-1.5 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition">
-                                            Enviar
-                                        </button>
-                                    </div>
-                                </form>
+                                        <div class="flex justify-end">
+                                            <button type="submit"
+                                                class="px-4 py-1.5 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition">
+                                                Enviar
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
                             </div>
-                        </div>
+                        @endif
 
 
                         {{-- LISTA DE MIEMBROS --}}
                         <div class="divide-y divide-gray-700">
-                            @foreach ($team->members as $member)
+                            @foreach ($members as $member)
                                 <div class="p-4 flex items-center justify-between hover:bg-gray-700/30 transition">
                                     <div class="flex items-center gap-4">
                                         <div
@@ -390,7 +397,7 @@
                                                     @endif
                                                 @endif
 
-                                                {{-- Si soy yo mismo y NO soy líder, puedo abandonar --}}
+                                                {{-- Si soy yo mismo y NO soy líder, puedo abandonar (solo si estoy aceptado) --}}
                                                 @if (auth()->id() === $member->id && $member->id !== $team->leader_id && $member->pivot->is_accepted)
                                                     <form action="{{ route('teams.leave', $team) }}" method="POST"
                                                         onsubmit="return confirm('¿Estás seguro de abandonar el equipo {{ $team->name }}?\n\nEsta acción no se puede deshacer.')">
