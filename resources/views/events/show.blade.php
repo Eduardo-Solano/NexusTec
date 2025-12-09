@@ -805,10 +805,21 @@
                                                             VER PROYECTO
                                                         </a>
                                                     @elseif($team->leader_id === Auth::id())
-                                                        <a href="{{ route('projects.create', ['team_id' => $team->id]) }}"
-                                                            class="w-full py-1.5 bg-purple-600 hover:bg-purple-500 text-white text-[10px] font-bold uppercase rounded text-center transition">
-                                                            ENTREGAR
-                                                        </a>
+                                                        @if($team->event->allowsProjectActions())
+                                                            <a href="{{ route('projects.create', ['team_id' => $team->id]) }}"
+                                                                class="w-full py-1.5 bg-purple-600 hover:bg-purple-500 text-white text-[10px] font-bold uppercase rounded text-center transition">
+                                                                ENTREGAR
+                                                            </a>
+                                                        @else
+                                                            <div class="w-full py-1.5 bg-gray-700/50 border border-gray-600 text-gray-400 text-[10px] font-bold uppercase rounded text-center flex flex-col items-center justify-center gap-0.5" title="El evento debe estar en curso para entregar proyectos">
+                                                                <span class="flex items-center gap-1">
+                                                                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                                    </svg>
+                                                                    ESPERA INICIO
+                                                                </span>
+                                                            </div>
+                                                        @endif
                                                     @else
                                                         <div
                                                             class="w-full py-1.5 bg-gray-700/50 border border-gray-600 text-gray-400 text-[10px] font-bold uppercase rounded text-center flex items-center justify-center gap-1">

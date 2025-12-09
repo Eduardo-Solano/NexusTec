@@ -700,10 +700,19 @@
                                                                     Editar Proyecto
                                                                 </a>
                                                             @else
-                                                                <a href="{{ route('projects.create', ['team_id' => $team->id]) }}"
-                                                                    class="flex justify-center items-center py-3 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-lg shadow-blue-500/30 transform hover:-translate-y-0.5 transition-all">
-                                                                    Entregar Proyecto
-                                                                </a>
+                                                                @if ($team->event->allowsProjectActions())
+                                                                    <a href="{{ route('projects.create', ['team_id' => $team->id]) }}"
+                                                                        class="flex justify-center items-center py-3 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-lg shadow-blue-500/30 transform hover:-translate-y-0.5 transition-all">
+                                                                        Entregar Proyecto
+                                                                    </a>
+                                                                @else
+                                                                    <div class="flex justify-center items-center py-3 px-4 bg-gray-700/50 border border-gray-600 text-gray-400 font-bold rounded-xl cursor-not-allowed" title="Espera a que el evento inicie para entregar tu proyecto">
+                                                                        <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                                        </svg>
+                                                                        Espera Inicio del Evento
+                                                                    </div>
+                                                                @endif
                                                             @endif
                                                         @endif
                                                         <a href="{{ route('events.show', $team->event_id) }}"

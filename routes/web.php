@@ -55,7 +55,6 @@ Route::get('/winners/{event}', [PublicController::class, 'eventWinners'])->name(
 Route::get('/teams', [TeamController::class, 'index'])->name('teams.index');
 
 Route::get('/projects', [ProjectController::class, 'index'])->name('projects.index');
-Route::get('/projects/{project}', [ProjectController::class, 'show'])->name('projects.show');
 
 // --- RUTAS PROTEGIDAS (AUTH) ---
 Route::middleware(['auth'])->group(function () {
@@ -219,6 +218,9 @@ Route::middleware(['auth', 'role:admin|staff|student'])->group(function () {
     Route::put('/projects/{project}', [ProjectController::class, 'update'])->name('projects.update');
     Route::patch('/projects/{project}', [ProjectController::class, 'update']);
 });
+
+// 🔹 Detalle público de proyecto (esta va DESPUÉS de /projects/create)
+Route::get('/projects/{project}', [ProjectController::class, 'show'])->name('projects.show');
 
 // --- RUTAS DE JUECES (ROLE: JUDGE) ---
 Route::middleware(['auth', 'role:judge'])->group(function () {
