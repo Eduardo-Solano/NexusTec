@@ -110,6 +110,15 @@ class JudgeController extends Controller
      */
     public function destroy(User $judge)
     {
+        // Regla de integridad: No eliminar jueces asignados a eventos activos (no cerrados)
+        $activeEvents = $judge->judgeProfile?->events()
+            ->where('status', '!=', 'closed')
+            ->exists();
+            
+        if ($activeEvents) {
+            return back()->with('error', 'No se puede eliminar el juez porque está asignado a eventos que aún no han finalizado.');
+        }
+        
         $judge->delete();
         return back()->with('success', 'Juez eliminado.');
     }

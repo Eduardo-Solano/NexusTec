@@ -249,12 +249,9 @@ class ProjectController extends Controller
             abort(403, 'No tienes permiso para eliminar este proyecto.');
         }
         
-        if ($project->evaluations()->exists()) {
-            return back()->with('error', 'No se puede eliminar un proyecto que ya ha sido evaluado. Esto protege la integridad de los datos históricos.');
-        }
-        
-        if ($project->team->awards()->exists()) {
-            return back()->with('error', 'No se puede eliminar un proyecto cuyo equipo ha recibido premios.');
+        // Regla de integridad: Solo se puede eliminar proyectos cuando el evento ya finalizó
+        if (!$project->team->event->isClosed()) {
+            return back()->with('error', 'No se puede eliminar el proyecto porque el evento aún no ha finalizado.');
         }
         
         $eventId = $project->team->event_id;

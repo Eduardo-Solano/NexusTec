@@ -587,4 +587,42 @@ class TeamController extends Controller
 
         return back()->with('success', "La invitación a '{$user->name}' ha sido cancelada.");
     }
+
+    /**
+     * Remove the specified team from storage.
+     */
+    public function destroy(Team $team)
+    {
+        $user = Auth::user();
+        
+        // Solo líder o admin/staff pueden eliminar
+        if ($team->leader_id !== $user->id && !$user->hasAnyRole(['admin', 'staff'])) {
+            abort(403, 'No tienes permiso para eliminar este equipo.');
+        }
+        
+        // Regla de integridad: Solo se puede eliminar equipos cuando el evento ya finalizó
+        if (!$team->event->isClosed()) {
+            return redirect()->route('teams.index')
+                ->with('error', 'No se puede eliminar el equipo porque el evento aún no ha finalizado.');
+        }
+        
+        $eventId = $team->event_id;
+        $teamName = $team->name;
+        
+        // Registrar actividad ANTES de eliminar
+        ActivityLog::log('deleted', "Equipo '{$teamName}' eliminado", $team, [
+            'team_name' => $teamName,
+            'event_id' => $eventId,
+            'deleted_by' => $user->name,
+        ]);
+        
+        // Desvincular miembros
+        $team->members()->detach();
+        
+        // Eliminar el equipo
+        $team->delete();
+        
+        return redirect()->route('teams.index')
+            ->with('success', "Equipo '{$teamName}' eliminado correctamente.");
+    }
 }

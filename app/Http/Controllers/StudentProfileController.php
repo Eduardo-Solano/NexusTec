@@ -313,6 +313,29 @@ class StudentProfileController extends Controller
      */
     public function destroy(User $student)
     {
+        // Regla de integridad: No eliminar estudiantes que participan en eventos activos
+        $activeTeams = $student->teams()
+            ->wherePivot('is_accepted', true)
+            ->whereHas('event', function ($q) {
+                $q->where('status', '!=', 'closed');
+            })
+            ->exists();
+            
+        if ($activeTeams) {
+            return back()->with('error', 'No se puede eliminar el estudiante porque participa en eventos que aún no han finalizado.');
+        }
+        
+        // Regla de integridad: No eliminar estudiantes que son líderes de equipos en eventos activos
+        $isLeaderActive = \App\Models\Team::where('leader_id', $student->id)
+            ->whereHas('event', function ($q) {
+                $q->where('status', '!=', 'closed');
+            })
+            ->exists();
+            
+        if ($isLeaderActive) {
+            return back()->with('error', 'No se puede eliminar el estudiante porque es líder de un equipo en un evento activo.');
+        }
+        
         $student->delete();
         return back()->with('success', 'Alumno eliminado.');
     }
