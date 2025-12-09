@@ -19,7 +19,9 @@ use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\CareerController;
 use App\Http\Controllers\SpecialtyController;
 use App\Http\Controllers\ReportController;
+
 use App\Models\Event;
+
 
 // Página de inicio
 Route::get('/', function () {
@@ -63,7 +65,7 @@ Route::middleware('auth')->group(function () {
 
     /* EVENTOS - Todos pueden ver, solo admin/staff pueden gestionar */
     Route::get('/events', [EventController::class, 'index'])->name('events.index');
-    
+
     Route::middleware(['role:admin|staff'])->group(function () {
         Route::get('/events/create', [EventController::class, 'create'])->name('events.create');
         Route::post('/events', [EventController::class, 'store'])->name('events.store');
@@ -75,7 +77,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/events/{event}/assign-judge', [EventController::class, 'assignJudge'])->name('events.assign-judge');
         Route::delete('/events/{event}/remove-judge/{judge}', [EventController::class, 'removeJudge'])->name('events.remove-judge');
     });
-    
+
     Route::get('/events/{event}', [EventController::class, 'show'])->name('events.show');
     Route::get('/events/{event}/rankings', [EventController::class, 'rankings'])->name('events.rankings');
 
@@ -142,6 +144,16 @@ Route::middleware('auth')->group(function () {
         Route::delete('/projects/{project}/remove-judge/{judge}', [ProjectController::class, 'removeJudge'])->name('projects.remove-judge');
     });
 
+    Route::middleware(['auth'])->group(function () {
+
+        // ...tus otras rutas...
+
+        Route::post('/teams/{team}/invitations/check', [TeamController::class, 'checkInvitationEmail'])
+            ->name('teams.invitations.check');
+    });
+    Route::get('/teams/{team}/invitations/create', [TeamController::class, 'edit'])
+        ->name('teams.invitations.create');
+
     Route::get('/projects', [ProjectController::class, 'index'])->name('projects.index');
     Route::get('/projects/{project}', [ProjectController::class, 'show'])->name('projects.show');
 
@@ -185,10 +197,10 @@ Route::middleware('auth')->group(function () {
 
         Route::resource('staff', StaffProfileController::class);
         Route::post('/staff/import-csv', [StaffProfileController::class, 'importCsv'])->name('staff.importCsv');
-        
+
         Route::resource('students', StudentProfileController::class);
         Route::post('/students/import-csv', [StudentProfileController::class, 'importCsv'])->name('students.importCsv');
-        
+
         Route::resource('judges', JudgeController::class);
         Route::post('/judges/import-csv', [JudgeController::class, 'importCsv'])->name('judges.importCsv');
 

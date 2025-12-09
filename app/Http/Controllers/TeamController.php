@@ -60,15 +60,28 @@ class TeamController extends Controller
 
     public function store(StoreTeamRequest $request)
     {
-        // ⛔ Validar que el evento esté en período de inscripciones
         $event = Event::findOrFail($request->event_id);
+
         if (!$event->allowsTeamRegistration()) {
             return back()->with('error', 'No se pueden registrar equipos porque el evento no está en período de inscripciones.');
         }
 
+        // Normalizar lista de correos de miembros invitados
+        $invitedEmails = array_filter($request->members ?? []);
+
+        // 👉 LÍMITE DE INTEGRANTES (incluye al líder)
+        $maxMembers = $event->max_team_members ?? 5; // ajusta el campo si se llama diferente
+        $totalRequested = 1 + count($invitedEmails); // 1 líder + N invitados
+
+        if ($totalRequested > $maxMembers) {
+            throw ValidationException::withMessages([
+                'members' => "Este evento permite máximo {$maxMembers} integrantes por equipo (incluyendo al líder). Estás intentando registrar {$totalRequested}."
+            ]);
+        }
+
         // Validar correos
         $correosInvalidos = [];
-        foreach (array_filter($request->members ?? []) as $email) {
+        foreach ($invitedEmails as $email) {
             if (!User::where('email', $email)->exists()) {
                 $correosInvalidos[] = $email;
             }
@@ -79,7 +92,7 @@ class TeamController extends Controller
             ]);
         }
 
-        return DB::transaction(function () use ($request, $event) {
+        return DB::transaction(function () use ($request, $event, $invitedEmails) {
 
             // Verificar si ya pertenece a un equipo del evento
             $exists = DB::table('team_user')
@@ -111,13 +124,11 @@ class TeamController extends Controller
             ]);
 
             // MIEMBROS INVITADOS
-            foreach (($request->members ?? []) as $index => $email) {
-                if (!$email)
-                    continue;
-
+            foreach ($invitedEmails as $index => $email) {
                 $user = User::where('email', $email)->first();
-                if (!$user || $user->id === Auth::id())
+                if (!$user || $user->id === Auth::id()) {
                     continue;
+                }
 
                 $role = $request->member_roles[$index] ?? 'Miembro';
 
@@ -135,13 +146,14 @@ class TeamController extends Controller
             ActivityLog::log('created', "Equipo '{$team->name}' creado para el evento '{$event->name}'", $team, [
                 'event_id' => $event->id,
                 'event_name' => $event->name,
-                'members_invited' => count(array_filter($request->members ?? [])),
+                'members_invited' => count($invitedEmails),
             ]);
 
             return redirect()->route('events.show', $event)
                 ->with('success', 'Equipo creado exitosamente.');
         });
     }
+
 
     /**
      * Mostrar equipo
@@ -253,7 +265,25 @@ class TeamController extends Controller
             return back()->with('error', 'No se pueden aceptar solicitudes porque el evento no está en período de inscripciones.');
         }
 
-        // Borrar la notificación del líder
+        // 👉 Validar límite de integrantes ANTES de aceptar
+        $maxMembers = $team->event->max_team_members ?? 5; // ajusta el campo si se llama distinto
+        // Contar solo miembros ya aceptados
+        $currentAccepted = $team->members()
+            ->wherePivot('is_accepted', true)
+            ->count();
+
+        // Verificar si este usuario ya está aceptado (por si acaso)
+        $isAlreadyAccepted = $team->members()
+            ->where('user_id', $user->id)
+            ->wherePivot('is_accepted', true)
+            ->exists();
+
+        // Si todavía no está aceptado y ya estamos al tope, NO dejar aceptar
+        if (!$isAlreadyAccepted && $currentAccepted >= $maxMembers) {
+            return back()->with('error', "No puedes aceptar más integrantes. El equipo ya alcanzó el máximo de {$maxMembers} miembros permitidos.");
+        }
+
+        // Borrar la notificación del líder (si viene en el request)
         if ($request->notification) {
             Auth::user()
                 ->notifications()
@@ -271,6 +301,7 @@ class TeamController extends Controller
 
         return back()->with('success', 'Miembro aceptado.');
     }
+
 
 
 
@@ -294,6 +325,105 @@ class TeamController extends Controller
         $user->notify(new TeamJoinResponseNotification($team, 'rejected'));
 
         return back()->with('success', 'Solicitud rechazada.');
+    }
+
+    /**
+     * Validar si el correo ingresado existe en el sistema (solo líder).
+     */
+    /**
+     * Validar correo e INVITAR al usuario si existe (solo líder).
+     */
+    public function checkInvitationEmail(Request $request, Team $team)
+    {
+        $user = Auth::user();
+
+        // Solo el líder puede usar este cuadro
+        if ($team->leader_id !== $user->id) {
+            abort(403, 'Solo el líder del equipo puede invitar miembros.');
+        }
+
+        // Validar que el evento permita inscripciones
+        if (!$team->event->allowsTeamRegistration()) {
+            return back()->with('error', 'El evento no está en período de inscripciones.');
+        }
+
+        // Validar solo formato de correo (NO existencia todavía)
+        $data = $request->validate([
+            'email' => ['required', 'email'],
+        ]);
+
+        // Buscar usuario por correo
+        $invitedUser = User::where('email', $data['email'])->first();
+
+        // Si no existe el usuario => mensaje "Usuario no registrado"
+        if (!$invitedUser) {
+            return back()
+                ->withErrors([
+                    'email' => 'Usuario no registrado.',
+                ])
+                ->withInput();
+        }
+
+        // Evitar invitarse a sí mismo
+        if ($invitedUser->id === $user->id) {
+            return back()
+                ->withErrors([
+                    'email' => 'No puedes invitarte a ti mismo.',
+                ])
+                ->withInput();
+        }
+
+        // Verificar si ya es miembro o tiene algo pendiente
+        $existing = $team->members()->where('user_id', $invitedUser->id)->first();
+
+        if ($existing) {
+            if ($existing->pivot->is_accepted) {
+                return back()
+                    ->withErrors([
+                        'email' => 'Este usuario ya es miembro del equipo.',
+                    ])
+                    ->withInput();
+            }
+
+            if ($existing->pivot->requested_by_user) {
+                return back()
+                    ->withErrors([
+                        'email' => 'Este usuario ya envió una solicitud para unirse. Revísala en la ficha del equipo.',
+                    ])
+                    ->withInput();
+            }
+
+            return back()
+                ->withErrors([
+                    'email' => 'Ya hay una invitación pendiente para este usuario.',
+                ])
+                ->withInput();
+        }
+
+        // Límite de integrantes (miembros + invitaciones pendientes)
+        $maxMembers = $team->event->max_team_members ?? 5;
+        $currentTotal = $team->members()->count();
+
+        if ($currentTotal >= $maxMembers) {
+            return back()
+                ->withErrors([
+                    'email' => "No puedes invitar más personas. El equipo ya alcanzó el máximo de {$maxMembers} integrantes.",
+                ])
+                ->withInput();
+        }
+
+        // Crear invitación en la tabla pivot (igual que en store)
+        $team->members()->attach($invitedUser->id, [
+            'is_accepted' => false,
+            'requested_by_user' => false,
+            'role' => 'Miembro',
+        ]);
+
+        // Notificación dentro del sistema (como cuando se crea el equipo)
+        $invitedUser->notify(new TeamInvitationNotification($team));
+
+        // Mensaje de éxito (se muestra en el cuadro)
+        return back()->with('invite_check_success', "Se ha enviado una invitación a {$invitedUser->email}.");
     }
 
 
