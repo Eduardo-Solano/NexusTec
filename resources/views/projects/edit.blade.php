@@ -58,7 +58,7 @@
                             <x-input-label for="name" :value="__('Nombre del Proyecto / Prototipo')" class="text-white font-bold mb-2 text-sm uppercase tracking-wider" />
                             <input id="name" 
                                 class="block w-full py-3 px-4 bg-black/20 border border-white/10 text-white placeholder-gray-500 focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 rounded-xl text-lg shadow-inner transition-all duration-300 hover:bg-black/30 backdrop-blur-sm" 
-                                type="text" name="name" :value="old('name', $project->name)" required autofocus placeholder="Ej: Sistema de Riego IoT" />
+                                type="text" name="name" value="{{ old('name', $project->name) }}" required autofocus placeholder="Ej: Sistema de Riego IoT" />
                             <x-input-error :messages="$errors->get('name')" class="mt-2" />
                         </div>
 
@@ -72,7 +72,7 @@
                                 </div>
                                 <input id="repository_url" 
                                     class="block w-full pl-10 py-3 bg-black/20 border border-white/10 text-white placeholder-gray-500 focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 rounded-xl shadow-inner transition-all duration-300 hover:bg-black/30 backdrop-blur-sm" 
-                                    type="url" name="repository_url" :value="old('repository_url', $project->repository_url)" required placeholder="https://github.com/usuario/repo" />
+                                    type="url" name="repository_url" value="{{ old('repository_url', $project->repository_url) }}" required placeholder="https://github.com/usuario/repo" />
                             </div>
                             <x-input-error :messages="$errors->get('repository_url')" class="mt-2" />
                         </div>
@@ -136,7 +136,10 @@
                                                 </label>
                                             </div>
                                             <div class="w-full h-24 rounded-lg overflow-hidden bg-black/20">
-                                                <img src="{{ $project->image_url }}" alt="Imagen del proyecto" class="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity">
+                                                <img src="{{ $project->image_url }}" 
+                                                     alt="Imagen del proyecto" 
+                                                     class="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity"
+                                                     onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name={{ urlencode($project->name) }}&background=6366f1&color=fff&size=128';">
                                             </div>
                                         </div>
                                     @endif
@@ -158,7 +161,7 @@
                                     </div>
                                     <input id="video_url" 
                                         class="block w-full pl-10 py-3 bg-black/20 border border-white/10 text-white placeholder-gray-500 focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 rounded-xl shadow-inner transition-all duration-300 hover:bg-black/30 backdrop-blur-sm" 
-                                        type="url" name="video_url" :value="old('video_url', $project->video_url)" placeholder="https://www.youtube.com/watch?v=..." />
+                                        type="url" name="video_url" value="{{ old('video_url', $project->video_url) }}" placeholder="https://www.youtube.com/watch?v=..." />
                                 </div>
                                 <p class="text-[10px] text-gray-500 mt-2 pl-1">Opcional. Enlace directo al video.</p>
                                 <x-input-error :messages="$errors->get('video_url')" class="mt-2" />
