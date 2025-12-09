@@ -15,28 +15,19 @@ class AwardWonNotification extends Notification implements ShouldQueue
 
     public Award $award;
 
-    /**
-     * Create a new notification instance.
-     */
     public function __construct(Award $award)
     {
         $this->award = $award;
     }
 
-    /**
-     * Get the notification's delivery channels.
-     */
     public function via(object $notifiable): array
     {
         return ['mail', 'database'];
     }
 
-    /**
-     * Get the mail representation of the notification.
-     */
     public function toMail(object $notifiable): MailMessage
     {
-        $positionLabel = \App\Models\Award::POSITIONS[$this->award->position] ?? 'Ganador';
+        $positionLabel = Award::POSITIONS[$this->award->position] ?? 'Ganador';
         
         $medals = [
             1 => '🥇',
@@ -65,12 +56,9 @@ class AwardWonNotification extends Notification implements ShouldQueue
             ->salutation(new HtmlString('Con orgullo,<br><strong>Equipo NexusTec</strong><br><em>Instituto Tecnológico de Oaxaca</em>'));
     }
 
-    /**
-     * Get the array representation of the notification for database.
-     */
     public function toArray(object $notifiable): array
     {
-        $positionLabel = \App\Models\Award::POSITIONS[$this->award->position] ?? 'Ganador';
+        $positionLabel = Award::POSITIONS[$this->award->position] ?? 'Ganador';
         
         return [
             'type' => 'award_won',

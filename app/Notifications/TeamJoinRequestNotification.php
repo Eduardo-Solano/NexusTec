@@ -38,5 +38,4 @@ class TeamJoinRequestNotification extends Notification
             'notification_id' => $this->id,
         ];
     }
-
 }

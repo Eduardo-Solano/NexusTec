@@ -19,20 +19,17 @@ class TeamInvitationNotification extends Notification
 
     public function via($notifiable)
     {
-        // Por ahora solo en base de datos (campanita)
         return ['database'];
     }
 
     public function toArray($notifiable)
     {
         return [
-            'type' => 'team_invitation', // 👈 CLAVE: identificar que es invitación
-            'id' => $this->id,           // ID de la notificación
+            'type' => 'team_invitation',
+            'id' => $this->id,
             'message' => 'Has sido invitado al equipo "' . $this->team->name . '"',
             'team_id' => $this->team->id,
             'team_name' => $this->team->name,
-
-            // URLs para aceptar / rechazar desde la campanita
             'accept_url' => route('teams.invitations.accept', [
                 'team' => $this->team->id,
                 'notification' => $this->id,
@@ -43,7 +40,4 @@ class TeamInvitationNotification extends Notification
             ]),
         ];
     }
-
-
-
 }

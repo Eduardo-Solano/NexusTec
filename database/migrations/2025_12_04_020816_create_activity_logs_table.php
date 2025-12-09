@@ -6,19 +6,16 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('activity_logs', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
-            $table->string('action'); // created, updated, deleted, assigned, etc.
-            $table->string('model_type'); // Team, Project, Event, etc.
+            $table->string('action');
+            $table->string('model_type');
             $table->unsignedBigInteger('model_id')->nullable();
             $table->string('description');
-            $table->json('properties')->nullable(); // Datos adicionales
+            $table->json('properties')->nullable();
             $table->string('ip_address')->nullable();
             $table->timestamps();
             
@@ -27,9 +24,6 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('activity_logs');
