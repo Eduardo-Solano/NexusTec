@@ -64,7 +64,7 @@ class UserSeeder extends Seeder
         $departments = Career::pluck('name')->toArray();
         $departments = array_merge($departments, ['Ciencias Básicas', 'Dirección Académica', 'Vinculación']);
 
-        for ($i = 2; $i <= 31; $i++) {
+        for ($i = 2; $i <= 13; $i++) {
             $empNumber = 'EMP-' . str_pad($i, 3, '0', STR_PAD_LEFT);
             
             $user = User::factory()->create([
@@ -91,7 +91,7 @@ class UserSeeder extends Seeder
 
         $specialties = Specialty::all();
         
-        User::factory(20)->create()->each(function ($user) use ($specialties) {
+        User::factory(10)->create()->each(function ($user) use ($specialties) {
             $user->assignRole('judge');
             JudgeProfile::create([
                 'user_id' => $user->id,
@@ -102,7 +102,7 @@ class UserSeeder extends Seeder
 
         $careers = Career::all();
         
-        User::factory(50)->create()->each(function ($user) use ($careers) {
+        User::factory(20)->create()->each(function ($user) use ($careers) {
             $user->assignRole('student');
             StudentProfile::factory()->create([
                 'user_id' => $user->id,
