@@ -138,8 +138,29 @@ class TeamController extends Controller
     {
         $team->load(['event', 'members', 'leader', 'advisor', 'project']);
         $event = $team->event;
-        return view('teams.show', compact('team', 'event'));
+
+        $user = Auth::user();
+
+        // Base: relación de miembros con campos del pivot
+        $membersQuery = $team->members()->withPivot(['is_accepted', 'role', 'requested_by_user']);
+
+        // Líder, admin y staff pueden ver pendientes
+        $canSeePending = $user && (
+            $user->id === $team->leader_id ||
+            $user->hasRole(['admin', 'staff'])
+        );
+
+        // Si NO es líder ni admin/staff → solo miembros aceptados
+        if (!$canSeePending) {
+            $membersQuery->wherePivot('is_accepted', true);
+        }
+
+        $members = $membersQuery->get();
+
+        return view('teams.show', compact('team', 'event', 'members'));
     }
+
+
 
     public function create(Request $request)
     {
@@ -300,6 +321,7 @@ class TeamController extends Controller
                 ->withInput();
         }
 
+        // Verificar si ya es miembro o tiene algo pendiente
         $existing = $team->members()->where('user_id', $invitedUser->id)->first();
 
         if ($existing) {
@@ -348,6 +370,11 @@ class TeamController extends Controller
         return back()->with('invite_check_success', "Se ha enviado una invitación a {$invitedUser->email}.");
     }
 
+
+
+    /**
+     * Aceptar invitación (cuando el usuario actual es el invitado)
+     */
     public function acceptInvitation(Team $team, $notification = null)
     {
         $user = Auth::user();
@@ -356,12 +383,15 @@ class TeamController extends Controller
             return back()->with('error', 'No se pueden aceptar invitaciones porque el evento no está en período de inscripciones.');
         }
 
+        // Marcar notificación como leída
         if ($notification) {
             $user->notifications()
                 ->where('id', $notification)
                 ->first()?->delete();
         }
 
+
+        // Verificar que el usuario tiene una invitación pendiente
         $member = $team->members()->where('user_id', $user->id)->first();
 
         if (!$member) {
@@ -372,12 +402,14 @@ class TeamController extends Controller
             return back()->with('success', 'Ya eres miembro de este equipo.');
         }
 
+        // Aceptar invitación
         $team->members()->updateExistingPivot($user->id, [
-            'is_accepted' => true
+            'is_accepted' => true,
         ]);
 
         return back()->with('success', '¡Te has unido al equipo exitosamente!');
     }
+
 
     public function rejectInvitation(Team $team, $notification = null)
     {

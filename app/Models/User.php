@@ -27,17 +27,15 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_active' => 'boolean',
         ];
     }
+
+    // --- RELACIONES DE PERFILES (1 a 1) ---
 
     public function studentProfile()
     {
         return $this->hasOne(StudentProfile::class);
-    }
-
-    public function staffProfile()
-    {
-        return $this->hasOne(StaffProfile::class);
     }
 
     public function judgeProfile()
@@ -45,9 +43,24 @@ class User extends Authenticatable
         return $this->hasOne(JudgeProfile::class);
     }
 
+    public function staffProfile()
+    {
+        return $this->hasOne(StaffProfile::class);
+    }
+
     public function teams()
     {
-        return $this->belongsToMany(Team::class)->withPivot('is_accepted', 'requested_by_user');
+        return $this->belongsToMany(Team::class)
+            ->withPivot(['is_accepted', 'role', 'requested_by_user'])
+            ->withTimestamps();
+    }
+
+    public function activeTeams()
+    {
+        return $this->belongsToMany(Team::class)
+            ->withPivot(['is_accepted', 'role', 'requested_by_user'])
+            ->wherePivot('is_accepted', true)
+            ->withTimestamps();
     }
 
     public function ownedTeams()

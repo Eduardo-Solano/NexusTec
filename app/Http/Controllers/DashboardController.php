@@ -41,21 +41,21 @@ class DashboardController extends Controller
             if ($activeEvent) {
                 $teamsWithProject = $activeEvent->teams->filter(fn($t) => $t->project !== null)->count();
                 $totalTeams = $activeEvent->teams->count();
-                
+
                 // Calcular proyectos completamente evaluados
                 $fullyEvaluated = 0;
                 $totalEvaluations = 0;
                 $requiredEvaluations = 0;
-                
+
                 foreach ($activeEvent->teams as $team) {
                     if ($team->project) {
                         $judgesCount = $team->project->judges()->count();
                         $completedJudges = $team->project->judges()->wherePivot('is_completed', true)->count();
-                        
+
                         if ($judgesCount > 0 && $completedJudges === $judgesCount) {
                             $fullyEvaluated++;
                         }
-                        
+
                         $totalEvaluations += $completedJudges;
                         $requiredEvaluations += $judgesCount;
                     }
@@ -78,16 +78,16 @@ class DashboardController extends Controller
 
             // Asesorías pendientes (solo para advisors)
             $data['pending_advisories'] = Team::where('advisor_id', $user->id)
-                                            ->where('advisor_status', 'pending')
-                                            ->with(['event', 'leader', 'members', 'project'])
-                                            ->get();
-            
+                ->where('advisor_status', 'pending')
+                ->with(['event', 'leader', 'members', 'project'])
+                ->get();
+
             // 2. EQUIPOS ASESORADOS (Equipos aceptados con toda su info)
             $data['advised_teams'] = Team::where('advisor_id', $user->id)
                 ->where('advisor_status', 'accepted')
                 ->with(['event', 'leader', 'members', 'project.evaluations', 'project.judges', 'awards'])
                 ->get();
-            
+
             $data['my_projects'] = $data['advised_teams']->count();
 
             // Datos para gráficas - Equipos por día (últimos 14 días)
@@ -111,8 +111,7 @@ class DashboardController extends Controller
                 ->orderByDesc('count')
                 ->take(5)
                 ->get();
-        } 
-        elseif ($user->hasRole('judge')) {
+        } elseif ($user->hasRole('judge')) {
             // Lógica para JUEZ
             $assignedProjects = $user->assignedProjects()
                 ->with(['team.event', 'team.members', 'team.leader', 'evaluations'])
@@ -126,13 +125,15 @@ class DashboardController extends Controller
             $avgScore = Evaluation::where('judge_id', $user->id)->avg('score');
 
             // Eventos en los que participa como juez
-            $eventsAsJudge = Event::whereHas('teams.project.judges', function($q) use ($user) {
+            $eventsAsJudge = Event::whereHas('teams.project.judges', function ($q) use ($user) {
                 $q->where('judge_id', $user->id);
-            })->with(['teams' => function($q) use ($user) {
-                $q->whereHas('project.judges', function($q2) use ($user) {
-                    $q2->where('judge_id', $user->id);
-                });
-            }])->get();
+            })->with([
+                        'teams' => function ($q) use ($user) {
+                            $q->whereHas('project.judges', function ($q2) use ($user) {
+                                $q2->where('judge_id', $user->id);
+                            });
+                        }
+                    ])->get();
 
             $data = [
                 'assigned_projects' => $assignedProjects,
@@ -144,20 +145,22 @@ class DashboardController extends Controller
                 'pending_count' => $pendingProjects->count(),
                 'completed_count' => $completedProjects->count(),
             ];
-        }
-        elseif ($user->hasRole('student')) {
+        } elseif ($user->hasRole('student')) {
             // Lógica para ESTUDIANTE
-            // Buscamos TODOS los equipos en los que participa el estudiante
-            $myTeams = Team::whereHas('members', function($q) use ($user) {
-                $q->where('user_id', $user->id);
-            })->with(['event', 'project.evaluations', 'project.judges', 'members', 'awards'])->latest()->get();
 
-            // Buscamos eventos próximos para mostrarle
+            // ✅ SOLO equipos donde el estudiante YA aceptó la invitación (is_accepted = true)
+            $myTeams = $user->activeTeams()
+                ->with(['event', 'project.evaluations', 'project.judges', 'members', 'awards'])
+                ->latest()
+                ->get();
+
+            // Eventos próximos para mostrarle
             $upcomingEvents = Event::whereIn('status', [Event::STATUS_REGISTRATION, Event::STATUS_ACTIVE])
-                                   ->where('start_date', '>', now())
-                                   ->take(3)->get();
+                ->where('start_date', '>', now())
+                ->take(3)
+                ->get();
 
-            // ========== NUEVO: Calcular progreso de cada equipo ==========
+            // ========== Calcular progreso de cada equipo ==========
             $teamsProgress = [];
             foreach ($myTeams as $team) {
                 $steps = [
@@ -190,8 +193,8 @@ class DashboardController extends Controller
                 if ($team->project && $team->project->evaluations->count() > 0) {
                     $avgScore = $team->project->evaluations->avg('score');
                     $teamProgress['score'] = round($avgScore, 2);
-                    $teamProgress['score_percent'] = $team->event->max_score > 0 
-                        ? round(($avgScore / $team->event->max_score) * 100) 
+                    $teamProgress['score_percent'] = $team->event->max_score > 0
+                        ? round(($avgScore / $team->event->max_score) * 100)
                         : 0;
                 }
 
