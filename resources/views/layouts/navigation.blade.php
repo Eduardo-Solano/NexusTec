@@ -128,7 +128,7 @@
 
                         <!-- NOTIFICATIONS PANEL -->
                         <div x-show="notificationsOpen" @click.away="notificationsOpen = false" x-transition
-                            class="absolute right-0 mt-4 w-96 bg-[#1a2333]/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl z-50 overflow-hidden"
+                            class="fixed left-2 right-2 top-16 sm:absolute sm:left-auto sm:right-0 sm:top-auto sm:mt-2 w-auto sm:w-80 bg-white dark:bg-gray-800 rounded-xl shadow-xl z-50 overflow-hidden divide-y divide-gray-200 dark:divide-gray-700"
                             style="display: none;">
 
                             <!-- Header -->
