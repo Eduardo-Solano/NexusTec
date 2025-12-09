@@ -20,10 +20,10 @@ class NotificationComposer
         if (Auth::check()) {
             $user = Auth::user();
             $userId = $user->id;
-            
+
             // Cache de notificaciones por 30 segundos para evitar consultas repetidas
             $cacheKey = "user_notifications_{$userId}";
-            
+
             $notificationData = Cache::remember($cacheKey, 30, function () use ($user) {
                 $data = [
                     'pendingMembers' => collect(),
@@ -41,8 +41,8 @@ class NotificationComposer
                 if ($teamIds->isNotEmpty()) {
                     $data['pendingMembers'] = \App\Models\User::whereHas('teams', function ($q) use ($teamIds) {
                         $q->whereIn('teams.id', $teamIds)
-                          ->where('team_user.is_accepted', false)
-                          ->where('team_user.requested_by_user', true);
+                            ->where('team_user.is_accepted', false)
+                            ->where('team_user.requested_by_user', true);
                     })->select('id', 'name', 'email')->get();
                 }
 
@@ -64,7 +64,7 @@ class NotificationComposer
                         ->get();
                 }
 
-                // 5. Notificaciones de BD (solo las últimas 10)
+                // 5. Notificaciones de BD (solo las últimas 10) -> SOLO NO LEÍDAS
                 $data['unreadNotifications'] = $user->unreadNotifications()
                     ->latest()
                     ->take(10)
@@ -79,10 +79,17 @@ class NotificationComposer
             $unreadNotifications = $notificationData['unreadNotifications'];
         }
 
+        // 🧮 NUEVO: total de notificaciones que mostramos en la campanita
+        $totalNotifications =
+            $unreadNotifications->count() +
+            $pendingAdvisories->count() +
+            $pendingEvaluations->count();
+
         // Pasar datos a la vista
         $view->with('pendingMembers', $pendingMembers);
         $view->with('pendingAdvisories', $pendingAdvisories);
         $view->with('pendingEvaluations', $pendingEvaluations);
         $view->with('unreadNotifications', $unreadNotifications);
+        $view->with('totalNotifications', $totalNotifications); // 👈 NUEVO
     }
 }
