@@ -184,6 +184,15 @@ class EventController extends Controller
 
     public function destroy(Event $event)
     {
+        // Regla de integridad: Solo se puede eliminar eventos que ya finalizaron
+        if (!$event->isClosed()) {
+            return back()->with('error', 'No se puede eliminar el evento porque aún no ha finalizado.');
+        }
+        
+        // Desvincular criterios y jueces antes de eliminar
+        $event->criteria()->detach();
+        $event->judges()->detach();
+        
         $event->delete();
 
         return redirect()->route('events.index')
@@ -267,6 +276,11 @@ class EventController extends Controller
 
     public function assignJudge(AssignJudgeRequest $request, Event $event)
     {
+        // Regla de integridad: No asignar jueces a eventos finalizados
+        if ($event->isClosed()) {
+            return back()->with('error', 'No se pueden asignar jueces a un evento que ya finalizó.');
+        }
+
         $validated = $request->validated();
 
         if ($event->judges()->where('judge_id', $validated['judge_id'])->exists()) {
@@ -280,6 +294,11 @@ class EventController extends Controller
 
     public function removeJudge(Event $event, JudgeProfile $judge)
     {
+        // Regla de integridad: No remover jueces de eventos finalizados
+        if ($event->isClosed()) {
+            return back()->with('error', 'No se pueden remover jueces de un evento que ya finalizó.');
+        }
+
         if (!$event->judges()->where('judge_id', $judge->id)->exists()) {
             return back()->with('error', 'Este juez no está asignado a este evento.');
         }
