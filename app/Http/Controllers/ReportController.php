@@ -16,12 +16,8 @@ use App\Exports\ParticipantsExport;
 
 class ReportController extends Controller
 {
-    /**
-     * Dashboard de reportes
-     */
     public function index()
     {
-        // Estadísticas generales
         $stats = [
             'total_events' => Event::count(),
             'active_events' => Event::whereIn('status', [Event::STATUS_REGISTRATION, Event::STATUS_ACTIVE])->count(),
@@ -33,14 +29,12 @@ class ReportController extends Controller
             'total_evaluations' => Evaluation::distinct('project_id', 'judge_id')->count(),
         ];
 
-        // Participación por mes (últimos 6 meses)
         $participationByMonth = Team::selectRaw("DATE_FORMAT(created_at, '%Y-%m') as month, COUNT(*) as count")
             ->where('created_at', '>=', now()->subMonths(6))
             ->groupBy('month')
             ->orderBy('month')
             ->get();
 
-        // Top 5 carreras con más participación
         $topCareers = DB::table('student_profiles')
             ->join('careers', 'student_profiles.career_id', '=', 'careers.id')
             ->join('team_user', 'student_profiles.user_id', '=', 'team_user.user_id')
@@ -50,13 +44,11 @@ class ReportController extends Controller
             ->take(5)
             ->get();
 
-        // Eventos con más participación
         $topEvents = Event::withCount('teams')
             ->orderByDesc('teams_count')
             ->take(5)
             ->get();
 
-        // Proyectos mejor evaluados (promedio)
         $topProjects = Project::with(['team.event'])
             ->withAvg('evaluations', 'score')
             ->withCount('evaluations')
@@ -75,9 +67,6 @@ class ReportController extends Controller
         ));
     }
 
-    /**
-     * Reporte por evento
-     */
     public function byEvent(Request $request)
     {
         $events = Event::withCount(['teams', 'awards', 'criteria'])
@@ -104,32 +93,26 @@ class ReportController extends Controller
                 ->withCount(['teams', 'awards'])
                 ->findOrFail($request->event_id);
 
-            // Calcular estadísticas del evento
             $teamsWithProject = $selectedEvent->teams->filter(fn($t) => $t->project !== null);
             $totalMembers = $selectedEvent->teams->sum(fn($t) => $t->members->count());
 
-            // Jueces asignados a proyectos del evento (únicos)
             $projectIds = $teamsWithProject->pluck('project.id')->filter();
             $totalJudges = DB::table('judge_project')
                 ->whereIn('project_id', $projectIds)
                 ->distinct('judge_id')
                 ->count('judge_id');
 
-            // Evaluaciones del evento
             $evaluationsQuery = Evaluation::whereIn('project_id', $projectIds);
             $totalEvaluations = $evaluationsQuery->count();
             
-            // Estadísticas de puntajes
             $scoreStats = Evaluation::whereIn('project_id', $projectIds)
                 ->selectRaw('AVG(score) as avg_score, MAX(score) as max_score, MIN(score) as min_score')
                 ->first();
 
-            // Equipos por estado
             $teamsByStatus = $selectedEvent->teams->groupBy('status')
                 ->map(fn($teams) => $teams->count())
                 ->toArray();
 
-            // Top proyectos evaluados
             $topProjects = Project::with(['team'])
                 ->whereIn('id', $projectIds)
                 ->withAvg('evaluations', 'score')
@@ -158,9 +141,6 @@ class ReportController extends Controller
         return view('reports.by-event', compact('events', 'selectedEvent', 'eventStats'));
     }
 
-    /**
-     * Reporte por carrera
-     */
     public function byCareer(Request $request)
     {
         $events = Event::orderBy('start_date', 'desc')->get();
@@ -168,7 +148,6 @@ class ReportController extends Controller
         $query = Career::query();
         
         if ($request->filled('event_id')) {
-            // Contar estudiantes participantes en un evento específico
             $careers = Career::select('careers.*')
                 ->selectSub(function($q) use ($request) {
                     $q->from('student_profiles')
@@ -181,7 +160,6 @@ class ReportController extends Controller
                 ->orderBy('name')
                 ->get();
         } else {
-            // Contar todos los estudiantes de la carrera
             $careers = Career::withCount('studentProfiles as students_count')
                 ->orderBy('name')
                 ->get();
@@ -190,9 +168,6 @@ class ReportController extends Controller
         return view('reports.by-career', compact('careers', 'events'));
     }
 
-    /**
-     * Reporte por período
-     */
     public function byPeriod(Request $request)
     {
         $startDate = $request->filled('start_date') 
@@ -202,7 +177,6 @@ class ReportController extends Controller
             ? \Carbon\Carbon::parse($request->end_date) 
             : now();
 
-        // Estadísticas del período
         $periodStats = [
             'new_users' => User::whereBetween('created_at', [$startDate, $endDate])->count(),
             'new_teams' => Team::whereBetween('created_at', [$startDate, $endDate])->count(),
@@ -210,7 +184,6 @@ class ReportController extends Controller
             'new_evaluations' => Evaluation::whereBetween('created_at', [$startDate, $endDate])->count(),
         ];
 
-        // Actividad diaria (equipos creados por día)
         $dailyActivity = Team::selectRaw("DATE(created_at) as date, COUNT(*) as count")
             ->whereBetween('created_at', [$startDate, $endDate])
             ->groupBy('date')
@@ -218,7 +191,6 @@ class ReportController extends Controller
             ->get()
             ->toArray();
 
-        // Eventos en el período
         $eventsInPeriod = Event::withCount('teams')
             ->where(function($q) use ($startDate, $endDate) {
                 $q->whereBetween('start_date', [$startDate, $endDate])
@@ -240,9 +212,6 @@ class ReportController extends Controller
         ));
     }
 
-    /**
-     * Exportar participantes de un evento
-     */
     public function exportParticipants(Request $request)
     {
         $eventId = $request->get('event_id');

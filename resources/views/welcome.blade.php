@@ -51,13 +51,11 @@
 
     <div class="relative bg-tecnm-blue overflow-hidden min-h-[calc(100vh-4rem)]">
 
-        {{-- Imagen de fondo para desktop --}}
         <div class="hidden lg:block lg:absolute lg:inset-y-0 lg:right-0 lg:w-1/2">
             <img class="h-full w-full object-cover" src="{{ asset('img/portada-ito.jpeg') }}" alt="Banner Evento">
             <div class="absolute inset-0 bg-gradient-to-r from-tecnm-blue via-tecnm-blue/50 to-transparent"></div>
         </div>
 
-        {{-- Decoración de fondo --}}
         <div class="absolute inset-0 overflow-hidden">
             <div class="absolute -top-40 -left-40 w-80 h-80 bg-ito-orange/10 rounded-full blur-3xl"></div>
             <div class="absolute bottom-0 left-1/4 w-96 h-96 bg-blue-400/10 rounded-full blur-3xl"></div>
@@ -67,7 +65,6 @@
 
             <div class="py-16 lg:py-32 lg:pr-8 flex flex-col justify-center">
                 <div class="max-w-xl mx-auto lg:mx-0">
-                    {{-- Badge --}}
                     <div
                         class="inline-flex items-center px-3 py-1 rounded-full bg-white/10 border border-white/20 text-sm text-white/80 mb-6">
                         <span class="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></span>
@@ -107,12 +104,10 @@
                         </a>
                     </div>
 
-                    {{-- Mini estadísticas --}}
                     <div class="mt-12 grid grid-cols-3 gap-6 pt-8 border-t border-white/10">
                         @php
                             $totalEvents = \App\Models\Event::count();
                             $totalTeams = \App\Models\Team::count();
-                            // Cuenta estudiantes de forma segura sin depender del rol
                             $totalStudents = \App\Models\StudentProfile::count();
                         @endphp
                         <div>
@@ -131,7 +126,6 @@
                 </div>
             </div>
 
-            {{-- Imagen móvil --}}
             <div class="lg:hidden h-64 w-full relative">
                 <img class="w-full h-full object-cover" src="{{ asset('img/portada-ito.jpeg') }}" alt="Banner Evento">
                 <div class="absolute inset-0 bg-gradient-to-t from-tecnm-blue to-transparent"></div>
@@ -139,7 +133,6 @@
         </div>
     </div>
 
-    {{-- Sección de características --}}
     <section class="py-16 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12">
@@ -193,7 +186,6 @@
         </div>
     </footer>
 
-    <!-- Easter Egg Modal - Desarrolladores -->
     <div x-show="showDevelopers" x-transition:enter="transition ease-out duration-300"
         x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
         x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100"
@@ -207,7 +199,6 @@
             x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
             class="relative bg-gradient-to-br from-blue-900 to-blue-950 rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4">
 
-            <!-- Botón cerrar -->
             <button @click="showDevelopers = false"
                 class="absolute top-4 right-4 text-white/70 hover:text-white transition">
                 <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -215,7 +206,6 @@
                 </svg>
             </button>
 
-            <!-- Engranaje animado en el centro -->
             <div class="flex justify-center mb-6">
                 <svg class="w-24 h-24 text-ito-orange animate-spin-slow" fill="currentColor" viewBox="0 0 24 24">
                     <path
@@ -223,7 +213,6 @@
                 </svg>
             </div>
 
-            <!-- Título -->
             <h2 class="text-3xl font-bold text-center text-white mb-2">
                 Desarrolladores
             </h2>
@@ -231,7 +220,6 @@
                 Equipo de Desarrollo NexusTec
             </p>
 
-            <!-- Lista de desarrolladores -->
             <div class="space-y-3">
                 <div class="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
                     <div class="flex items-center gap-3">
@@ -286,7 +274,6 @@
                 </div>
             </div>
 
-            <!-- Mensaje especial -->
             <div class="mt-6 text-center">
                 <p class="text-blue-200 text-sm italic">
                     "Construyendo el futuro, una línea de código a la vez"
@@ -295,21 +282,7 @@
         </div>
     </div>
 
-    <style>
-        @keyframes spin-slow {
-            from {
-                transform: rotate(0deg);
-            }
 
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        .animate-spin-slow {
-            animation: spin-slow 3s linear infinite;
-        }
-    </style>
 </body>
 
 </html>

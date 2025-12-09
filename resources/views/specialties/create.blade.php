@@ -1,47 +1,70 @@
 <x-app-layout>
-    <div class="min-h-screen bg-gray-900 py-12">
-        <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
+    {{-- Animated Background --}}
+    <div class="circuit-background-app"></div>
+    <div class="light-particles-app"></div>
 
-            <div class="bg-gray-800 border border-gray-700 rounded-2xl shadow-xl overflow-hidden">
-                {{-- Header --}}
-                <div class="bg-gradient-to-r from-amber-600 to-amber-700 px-8 py-6">
-                    <div class="flex items-center gap-4">
-                        <a href="{{ route('specialties.index') }}" 
-                            class="p-2 bg-white/10 hover:bg-white/20 rounded-lg transition">
-                            <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-                            </svg>
-                        </a>
-                        <div>
-                            <h1 class="text-2xl font-bold text-white">Nueva Especialidad</h1>
-                            <p class="text-amber-100 text-sm">Registra una nueva especialidad para jueces</p>
-                        </div>
+    <div class="min-h-screen py-12 relative z-10">
+        <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
+            {{-- Navigation Back --}}
+            <nav class="flex items-center text-sm font-medium text-gray-400 mb-6">
+                <a href="{{ route('specialties.index') }}" class="group flex items-center hover:text-white transition-colors duration-300">
+                    <div class="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mr-3 group-hover:border-amber-500/50 group-hover:bg-amber-500/20 transition-all duration-300">
+                        <svg class="w-4 h-4 group-hover:text-amber-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                        </svg>
+                    </div>
+                    <span>Volver a Catálogo</span>
+                </a>
+            </nav>
+
+            <div class="glass-card rounded-2xl overflow-hidden shadow-2xl animate-fade-in-up">
+                <div class="p-8 border-b border-white/10 flex justify-between items-center bg-white/5">
+                    <div>
+                        <h2 class="text-xs font-bold text-amber-400 uppercase tracking-widest mb-1">Registro</h2>
+                        <h1 class="text-3xl font-bold text-white bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
+                            Nueva Especialidad
+                        </h1>
+                    </div>
+                    <div class="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center border border-amber-500/20">
+                        <span class="text-2xl">⚖️</span>
                     </div>
                 </div>
-
-                {{-- Form --}}
-                <form action="{{ route('specialties.store') }}" method="POST" class="p-8 space-y-6">
+                
+                <form action="{{ route('specialties.store') }}" method="POST" class="p-8 space-y-8">
                     @csrf
-
+                    
                     <div>
-                        <label for="name" class="block text-sm font-bold text-gray-300 mb-2">Nombre de la Especialidad *</label>
-                        <input type="text" name="name" id="name" value="{{ old('name') }}" required
-                            placeholder="Ej: Desarrollo de Software, Inteligencia Artificial..."
-                            class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:ring-2 focus:ring-amber-500 focus:border-transparent transition"
-                            maxlength="100">
+                        <x-input-label for="name" :value="__('Nombre de la Especialidad')" class="text-white font-bold mb-2 text-sm uppercase tracking-wider" />
+                        <div class="relative group">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <svg class="h-5 w-5 text-gray-500 group-focus-within:text-amber-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                                </svg>
+                            </div>
+                            <input id="name" class="block w-full pl-10 py-3 bg-black/20 border border-white/10 text-white placeholder-gray-500 focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/50 rounded-xl shadow-inner transition-all duration-300 hover:bg-black/30 backdrop-blur-sm" 
+                                type="text" name="name" value="{{ old('name') }}" required maxlength="100" placeholder="Ej: Inteligencia Artificial, Desarrollo Web..." autofocus />
+                        </div>
                         @error('name')
-                            <p class="mt-2 text-sm text-red-400">{{ $message }}</p>
+                            <p class="text-red-400 text-sm mt-2 flex items-center gap-1">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                {{ $message }}
+                            </p>
                         @enderror
                     </div>
 
-                    <div class="flex items-center justify-end gap-4 pt-6 border-t border-gray-700">
+                    <div class="flex items-center justify-between mt-8 pt-6 border-t border-white/10">
                         <a href="{{ route('specialties.index') }}" 
-                            class="px-6 py-3 bg-gray-700 hover:bg-gray-600 text-gray-300 font-bold rounded-xl transition">
+                            class="text-sm font-bold text-gray-400 hover:text-white transition-colors flex items-center gap-2 group">
+                            <svg class="w-4 h-4 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
                             Cancelar
                         </a>
                         <button type="submit" 
-                            class="px-6 py-3 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-xl transition shadow-lg hover:shadow-amber-500/25">
-                            Guardar Especialidad
+                            class="relative inline-flex items-center justify-center px-8 py-3 overflow-hidden font-bold text-white transition-all duration-300 bg-amber-600 rounded-xl group hover:bg-amber-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 focus:ring-offset-gray-900 shadow-lg hover:shadow-amber-500/40">
+                            <span class="absolute inset-0 w-full h-full -mt-10 transition-all duration-700 opacity-0 bg-gradient-to-b from-transparent via-transparent to-black group-hover:opacity-20"></span>
+                            <span class="relative flex items-center gap-2">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                Guardar Especialidad
+                            </span>
                         </button>
                     </div>
                 </form>

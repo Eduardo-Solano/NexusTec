@@ -1,7 +1,6 @@
 <div class="logo-circle-wrapper" style="position: relative; display: inline-block;">
     <svg {{ $attributes }} viewBox="1000 200 5875 5360" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5; shape-rendering: geometricPrecision;">
         <defs>
-            <!-- Gradientes para mayor profundidad -->
             <linearGradient id="cyan-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" style="stop-color:#06B6D4;stop-opacity:1" />
                 <stop offset="50%" style="stop-color:#22D3EE;stop-opacity:1" />
@@ -13,7 +12,6 @@
                 <stop offset="100%" style="stop-color:#BEF264;stop-opacity:1" />
             </linearGradient>
             
-            <!-- Filtros de neón mejorados con múltiples capas -->
             <filter id="neon-cyan" x="-100%" y="-100%" width="300%" height="300%">
                 <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur1"/>
                 <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur2"/>
@@ -48,7 +46,6 @@
                 </feMerge>
             </filter>
             
-            <!-- Sombra interna para profundidad -->
             <filter id="inner-shadow">
                 <feGaussianBlur in="SourceAlpha" stdDeviation="4" result="blur"/>
                 <feOffset in="blur" dx="2" dy="2" result="offsetBlur"/>
@@ -59,25 +56,20 @@
             </filter>
         </defs>
         <g>
-            <!-- Círculo exterior con efecto neón mejorado y múltiples capas -->
             <circle cx="3937.5" cy="2780" r="2350" class="breathing-circle-base" style="fill:none;stroke:url(#cyan-gradient);stroke-width:25px;opacity:0.2;"/>
             <circle cx="3937.5" cy="2780" r="2400" class="breathing-circle" style="fill:none;stroke:url(#cyan-gradient);stroke-width:50px;filter:url(#neon-circle);opacity:0.7;"/>
             <circle cx="3937.5" cy="2780" r="2440" class="breathing-circle-mid" style="fill:none;stroke:url(#green-gradient);stroke-width:35px;filter:url(#neon-circle);opacity:0.5;"/>
             <circle cx="3937.5" cy="2780" r="2480" class="breathing-circle-outer" style="fill:none;stroke:url(#green-gradient);stroke-width:40px;filter:url(#neon-circle);opacity:0.6;"/>
             
-            <!-- Logo centrado con trazos mejorados -->
             <g transform="translate(80, 0)" class="logo-n-group">
-                <!-- Trazos de la N con gradientes y mejor resolución -->
                 <path class="path-cyan-1" d="M4219.78,2303.75c-52.193,-575.042 141.907,-788.482 397.887,-763.613c243.025,23.611 427.257,106.675 388.234,914.086" style="fill:none;stroke:url(#cyan-gradient);stroke-width:130px;filter:url(#neon-cyan);stroke-linecap:round;"/>
                 <path class="path-green-1" d="M2505.92,3069.29c14.212,113.151 -122.361,902.204 351.625,911.717c150.994,3.031 484.114,-17.975 413.402,-765.71" style="fill:none;stroke:url(#green-gradient);stroke-width:130px;filter:url(#neon-green);stroke-linecap:round;"/>
                 
-                <!-- Círculos con relleno y brillo -->
                 <ellipse class="ellipse-green-1" cx="2878.17" cy="3516.4" rx="107.567" ry="115.282" style="fill:none;stroke:url(#green-gradient);stroke-width:130px;filter:url(#neon-green);"/>
                 <ellipse class="ellipse-green-fill-1" cx="2878.17" cy="3516.4" rx="80" ry="85" style="fill:#A3E635;opacity:0.3;"/>
                 
                 <path class="path-green-2" d="M2878.17,3379.99c9.512,-821.622 -50.041,-1297.49 79.536,-1344.63c120.207,-43.734 252.925,150.709 555.678,489.613" style="fill:none;stroke:url(#green-gradient);stroke-width:130px;filter:url(#neon-green);stroke-linecap:round;"/>
                 
-                <!-- Puntos de conexión mejorados -->
                 <ellipse class="ellipse-green-2" cx="3737.01" cy="2762.82" rx="95" ry="102" style="fill:url(#green-gradient);filter:url(#neon-green);"/>
                 <ellipse class="ellipse-green-fill-2" cx="3737.01" cy="2762.82" rx="70" ry="75" style="fill:#BEF264;opacity:0.8;"/>
                 
@@ -99,7 +91,6 @@
         </g>
     </svg>
     <style>
-        /* Animaciones de los círculos exteriores */
         @keyframes breathing {
             0%, 100% {
                 r: 2400px;
@@ -150,7 +141,6 @@
             }
         }
         
-        /* Animación de pulso para elipses */
         @keyframes pulse-scale {
             0%, 100% {
                 transform: scale(1);
@@ -162,7 +152,6 @@
             }
         }
         
-        /* Animación de pulso para rellenos */
         @keyframes pulse-fill {
             0%, 100% {
                 opacity: 0.3;
@@ -174,7 +163,6 @@
             }
         }
         
-        /* Animación de trazos dibujándose */
         @keyframes draw-path {
             0% {
                 stroke-dashoffset: 3000;
@@ -186,7 +174,6 @@
             }
         }
         
-        /* Animación de brillo pulsante */
         @keyframes glow-pulse {
             0%, 100% {
                 filter: url(#neon-cyan) drop-shadow(0 0 5px currentColor);
@@ -196,7 +183,6 @@
             }
         }
         
-        /* Animación de entrada fadeIn con escala */
         @keyframes fadeInScale {
             0% {
                 opacity: 0;
@@ -208,7 +194,6 @@
             }
         }
         
-        /* Aplicar animaciones a los círculos */
         .breathing-circle-base {
             animation: breathing-base 3s ease-in-out infinite;
             transition: all 0.3s ease;
@@ -229,13 +214,11 @@
             transition: all 0.3s ease;
         }
         
-        /* Renderizado optimizado */
         svg {
             image-rendering: -webkit-optimize-contrast;
             image-rendering: crisp-edges;
         }
         
-        /* Animaciones de los trazos paths */
         svg path[class*="path-"] {
             stroke-dasharray: 3000;
             stroke-dashoffset: 3000;
@@ -244,7 +227,6 @@
             transition: all 0.3s ease;
         }
         
-        /* Delays escalonados para los paths */
         .path-cyan-1 { animation-delay: 0s; }
         .path-green-1 { animation-delay: 0.2s; }
         .path-green-2 { animation-delay: 0.4s; }
@@ -252,14 +234,12 @@
         .path-cyan-3 { animation-delay: 0.8s; }
         .path-green-3 { animation-delay: 1s; }
         
-        /* Animaciones de las elipses - pulsos constantes */
         svg ellipse[class*="ellipse-"] {
             transform-origin: center;
             animation: pulse-scale 2.5s ease-in-out infinite;
             transition: all 0.3s ease;
         }
         
-        /* Delays escalonados para las elipses */
         .ellipse-green-1 { animation-delay: 0s; }
         .ellipse-green-fill-1 { animation: pulse-fill 2.5s ease-in-out infinite 0.1s; }
         .ellipse-green-2 { animation-delay: 0.3s; }
@@ -271,14 +251,12 @@
         .ellipse-green-3 { animation-delay: 1.2s; }
         .ellipse-green-fill-3 { animation: pulse-fill 2.5s ease-in-out infinite 1.3s; }
         
-        /* Contenedor principal */
         .logo-circle-wrapper {
             transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s ease;
             cursor: pointer;
             animation: fadeInScale 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         }
         
-        /* HOVER - Efectos cuando el usuario pasa el mouse */
         .logo-circle-wrapper:hover {
             transform: scale(1.08);
             filter: drop-shadow(0 0 25px rgba(6, 182, 212, 0.6)) 
@@ -310,14 +288,12 @@
             stroke-width: 50px;
         }
         
-        /* Hover en paths - efecto de redibujo rápido */
         .logo-circle-wrapper:hover svg path[class*="path-"] {
             stroke-width: 145px;
             animation: draw-path 1.5s ease-in-out infinite;
             filter: brightness(1.3) drop-shadow(0 0 15px currentColor);
         }
         
-        /* Hover en elipses - pulso más rápido e intenso */
         .logo-circle-wrapper:hover svg ellipse[class*="ellipse-"] {
             animation-duration: 1s;
             filter: brightness(1.5) drop-shadow(0 0 15px currentColor);
@@ -328,13 +304,11 @@
             opacity: 0.8 !important;
         }
         
-        /* ACTIVE - Cuando se hace clic */
         .logo-circle-wrapper:active {
             transform: scale(1.02);
             transition: transform 0.1s ease;
         }
         
-        /* Animación del grupo de la N en hover */
         .logo-n-group {
             transform-origin: center;
             transition: transform 0.3s ease;
@@ -344,13 +318,11 @@
             transform: translate(80px, 0) scale(1.02);
         }
         
-        /* Efecto de resplandor en focus (accesibilidad) */
         .logo-circle-wrapper:focus {
             outline: none;
             filter: drop-shadow(0 0 30px rgba(6, 182, 212, 0.8));
         }
         
-        /* Animación continua sutil de los gradientes */
         @keyframes gradient-shift {
             0%, 100% {
                 stop-color: #06B6D4;

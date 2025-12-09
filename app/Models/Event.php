@@ -7,15 +7,21 @@ use Illuminate\Database\Eloquent\Model;
 
 class Event extends Model
 {
-    /** @use HasFactory<\Database\Factories\EventFactory> */
     use HasFactory;
 
-    // Constantes para los estados del evento
-    const STATUS_REGISTRATION = 'registration'; // Período de inscripciones
-    const STATUS_ACTIVE = 'active';             // Evento en curso (proyectos, evaluaciones)
-    const STATUS_CLOSED = 'closed';             // Evento cerrado (ganadores, diplomas)
+    const STATUS_REGISTRATION = 'registration';
+    const STATUS_ACTIVE = 'active';
+    const STATUS_CLOSED = 'closed';
 
-    protected $fillable = ['name', 'description', 'start_date', 'registration_deadline', 'end_date', 'status', 'show_feedback_to_students'];
+    protected $fillable = [
+        'name',
+        'description',
+        'start_date',
+        'registration_deadline',
+        'end_date',
+        'status',
+        'show_feedback_to_students'
+    ];
 
     protected $casts = [
         'start_date' => 'datetime',
@@ -24,37 +30,25 @@ class Event extends Model
         'show_feedback_to_students' => 'boolean',
     ];
 
-    /**
-     * Calcular el estado del evento basado en las fechas
-     * Retorna el estado que DEBERÍA tener según la fecha actual
-     */
     public function calculateStatus(): string
     {
         $now = now();
 
-        // Si ya pasó la fecha de cierre → Cerrado
         if ($this->end_date && $now->greaterThan($this->end_date)) {
             return self::STATUS_CLOSED;
         }
 
-        // Si hay fecha límite de inscripción y ya pasó → Activo
         if ($this->registration_deadline && $now->greaterThan($this->registration_deadline)) {
             return self::STATUS_ACTIVE;
         }
 
-        // Si ya inició el evento pero no hay registration_deadline → Activo
         if (!$this->registration_deadline && $this->start_date && $now->greaterThan($this->start_date)) {
             return self::STATUS_ACTIVE;
         }
 
-        // Por defecto → Inscripciones abiertas
         return self::STATUS_REGISTRATION;
     }
 
-    /**
-     * Actualizar el estado del evento si es necesario (basado en fechas)
-     * Retorna true si se actualizó el estado
-     */
     public function syncStatus(): bool
     {
         $calculatedStatus = $this->calculateStatus();
@@ -68,78 +62,46 @@ class Event extends Model
         return false;
     }
 
-    /**
-     * Verificar si el evento está en período de inscripciones
-     */
     public function isRegistrationOpen(): bool
     {
         return $this->status === self::STATUS_REGISTRATION;
     }
 
-    /**
-     * Verificar si el evento está activo (en curso)
-     */
     public function isActive(): bool
     {
         return $this->status === self::STATUS_ACTIVE;
     }
 
-    /**
-     * Verificar si el evento está cerrado
-     */
     public function isClosed(): bool
     {
         return $this->status === self::STATUS_CLOSED;
     }
 
-    /**
-     * Verificar si el evento permite inscripciones de equipos
-     * Solo en estado "registration"
-     */
     public function allowsTeamRegistration(): bool
     {
         return $this->isRegistrationOpen();
     }
 
-    /**
-     * Verificar si el evento permite acciones de proyecto (crear, editar, enviar)
-     * Solo en estado "active"
-     */
     public function allowsProjectActions(): bool
     {
         return $this->isActive();
     }
 
-    /**
-     * Verificar si el evento permite evaluaciones de jueces
-     * Solo en estado "active"
-     */
     public function allowsEvaluations(): bool
     {
         return $this->isActive();
     }
 
-    /**
-     * Verificar si el evento permite gestión de premios y diplomas
-     * Solo en estado "closed"
-     */
     public function allowsAwardsAndDiplomas(): bool
     {
         return $this->isClosed();
     }
 
-    /**
-     * Verificar si el evento está abierto para alguna acción (legacy support)
-     * Retorna true si NO está cerrado
-     */
     public function isOpen(): bool
     {
         return !$this->isClosed();
     }
 
-    /**
-     * Obtener el estado del evento como texto legible
-     */
     public function getStatusLabelAttribute(): string
     {
         return match($this->status) {
@@ -150,9 +112,6 @@ class Event extends Model
         };
     }
 
-    /**
-     * Obtener el color del badge según el estado
-     */
     public function getStatusColorAttribute(): string
     {
         return match($this->status) {
@@ -163,9 +122,6 @@ class Event extends Model
         };
     }
 
-    /**
-     * Obtener el icono del estado
-     */
     public function getStatusIconAttribute(): string
     {
         return match($this->status) {
@@ -176,9 +132,6 @@ class Event extends Model
         };
     }
 
-    /**
-     * Obtener todos los estados disponibles
-     */
     public static function getStatuses(): array
     {
         return [
@@ -192,7 +145,6 @@ class Event extends Model
     {
         $name = strtolower($this->name);
 
-        // CASO A: Hackathons (Enfoque 100% Software)
         if (str_contains($name, 'hack')) {
             return [
                 'Full Stack Developer',
@@ -204,20 +156,17 @@ class Event extends Model
             ];
         }
 
-        // CASO B: InnovaTec / Emprendimiento (Enfoque Multidisciplinario)
-        // Cubre las áreas de: Técnica, Negocios, Diseño y Finanzas
         if (str_contains($name, 'innova') || str_contains($name, 'emprende')) {
             return [
-                'Líder de Proyecto',       // El CEO del equipo
-                'Desarrollador Técnico',   // El que construye el prototipo (Ingenierías)
-                'Analista de Negocios',    // El que hace el Canvas (Gestión/Admin)
-                'Especialista Financiero', // Costos y Rentabilidad
-                'Diseñador de Producto',   // Imagen y Marketing
-                'Investigador'             // Fundamentación teórica
+                'Líder de Proyecto',
+                'Desarrollador Técnico',
+                'Analista de Negocios',
+                'Especialista Financiero',
+                'Diseñador de Producto',
+                'Investigador'
             ];
         }
 
-        // CASO C: Otros (Robótica, Ciencias Básicas, etc.)
         return [
             'Capitán',
             'Investigador',
@@ -226,15 +175,17 @@ class Event extends Model
             'Miembro General'
         ];
     }
-    // --- Relaciones de 1:N ---
-    public function teams() {
+
+    public function teams() 
+    {
         return $this->hasMany(Team::class);
     }
-    // Relación con premios
-    public function awards() {
+
+    public function awards() 
+    {
         return $this->hasMany(Award::class);
     }
-    // --- Relaciones de N:M ---
+
     public function criteria()
     {
         return $this->belongsToMany(Criterion::class, 'event_criterion');

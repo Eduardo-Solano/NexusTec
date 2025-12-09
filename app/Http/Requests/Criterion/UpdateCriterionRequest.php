@@ -6,19 +6,11 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateCriterionRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         $criterionId = $this->route('criterion')->id ?? $this->route('criterion');
@@ -29,9 +21,6 @@ class UpdateCriterionRequest extends FormRequest
         ];
     }
 
-    /**
-     * Get custom messages for validator errors.
-     */
     public function messages(): array
     {
         return [

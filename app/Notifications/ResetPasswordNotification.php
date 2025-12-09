@@ -32,8 +32,6 @@ class ResetPasswordNotification extends Notification
             ->greeting('Hola,')
             ->line('Has solicitado restablecer tu contraseña. Copia el siguiente código:')
             
-            // CORRECCIÓN: Todo el HTML pegado a la izquierda (sin espacios) o en una sola línea.
-            // Además corregí el CSS del borde (era 'border' y debe ser 'solid').
             ->line(new HtmlString('<div style="text-align: center; margin: 20px 0;">
 <span style="display: inline-block; font-size: 24px; font-weight: bold; letter-spacing: 3px; color: #2d3748; background-color: #edf2f7; padding: 15px 25px; border-radius: 8px; border: 1px solid #cbd5e0; font-family: monospace;">' . $this->token . '</span>
 </div>'))
