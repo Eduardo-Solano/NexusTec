@@ -2,12 +2,592 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Layouts */
-@import 'layouts/app.css';
-@import 'layouts/guest.css';
-@import 'layouts/error.css';
+/* =========================================
+   Layouts: App
+   ========================================= */
+/* App Layout Styles */
+/* Fondo de circuitos animados */
+.circuit-background-app {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.4;
+    background-image:
+        linear-gradient(90deg, transparent 48%, rgba(6, 182, 212, 0.1) 49%, rgba(6, 182, 212, 0.4) 50%, rgba(6, 182, 212, 0.1) 51%, transparent 52%),
+        linear-gradient(0deg, transparent 48%, rgba(6, 182, 212, 0.1) 49%, rgba(6, 182, 212, 0.4) 50%, rgba(6, 182, 212, 0.1) 51%, transparent 52%);
+    background-size: 80px 80px;
+    animation: circuit-flow-app 8s linear infinite;
+    pointer-events: none;
+    z-index: 0;
+}
 
-/* Pages */
-@import 'pages/dashboard.css';
-@import 'pages/welcome.css';
-@import 'pages/calendar.css';
+@keyframes circuit-flow-app {
+    0% {
+        background-position: 0 0;
+    }
+
+    100% {
+        background-position: 80px 80px;
+    }
+}
+
+/* Partículas de luz flotantes */
+.light-particles-app {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image:
+        radial-gradient(circle at 15% 20%, rgba(6, 182, 212, 0.4) 2px, transparent 2px),
+        radial-gradient(circle at 85% 30%, rgba(59, 130, 246, 0.5) 3px, transparent 3px),
+        radial-gradient(circle at 45% 70%, rgba(6, 182, 212, 0.3) 2px, transparent 2px),
+        radial-gradient(circle at 70% 80%, rgba(59, 130, 246, 0.4) 2px, transparent 2px),
+        radial-gradient(circle at 30% 60%, rgba(6, 182, 212, 0.5) 3px, transparent 3px),
+        radial-gradient(circle at 90% 50%, rgba(59, 130, 246, 0.3) 2px, transparent 2px),
+        radial-gradient(circle at 10% 90%, rgba(6, 182, 212, 0.4) 3px, transparent 3px);
+    background-size: 100% 100%;
+    animation: particles-pulse-app 2s ease-in-out infinite, particles-move-app 12s linear infinite;
+    pointer-events: none;
+    z-index: 0;
+}
+
+@keyframes particles-pulse-app {
+
+    0%,
+    100% {
+        opacity: 0.4;
+    }
+
+    50% {
+        opacity: 1;
+    }
+}
+
+@keyframes particles-move-app {
+    0% {
+        transform: translateY(0) translateX(0);
+    }
+
+    50% {
+        transform: translateY(-15px) translateX(15px);
+    }
+
+    100% {
+        transform: translateY(0) translateX(0);
+    }
+}
+
+/* Líneas de circuito flotantes */
+.circuit-lines-app {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.5;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.circuit-lines-app::before {
+    content: '';
+    position: absolute;
+    top: 25%;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent 0%, rgba(6, 182, 212, 0) 20%, rgba(6, 182, 212, 0.8) 40%, rgba(6, 182, 212, 1) 50%, rgba(6, 182, 212, 0.8) 60%, rgba(6, 182, 212, 0) 80%, transparent 100%);
+    background-size: 200% 100%;
+    box-shadow: 0 0 10px rgba(6, 182, 212, 0.8);
+    animation: line-flow-app-1 3s linear infinite;
+}
+
+.circuit-lines-app::after {
+    content: '';
+    position: absolute;
+    bottom: 30%;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent 0%, rgba(59, 130, 246, 0) 20%, rgba(59, 130, 246, 0.8) 40%, rgba(59, 130, 246, 1) 50%, rgba(59, 130, 246, 0.8) 60%, rgba(59, 130, 246, 0) 80%, transparent 100%);
+    background-size: 200% 100%;
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.8);
+    animation: line-flow-app-2 3.5s linear infinite reverse;
+}
+
+@keyframes line-flow-app-1 {
+    0% {
+        background-position: -200% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+@keyframes line-flow-app-2 {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* =========================================
+   Layouts: Guest
+   ========================================= */
+/* Guest Layout Styles */
+.circuit-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.4;
+    background-image:
+        linear-gradient(90deg, transparent 48%, rgba(6, 182, 212, 0.1) 49%, rgba(6, 182, 212, 0.4) 50%, rgba(6, 182, 212, 0.1) 51%, transparent 52%),
+        linear-gradient(0deg, transparent 48%, rgba(6, 182, 212, 0.1) 49%, rgba(6, 182, 212, 0.4) 50%, rgba(6, 182, 212, 0.1) 51%, transparent 52%);
+    background-size: 80px 80px;
+    animation: circuit-flow 6s linear infinite;
+}
+
+@keyframes circuit-flow {
+    0% {
+        background-position: 0 0;
+    }
+
+    100% {
+        background-position: 80px 80px;
+    }
+}
+
+/* Partículas de luz flotantes (Guest) */
+.light-particles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image:
+        radial-gradient(circle at 15% 20%, rgba(6, 182, 212, 0.4) 2px, transparent 2px),
+        radial-gradient(circle at 85% 30%, rgba(59, 130, 246, 0.5) 3px, transparent 3px),
+        radial-gradient(circle at 45% 70%, rgba(6, 182, 212, 0.3) 2px, transparent 2px),
+        radial-gradient(circle at 70% 80%, rgba(59, 130, 246, 0.4) 2px, transparent 2px),
+        radial-gradient(circle at 30% 60%, rgba(6, 182, 212, 0.5) 3px, transparent 3px),
+        radial-gradient(circle at 90% 50%, rgba(59, 130, 246, 0.3) 2px, transparent 2px),
+        radial-gradient(circle at 10% 90%, rgba(6, 182, 212, 0.4) 3px, transparent 3px);
+    background-size: 100% 100%;
+    animation: particles-pulse 1.5s ease-in-out infinite, particles-move 8s linear infinite;
+}
+
+@keyframes particles-pulse {
+
+    0%,
+    100% {
+        opacity: 0.4;
+    }
+
+    50% {
+        opacity: 1;
+    }
+}
+
+@keyframes particles-move {
+    0% {
+        transform: translateY(0) translateX(0);
+    }
+
+    50% {
+        transform: translateY(-20px) translateX(20px);
+    }
+
+    100% {
+        transform: translateY(0) translateX(0);
+    }
+}
+
+/* Líneas de circuito flotantes brillantes (Guest) */
+.circuit-lines-floating {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.circuit-lines-floating::before {
+    content: '';
+    position: absolute;
+    top: 20%;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent 0%, rgba(6, 182, 212, 0) 20%, rgba(6, 182, 212, 0.8) 40%, rgba(6, 182, 212, 1) 50%, rgba(6, 182, 212, 0.8) 60%, rgba(6, 182, 212, 0) 80%, transparent 100%);
+    background-size: 200% 100%;
+    box-shadow: 0 0 10px rgba(6, 182, 212, 0.8), 0 0 20px rgba(6, 182, 212, 0.5);
+    animation: line-flow-1 2s linear infinite;
+}
+
+.circuit-lines-floating::after {
+    content: '';
+    position: absolute;
+    bottom: 25%;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent 0%, rgba(59, 130, 246, 0) 20%, rgba(59, 130, 246, 0.8) 40%, rgba(59, 130, 246, 1) 50%, rgba(59, 130, 246, 0.8) 60%, rgba(59, 130, 246, 0) 80%, transparent 100%);
+    background-size: 200% 100%;
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.8), 0 0 20px rgba(59, 130, 246, 0.5);
+    animation: line-flow-2 2.5s linear infinite reverse;
+}
+
+@keyframes line-flow-1 {
+    0% {
+        background-position: -200% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+@keyframes line-flow-2 {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+.logo-container-main {
+    transition: transform 0.3s ease-out, filter 0.3s ease;
+    animation: gentle-pulse 3s ease-in-out infinite, neon-flicker 6s ease-in-out infinite;
+}
+
+.logo-container-main:hover {
+    transform: scale(1.08);
+    filter: drop-shadow(0 0 40px rgba(129, 206, 224, 1)) drop-shadow(0 0 60px rgba(180, 226, 92, 0.8)) drop-shadow(0 0 80px rgba(129, 206, 224, 0.6));
+}
+
+@keyframes neon-flicker {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    2%,
+    8%,
+    10%,
+    15%,
+    18%,
+    22%,
+    38%,
+    40% {
+        opacity: 0.98;
+    }
+
+    4%,
+    12%,
+    20%,
+    42% {
+        opacity: 0.95;
+    }
+
+    6%,
+    14%,
+    25%,
+    45% {
+        opacity: 1;
+    }
+}
+
+@keyframes gentle-pulse {
+
+    0%,
+    100% {
+        filter: drop-shadow(0 0 25px rgba(129, 206, 224, 0.7)) drop-shadow(0 0 50px rgba(180, 226, 92, 0.4)) drop-shadow(0 0 75px rgba(129, 206, 224, 0.3));
+    }
+
+    50% {
+        filter: drop-shadow(0 0 35px rgba(129, 206, 224, 0.9)) drop-shadow(0 0 70px rgba(180, 226, 92, 0.6)) drop-shadow(0 0 100px rgba(129, 206, 224, 0.4));
+    }
+}
+
+@keyframes breathing-main {
+
+    0%,
+    100% {
+        r: 2400px;
+        opacity: 0.95;
+        stroke-width: 50px;
+    }
+
+    50% {
+        r: 2450px;
+        opacity: 1;
+        stroke-width: 60px;
+    }
+}
+
+@keyframes breathing-outer-main {
+
+    0%,
+    100% {
+        r: 2480px;
+        opacity: 0.85;
+        stroke-width: 40px;
+    }
+
+    50% {
+        r: 2530px;
+        opacity: 1;
+        stroke-width: 50px;
+    }
+}
+
+.breathing-circle-main {
+    animation: breathing-main 3s ease-in-out infinite;
+}
+
+.breathing-circle-outer-main {
+    animation: breathing-outer-main 3s ease-in-out infinite 0.5s;
+}
+
+/* Líneas verticales animadas */
+.vertical-lines {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.3;
+    pointer-events: none;
+}
+
+.vertical-lines::before {
+    content: '';
+    position: absolute;
+    left: 30%;
+    top: 0;
+    width: 2px;
+    height: 100%;
+    background: linear-gradient(180deg, transparent 0%, rgba(6, 182, 212, 0) 20%, rgba(6, 182, 212, 0.8) 40%, rgba(6, 182, 212, 1) 50%, rgba(6, 182, 212, 0.8) 60%, rgba(6, 182, 212, 0) 80%, transparent 100%);
+    background-size: 100% 200%;
+    box-shadow: 0 0 10px rgba(6, 182, 212, 0.8);
+    animation: vertical-flow 3s linear infinite;
+}
+
+.vertical-lines::after {
+    content: '';
+    position: absolute;
+    right: 25%;
+    top: 0;
+    width: 2px;
+    height: 100%;
+    background: linear-gradient(180deg, transparent 0%, rgba(59, 130, 246, 0) 20%, rgba(59, 130, 246, 0.8) 40%, rgba(59, 130, 246, 1) 50%, rgba(59, 130, 246, 0.8) 60%, rgba(59, 130, 246, 0) 80%, transparent 100%);
+    background-size: 100% 200%;
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.8);
+    animation: vertical-flow 3.5s linear infinite reverse;
+}
+
+@keyframes vertical-flow {
+    0% {
+        background-position: 0 -200%;
+    }
+
+    100% {
+        background-position: 0 200%;
+    }
+}
+
+/* Puntos de energía flotantes */
+.energy-dots {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    background-image:
+        radial-gradient(circle at 20% 35%, rgba(6, 182, 212, 0.6) 4px, transparent 4px),
+        radial-gradient(circle at 75% 25%, rgba(59, 130, 246, 0.7) 5px, transparent 5px),
+        radial-gradient(circle at 50% 50%, rgba(6, 182, 212, 0.5) 3px, transparent 3px),
+        radial-gradient(circle at 80% 65%, rgba(59, 130, 246, 0.6) 4px, transparent 4px),
+        radial-gradient(circle at 25% 75%, rgba(6, 182, 212, 0.7) 5px, transparent 5px),
+        radial-gradient(circle at 60% 85%, rgba(59, 130, 246, 0.5) 3px, transparent 3px),
+        radial-gradient(circle at 40% 15%, rgba(6, 182, 212, 0.6) 4px, transparent 4px),
+        radial-gradient(circle at 95% 45%, rgba(59, 130, 246, 0.7) 5px, transparent 5px),
+        radial-gradient(circle at 10% 55%, rgba(6, 182, 212, 0.5) 4px, transparent 4px);
+    background-size: 100% 100%;
+    animation: energy-pulse 2s ease-in-out infinite, energy-float 10s ease-in-out infinite;
+}
+
+@keyframes energy-pulse {
+
+    0%,
+    100% {
+        opacity: 0.3;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.8;
+        transform: scale(1.1);
+    }
+}
+
+@keyframes energy-float {
+
+    0%,
+    100% {
+        transform: translate(0, 0) scale(1);
+    }
+
+    25% {
+        transform: translate(30px, -30px) scale(1.05);
+    }
+
+    50% {
+        transform: translate(-20px, -40px) scale(1.1);
+    }
+
+    75% {
+        transform: translate(-30px, 20px) scale(1.05);
+    }
+}
+
+/* Ondas expansivas */
+.expanding-waves {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.expanding-waves::before,
+.expanding-waves::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 200px;
+    height: 200px;
+    border: 2px solid rgba(6, 182, 212, 0.3);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    animation: wave-expand 4s ease-out infinite;
+}
+
+.expanding-waves::after {
+    border-color: rgba(59, 130, 246, 0.3);
+    animation-delay: 2s;
+}
+
+@keyframes wave-expand {
+    0% {
+        width: 200px;
+        height: 200px;
+        opacity: 0.6;
+    }
+
+    100% {
+        width: 800px;
+        height: 800px;
+        opacity: 0;
+    }
+}
+
+/* =========================================
+   Pages: Dashboard
+   ========================================= */
+/* Dashboard Animations & Styles */
+/* Header & Cards */
+@keyframes blob {
+    0% {
+        transform: translate(0px, 0px) scale(1);
+    }
+
+    33% {
+        transform: translate(30px, -50px) scale(1.1);
+    }
+
+    66% {
+        transform: translate(-20px, 20px) scale(0.9);
+    }
+
+    100% {
+        transform: translate(0px, 0px) scale(1);
+    }
+}
+
+.animate-blob {
+    animation: blob 7s infinite;
+}
+
+.animation-delay-2000 {
+    animation-delay: 2s;
+}
+
+.animation-delay-4000 {
+    animation-delay: 4s;
+}
+
+/* CRITICAL: Glass Card Styles */
+.glass-card {
+    background: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.glass-card:hover {
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Dark mode specific override */
+.dark .glass-card {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dark .glass-card:hover {
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* =========================================
+   Pages: Welcome
+   ========================================= */
+@keyframes spin-slow {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.animate-spin-slow {
+    animation: spin-slow 3s linear infinite;
+}
+
+/* =========================================
+   Pages: Calendar
+   ========================================= */
+.glass-nav {
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
