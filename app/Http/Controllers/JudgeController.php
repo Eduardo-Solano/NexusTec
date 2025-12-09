@@ -110,6 +110,23 @@ class JudgeController extends Controller
      */
     public function destroy(User $judge)
     {
+        // Verificar proyectos asignados con estado incompleto o completo
+        if ($judge->assignedProjects()->exists()) {
+            return back()->with('error', 'No se puede eliminar el juez porque tiene proyectos asignados.');
+        }
+
+        // Verificar si ya ha realizado evaluaciones
+        if ($judge->evaluations()->exists()) {
+            return back()->with('error', 'No se puede eliminar el juez porque ya ha realizado evaluaciones.');
+        }
+
+        // Verificar si está asignado a eventos activos (si aplica logicamente, aunque event_judge es N:M)
+        // Accedemos via judgeProfile
+        $judge->load('judgeProfile');
+        if ($judge->judgeProfile && $judge->judgeProfile->events()->where('status', '!=', \App\Models\Event::STATUS_CLOSED)->exists()) {
+             return back()->with('error', 'No se puede eliminar el juez porque está asignado a eventos activos.');
+        }
+
         $judge->delete();
         return back()->with('success', 'Juez eliminado.');
     }

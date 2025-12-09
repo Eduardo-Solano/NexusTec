@@ -82,6 +82,16 @@ class CriterionController extends Controller
                 ->with('error', 'No se puede eliminar el criterio porque tiene evaluaciones asociadas.');
         }
 
+        // Verificar si está asociado a eventos activos o en registro
+        $activeEventsCount = $criterion->events()
+            ->where('status', '!=', \App\Models\Event::STATUS_CLOSED)
+            ->count();
+
+        if ($activeEventsCount > 0) {
+            return redirect()->route('criteria.index')
+                ->with('error', 'No se puede eliminar el criterio porque está asignado a eventos activos o en registro.');
+        }
+
         $criterion->events()->detach();
         $criterion->delete();
 

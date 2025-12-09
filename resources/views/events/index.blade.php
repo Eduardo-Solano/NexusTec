@@ -1,4 +1,55 @@
 <x-app-layout>
+    <!-- Fondo animado -->
+    <div class="fixed inset-0 bg-gradient-to-br from-[#0a1128] via-[#0d1b2a] to-[#1b263b] -z-10">
+        <!-- Grid de circuitos -->
+        <div class="absolute inset-0 opacity-40">
+            <div class="absolute inset-0" style="
+                background-image: 
+                    linear-gradient(rgba(6, 182, 212, 0.1) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(6, 182, 212, 0.1) 1px, transparent 1px);
+                background-size: 80px 80px;
+                animation: circuit-flow-app 8s linear infinite;
+            "></div>
+        </div>
+
+        <!-- Partículas de luz -->
+        <div class="absolute inset-0 overflow-hidden">
+            <div class="absolute inset-0">
+                <svg class="absolute w-full h-full" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <filter id="glow-app">
+                            <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                            <feMerge>
+                                <feMergeNode in="coloredBlur"/>
+                                <feMergeNode in="SourceGraphic"/>
+                            </feMerge>
+                        </filter>
+                    </defs>
+                    @for ($i = 0; $i < 7; $i++)
+                        <circle 
+                            cx="{{ rand(0, 100) }}%" 
+                            cy="{{ rand(0, 100) }}%" 
+                            r="{{ rand(2, 4) }}" 
+                            fill="#06B6D4" 
+                            opacity="0.6"
+                            filter="url(#glow-app)"
+                            style="animation: particles-pulse-app 2s ease-in-out infinite {{ $i * 0.3 }}s, particles-move-app 12s ease-in-out infinite {{ $i * 1.5 }}s;"
+                        />
+                    @endfor
+                </svg>
+            </div>
+        </div>
+
+        <!-- Líneas de circuito flotantes horizontales -->
+        <div class="absolute inset-0 overflow-hidden opacity-30">
+            <div class="absolute h-px bg-gradient-to-r from-transparent via-cyan-400 to-transparent w-full top-1/4" 
+                 style="animation: line-flow-1-app 3s ease-in-out infinite;"></div>
+            <div class="absolute h-px bg-gradient-to-r from-transparent via-blue-400 to-transparent w-full top-2/4" 
+                 style="animation: line-flow-2-app 3.5s ease-in-out infinite 0.5s;"></div>
+            <div class="absolute h-px bg-gradient-to-r from-transparent via-cyan-400 to-transparent w-full top-3/4" 
+                 style="animation: line-flow-1-app 4s ease-in-out infinite 1s;"></div>
+        </div>
+    </div>
     <x-slot name="header">
         <div class="flex justify-between items-center">
             <h2 class="font-bold text-xl text-gray-800 dark:text-gray-200 leading-tight">

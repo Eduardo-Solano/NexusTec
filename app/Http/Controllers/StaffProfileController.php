@@ -183,6 +183,12 @@ class StaffProfileController extends Controller
         if ($staff->id === Auth::id()) {
             return back()->with('error', 'No puedes eliminar tu propia cuenta.');
         }
+
+        // Verificar si es asesor de algún equipo
+        if (\App\Models\Team::where('advisor_id', $staff->id)->exists()) {
+            return back()->with('error', 'No se puede eliminar el docente porque es asesor de uno o más equipos.');
+        }
+
         $staff->delete();
         return back()->with('success', 'Docente eliminado del sistema.');
     }

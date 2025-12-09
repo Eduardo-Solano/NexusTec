@@ -313,6 +313,16 @@ class StudentProfileController extends Controller
      */
     public function destroy(User $student)
     {
+        // Verificar si es líder de algún equipo
+        if ($student->ownedTeams()->exists()) {
+            return back()->with('error', 'No se puede eliminar el alumno porque es líder de un equipo.');
+        }
+
+        // Verificar si pertenece a algún equipo (aceptado)
+        if ($student->activeTeams()->exists()) {
+            return back()->with('error', 'No se puede eliminar el alumno porque pertenece a un equipo activo.');
+        }
+
         $student->delete();
         return back()->with('success', 'Alumno eliminado.');
     }

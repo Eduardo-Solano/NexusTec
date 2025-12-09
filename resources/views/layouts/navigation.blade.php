@@ -346,7 +346,7 @@
                 x-transition:enter-start="-translate-x-full" x-transition:enter-end="translate-x-0"
                 x-transition:leave="transition ease-in duration-200 transform"
                 x-transition:leave-start="translate-x-0" x-transition:leave-end="-translate-x-full"
-                class="fixed inset-y-0 left-0 w-[80%] max-w-sm bg-[#0B1120]/95 backdrop-blur-2xl border-r border-white/10 shadow-2xl overflow-y-auto">
+                class="fixed inset-y-0 left-0 w-[80%] max-w-sm bg-[#0B1120]/95 backdrop-blur-2xl border-r border-white/10 shadow-2xl overflow-y-auto elegant-scrollbar">
 
                 <!-- Sidebar Header -->
                 <div class="flex items-center justify-between px-6 h-20 bg-gradient-to-r from-blue-900/20 to-purple-900/20 border-b border-white/10">
