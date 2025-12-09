@@ -81,6 +81,64 @@ Route::middleware(['auth'])->group(function () {
         return back()->with('success', 'Todas las notificaciones marcadas como leídas.');
     })->name('notifications.markAllAsRead');
 
+    // API endpoint for polling notifications
+    Route::get('/notifications/poll', function () {
+        $user = Auth::user();
+        
+        $unreadNotifications = $user->unreadNotifications;
+        
+        // Pending advisories (for advisors)
+        $pendingAdvisories = collect();
+        if ($user->hasRole('advisor') || $user->hasRole('staff')) {
+            $pendingAdvisories = \App\Models\Team::where('advisor_id', $user->id)
+                ->where('advisor_status', 'pending')
+                ->with(['event'])
+                ->get();
+        }
+        
+        // Pending evaluations (for judges)
+        $pendingEvaluations = collect();
+        if ($user->hasRole('judge')) {
+            $pendingEvaluations = $user->assignedProjects()
+                ->wherePivot('is_completed', false)
+                ->with(['team'])
+                ->get();
+        }
+        
+        $totalCount = $pendingAdvisories->count() + $pendingEvaluations->count() + $unreadNotifications->count();
+        
+        return response()->json([
+            'total' => $totalCount,
+            'unread_notifications' => $unreadNotifications->map(fn($n) => [
+                'id' => $n->id,
+                'type' => $n->data['type'] ?? 'general',
+                'message' => $n->data['message'] ?? '',
+                'team_name' => $n->data['team_name'] ?? null,
+                'team_id' => $n->data['team_id'] ?? null,
+                'user_id' => $n->data['user_id'] ?? null,
+                'user_name' => $n->data['user_name'] ?? null,
+                'status' => $n->data['status'] ?? null,
+                'team_url' => $n->data['team_url'] ?? null,
+                'accept_url' => $n->data['accept_url'] ?? null,
+                'reject_url' => $n->data['reject_url'] ?? null,
+                'event_id' => $n->data['event_id'] ?? null,
+                'event_name' => $n->data['event_name'] ?? null,
+                'award_category' => $n->data['award_category'] ?? null,
+                'created_at' => $n->created_at->diffForHumans(),
+            ]),
+            'pending_advisories' => $pendingAdvisories->map(fn($t) => [
+                'id' => $t->id,
+                'name' => $t->name,
+                'event_name' => $t->event->name ?? '',
+            ]),
+            'pending_evaluations' => $pendingEvaluations->map(fn($p) => [
+                'id' => $p->id,
+                'name' => $p->name,
+                'team_name' => $p->team->name ?? '',
+            ]),
+        ]);
+    })->name('notifications.poll');
+
     // Validación de invitaciones
     Route::post('/teams/{team}/invitations/check', [TeamController::class, 'checkInvitationEmail'])
         ->name('teams.invitations.check');

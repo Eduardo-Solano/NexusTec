@@ -101,7 +101,31 @@
             <div class="flex items-center">
 
                 @auth
-                    <div class="relative me-3 ms-6 group">
+                    <div class="relative me-3 ms-6 group"
+                        x-data="{
+                            totalNotifications: {{ $totalNotifications ?? 0 }},
+                            polling: null,
+                            async fetchNotifications() {
+                                try {
+                                    const response = await fetch('{{ route('notifications.poll') }}');
+                                    if (response.ok) {
+                                        const data = await response.json();
+                                        this.totalNotifications = data.total;
+                                    }
+                                } catch (e) {
+                                    console.error('Error polling notifications:', e);
+                                }
+                            },
+                            startPolling() {
+                                this.fetchNotifications();
+                                this.polling = setInterval(() => this.fetchNotifications(), 15000);
+                            },
+                            stopPolling() {
+                                if (this.polling) clearInterval(this.polling);
+                            }
+                        }"
+                        x-init="startPolling()"
+                        @beforeunload.window="stopPolling()">
                         @php
                             $hasJoinRequests = $unreadNotifications->where('data.type', 'join_request')->count() > 0;
                             $totalNotifications =
@@ -116,14 +140,13 @@
                                 <path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                                     d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 00-4-5.7V4a2 2 0 10-4 0v1.3A6 6 0 006 11v3.2a2 2 0 01-.6 1.4L4 17h5m6 0v1a3 3 0 11-6 0v-1" />
                             </svg>
-                            @if ($totalNotifications > 0)
-                                <span
-                                    class="absolute top-1 right-1 h-2.5 w-2.5 bg-red-500 rounded-full animate-pulse ring-2 ring-[#0B1120]"></span>
-                                <span
-                                    class="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center bg-red-600 text-white rounded-full text-[10px] font-bold shadow-lg shadow-red-500/30">
-                                    {{ $totalNotifications > 9 ? '9+' : $totalNotifications }}
+                            <template x-if="totalNotifications > 0">
+                                <span>
+                                    <span class="absolute top-1 right-1 h-2.5 w-2.5 bg-red-500 rounded-full animate-pulse ring-2 ring-[#0B1120]"></span>
+                                    <span class="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center bg-red-600 text-white rounded-full text-[10px] font-bold shadow-lg shadow-red-500/30"
+                                        x-text="totalNotifications > 9 ? '9+' : totalNotifications"></span>
                                 </span>
-                            @endif
+                            </template>
                         </button>
 
                         <!-- NOTIFICATIONS PANEL -->
