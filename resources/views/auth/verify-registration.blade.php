@@ -21,6 +21,16 @@
         </div>
     @endif
 
+    <div class="mt-6 p-4 bg-gray-800/50 border border-gray-700 rounded-lg">
+        <p class="text-gray-400 text-xs text-center">
+            <span class="text-orange-400 font-bold">Nota:</span> El registro de jueces y personal administrativo 
+            es gestionado exclusivamente por los organizadores del evento.
+        </p>
+        <p class="text-gray-500 text-xs text-center mt-2">
+            Se enviará un código de verificación a tu correo institucional.
+        </p>
+    </div>
+
     <form method="POST" action="{{ route('register.verify.submit') }}">
         @csrf
         

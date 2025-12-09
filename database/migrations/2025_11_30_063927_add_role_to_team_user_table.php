@@ -6,24 +6,16 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::table('team_user', function (Blueprint $table) {
-            // Agregar columna 'role' a la tabla pivote team_user
             $table->string('role')->nullable()->after('user_id');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::table('team_user', function (Blueprint $table) {
-            //
             $table->dropColumn('role');
         });
     }

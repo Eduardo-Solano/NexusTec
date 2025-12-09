@@ -1,13 +1,10 @@
 <nav x-data="{ open: false, notificationsOpen: false }"
     class="sticky top-0 z-40 bg-[#0B1120]/80 backdrop-blur-md border-b border-white/10 shadow-lg transition-all duration-300">
 
-    <!-- PRIMARY NAVIGATION BAR -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-20">
 
-            <!-- LEFT SIDE: Logo & Desktop Menu -->
             <div class="flex">
-                <!-- Logo -->
                 <div class="shrink-0 flex items-center">
                     <a href="{{ route('dashboard') }}" class="group relative">
                         <div class="absolute inset-0 bg-blue-500/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
@@ -16,7 +13,6 @@
                     </a>
                 </div>
 
-                <!-- Desktop Navigation Links (Visible only on XL screens and up) -->
                 <div class="hidden space-x-8 xl:-my-px xl:ms-10 xl:flex">
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" class="text-gray-300 hover:text-white transition-colors duration-300">
                         {{ __('Inicio') }}
@@ -78,7 +74,6 @@
                             {{ __('Actividad') }}
                         </x-nav-link>
 
-                        {{-- Admin Dropdown (Desktop) --}}
                         <div class="hidden xl:flex xl:items-center xl:ms-6">
                             <x-dropdown align="right" width="48">
                                 <x-slot name="trigger">
@@ -103,10 +98,8 @@
                 </div>
             </div>
 
-            <!-- RIGHT SIDE: Notifications & User Menu -->
             <div class="flex items-center">
 
-                <!-- 🔔 Notification Bell -->
                 @auth
                     <div class="relative me-3 ms-6 group">
                         @php

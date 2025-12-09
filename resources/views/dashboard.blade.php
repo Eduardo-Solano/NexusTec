@@ -1,7 +1,5 @@
 <x-app-layout>
-    <!-- Fondo animado -->
     <div class="fixed inset-0 bg-gradient-to-br from-[#0a1128] via-[#0d1b2a] to-[#1b263b] -z-10">
-        <!-- Grid de circuitos -->
         <div class="absolute inset-0 opacity-40">
             <div class="absolute inset-0" style="
                 background-image: 
@@ -12,7 +10,6 @@
             "></div>
         </div>
 
-        <!-- Partículas de luz -->
         <div class="absolute inset-0 overflow-hidden">
             <div class="absolute inset-0">
                 <svg class="absolute w-full h-full" xmlns="http://www.w3.org/2000/svg">
@@ -40,7 +37,6 @@
             </div>
         </div>
 
-        <!-- Líneas de circuito flotantes horizontales -->
         <div class="absolute inset-0 overflow-hidden opacity-30">
             <div class="absolute h-px bg-gradient-to-r from-transparent via-cyan-400 to-transparent w-full top-1/4" 
                  style="animation: line-flow-1-app 3s ease-in-out infinite;"></div>
@@ -112,10 +108,8 @@
         </div>
     </x-slot>
 
-    <!-- Main Container -->
     <div class="relative z-10 min-h-screen selection:bg-purple-500 selection:text-white pb-20 overflow-hidden">
         
-        <!-- Animated Background Blobs -->
         <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none -z-0">
             <div class="absolute top-0 left-1/4 w-96 h-96 bg-purple-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
             <div class="absolute top-0 right-1/4 w-96 h-96 bg-yellow-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
@@ -125,7 +119,6 @@
         <div class="relative z-10 py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-12">
                 
-                <!-- Hero Section: Welcome & Status -->
                 <div class="relative overflow-hidden group rounded-[2.5rem] bg-white/[0.02] backdrop-blur-3xl border border-white/20 hover:border-white/30 shadow-2xl p-8 sm:p-12 transition-all">
                     <div class="absolute right-0 top-0 h-full w-1/2 bg-gradient-to-l from-purple-100/50 dark:from-purple-900/20 to-transparent"></div>
                     <div class="relative z-10 flex flex-col md:flex-row justify-between items-center gap-8">
@@ -145,7 +138,6 @@
                                     Todo está tranquilo por ahora.
                                 @endif
                             </p>
-                            <!-- Action Buttons -->
                              <div class="flex flex-wrap gap-4 mt-8">
                                 <a href="{{ route('profile.edit') }}" class="px-6 py-3 rounded-xl bg-white/[0.05] backdrop-blur-xl border border-white/30 text-white font-bold hover:scale-105 hover:border-white/40 transition-all shadow-lg flex items-center gap-2">
                                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
@@ -159,7 +151,6 @@
                                 @endrole
                             </div>
                         </div>
-                        <!-- Hero Illustration / Icon -->
                         <div class="relative hidden md:block group-hover:scale-110 transition-transform duration-700 ease-in-out">
                             <div class="w-48 h-48 bg-gradient-to-tr from-purple-500 to-pink-500 rounded-[2rem] rotate-6 shadow-2xl opacity-80 blur-sm absolute top-4 left-4"></div>
                             <div class="w-48 h-48 bg-white/[0.02] backdrop-blur-xl rounded-[2rem] relative z-10 flex items-center justify-center border border-white/20 shadow-2xl">
@@ -169,9 +160,7 @@
                     </div>
                 </div>
 
-                <!-- ADMIN / STAFF / ADVISOR DASHBOARD -->
                 @can('teams.advise')
-                    <!-- KPIs Grid -->
                      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         @php
                             $stats = [
@@ -216,7 +205,6 @@
                                     <p class="text-gray-400 mt-1">Sigue el progreso en tiempo real de la competencia.</p>
                                 </div>
 
-                                <!-- Countdown -->
                                 <div class="flex gap-4">
                                     <div class="text-center p-4 bg-white/5 rounded-2xl backdrop-blur-sm border border-white/10">
                                         <span class="block text-3xl font-black text-purple-400">{{ round($data['event_progress']['days_remaining']) }}</span>
@@ -229,7 +217,6 @@
                                 </div>
                             </div>
 
-                            <!-- Progress Bars Grid -->
                             <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                                 @php
                                     $progressItems = [
@@ -257,7 +244,6 @@
                                 @endforeach
                             </div>
 
-                            <!-- Acciones Rápidas (Botones) -->
                             <div class="flex flex-wrap gap-3 pt-6 border-t border-gray-700/50">
                                 <a href="{{ route('events.show', $data['event_progress']['event']) }}" 
                                     class="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-sm font-bold rounded-xl transition shadow-lg shadow-blue-500/20 flex items-center gap-2">
@@ -279,7 +265,6 @@
                     </div>
                 @endif
 
-                {{-- SECCIÓN PARA DOCENTES/ASESORES: Equipos que asesoran --}}
                 @role('advisor')
                     @if(isset($data['advised_teams']) && $data['advised_teams']->count() > 0)
                         <div class="mt-8">
@@ -323,7 +308,6 @@
                                                     </div>
                                                 </div>
                                                 <div class="flex items-center gap-3">
-                                                    {{-- Estado del Proyecto --}}
                                                     @if($team->project)
                                                         <span class="px-3 py-1.5 bg-blue-500/20 text-blue-400 text-xs font-bold rounded-lg flex items-center gap-1">
                                                             📋 Proyecto: {{ Str::limit($team->project->name, 20) }}
@@ -342,7 +326,6 @@
                                                             📋 Sin proyecto
                                                         </span>
                                                     @endif
-                                                    {{-- Estado del Evento --}}
                                                     <span class="px-3 py-1.5 text-xs font-bold rounded-lg
                                                         @if($team->event->status === 'registration') bg-blue-500/20 text-blue-400
                                                         @elseif($team->event->status === 'active') bg-green-500/20 text-green-400
@@ -362,7 +345,6 @@
                             </div>
                         </div>
                     @elseif(isset($data['pending_advisories']) && $data['pending_advisories']->count() > 0)
-                        {{-- Mostrar solicitudes pendientes si no tiene equipos aceptados --}}
                         <div class="mt-8">
                             <div class="glass-card rounded-3xl overflow-hidden border border-yellow-500/20">
                                 <div class="p-6 border-b border-gray-200/10 dark:border-gray-700/50 bg-gradient-to-r from-yellow-500/10 to-transparent">
@@ -381,7 +363,6 @@
                             </div>
                         </div>
                     @else
-                        {{-- No tiene equipos ni solicitudes --}}
                         <div class="mt-8">
                             <div class="glass-card rounded-3xl p-8 text-center border border-gray-500/20">
                                 <div class="text-6xl mb-4">📚</div>
@@ -392,10 +373,8 @@
                     @endif
                 @endrole
 
-                    <!-- Charts Section -->
                 @if(isset($data['event_progress']))
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-12">
-                        <!-- Equipos Chart -->
                         <div class="glass-card p-6 rounded-3xl relative overflow-hidden">
                             <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
                                 <span class="p-2 bg-blue-500/10 text-blue-500 rounded-lg"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg></span>
@@ -406,7 +385,6 @@
                             </div>
                         </div>
 
-                        <!-- Carreras Chart -->
                         <div class="glass-card p-6 rounded-3xl relative overflow-hidden">
                             <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
                                 <span class="p-2 bg-purple-500/10 text-purple-500 rounded-lg"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/></svg></span>
@@ -417,7 +395,6 @@
                             </div>
                         </div>
 
-                        <!-- Eventos Chart -->
                         <div class="glass-card p-6 rounded-3xl relative overflow-hidden lg:col-span-2">
                             <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
                                 <span class="p-2 bg-green-500/10 text-green-500 rounded-lg"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg></span>
@@ -429,7 +406,6 @@
                         </div>
                     </div>
 
-                    <!-- Recent Teams List -->
                     <div class="mt-12">
                         <div class="glass-card rounded-3xl overflow-hidden">
                             <div class="p-6 border-b border-gray-200/10 dark:border-gray-700/50 flex items-center justify-between">
@@ -467,7 +443,6 @@
                     </div>
                 @endif
                 
-                <!-- STUDENT ROLE -->
                 @role('student')
                     @if (isset($data['my_teams']) && $data['my_teams']->count() > 0)
                         <div class="space-y-8">
@@ -476,7 +451,6 @@
                                     $teamProgress = $data['teams_progress'][$team->id] ?? null;
                                 @endphp
                                 <div class="grid lg:grid-cols-3 gap-8">
-                                    <!-- Team Card -->
                                     <div class="lg:col-span-2 glass-card rounded-[2rem] p-8 relative overflow-hidden group">
                                         <div class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-purple-500/10 to-transparent -mr-16 -mt-16 rounded-full blur-3xl"></div>
                                         <div class="relative z-10">
@@ -493,7 +467,6 @@
 
                                             @if($teamProgress)
                                                 <div class="space-y-6">
-                                                    <!-- Steps -->
                                                     <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
                                                          @foreach($teamProgress['steps'] as $key => $step)
                                                             <div class="flex flex-col items-center text-center p-4 rounded-2xl border {{ $step['completed'] ? 'bg-green-500/10 backdrop-blur-xl border-green-500/30' : 'bg-white/[0.02] backdrop-blur-xl border-white/20' }} transition-all">
@@ -540,7 +513,6 @@
                                         </div>
                                     </div>
 
-                                    <!-- Score Card (if available) -->
                                     @if(isset($teamProgress['score']) && $teamProgress['score'] > 0)
                                         <div class="glass-card rounded-[2rem] p-8 flex flex-col items-center justify-center text-center relative overflow-hidden">
                                              <div class="absolute inset-0 bg-gradient-to-b from-amber-500/10 to-transparent"></div>
@@ -570,7 +542,6 @@
                     @endif
                 @endrole
 
-                <!-- JUDGE ROLE -->
                 @role('judge')
                      @include('dashboard.partials.judge-view')
                 @endrole

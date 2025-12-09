@@ -17,25 +17,18 @@ use App\Http\Requests\Team\UpdateTeamRequest;
 use App\Http\Requests\Team\JoinTeamRequest;
 use App\Notifications\TeamJoinResponseNotification;
 
-
 class TeamController extends Controller
 {
-    /**
-     * Crear equipo
-     */
     public function index(Request $request)
     {
-        // ⛔ SEGURIDAD: Los jueces NO pueden ver el listado general de equipos
         if (Auth::user()->hasRole('judge')) {
             abort(403, 'Acceso denegado. Los jueces no tienen acceso al directorio de equipos.');
         }
 
-        // Obtener lista de eventos para el filtro
-        $events = \App\Models\Event::orderBy('name')->get();
+        $events = Event::orderBy('name')->get();
 
         $query = Team::with(['event', 'members', 'leader', 'advisor']);
 
-        // Filtro por búsqueda (nombre del equipo o líder)
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
@@ -46,7 +39,6 @@ class TeamController extends Controller
             });
         }
 
-        // Filtro por evento
         if ($request->filled('event_id')) {
             $query->where('event_id', $request->event_id);
         }
@@ -56,8 +48,6 @@ class TeamController extends Controller
         return view('teams.index', compact('teams', 'events'));
     }
 
-
-
     public function store(StoreTeamRequest $request)
     {
         $event = Event::findOrFail($request->event_id);
@@ -66,12 +56,10 @@ class TeamController extends Controller
             return back()->with('error', 'No se pueden registrar equipos porque el evento no está en período de inscripciones.');
         }
 
-        // Normalizar lista de correos de miembros invitados
         $invitedEmails = array_filter($request->members ?? []);
 
-        // 👉 LÍMITE DE INTEGRANTES (incluye al líder)
-        $maxMembers = $event->max_team_members ?? 5; // ajusta el campo si se llama diferente
-        $totalRequested = 1 + count($invitedEmails); // 1 líder + N invitados
+        $maxMembers = $event->max_team_members ?? 5;
+        $totalRequested = 1 + count($invitedEmails);
 
         if ($totalRequested > $maxMembers) {
             throw ValidationException::withMessages([
@@ -79,7 +67,6 @@ class TeamController extends Controller
             ]);
         }
 
-        // Validar correos
         $correosInvalidos = [];
         foreach ($invitedEmails as $email) {
             if (!User::where('email', $email)->exists()) {
@@ -93,8 +80,6 @@ class TeamController extends Controller
         }
 
         return DB::transaction(function () use ($request, $event, $invitedEmails) {
-
-            // Verificar si ya pertenece a un equipo del evento
             $exists = DB::table('team_user')
                 ->join('teams', 'team_user.team_id', '=', 'teams.id')
                 ->where('teams.event_id', $event->id)
@@ -107,7 +92,6 @@ class TeamController extends Controller
                 ]);
             }
 
-            // Crear equipo
             $team = Team::create([
                 'name' => $request->name,
                 'event_id' => $event->id,
@@ -116,14 +100,12 @@ class TeamController extends Controller
                 'advisor_status' => 'pending'
             ]);
 
-            // LÍDER
             $team->members()->attach(Auth::id(), [
                 'is_accepted' => true,
                 'requested_by_user' => false,
                 'role' => $request->leader_role
             ]);
 
-            // MIEMBROS INVITADOS
             foreach ($invitedEmails as $index => $email) {
                 $user = User::where('email', $email)->first();
                 if (!$user || $user->id === Auth::id()) {
@@ -138,11 +120,9 @@ class TeamController extends Controller
                     'role' => $role
                 ]);
 
-                // Notificación de invitación
                 $user->notify(new TeamInvitationNotification($team));
             }
 
-            // Registrar actividad
             ActivityLog::log('created', "Equipo '{$team->name}' creado para el evento '{$event->name}'", $team, [
                 'event_id' => $event->id,
                 'event_name' => $event->name,
@@ -154,10 +134,6 @@ class TeamController extends Controller
         });
     }
 
-
-    /**
-     * Mostrar equipo
-     */
     public function show(Team $team)
     {
         $team->load(['event', 'members', 'leader', 'advisor', 'project']);
@@ -170,7 +146,6 @@ class TeamController extends Controller
         $event = Event::find($request->event_id);
         abort_unless($event, 404);
 
-        // Validar que el evento esté en período de inscripciones
         if (!$event->allowsTeamRegistration()) {
             return redirect()->route('events.show', $event)
                 ->with('error', 'No se pueden crear equipos porque el evento no está en período de inscripciones.');
@@ -179,33 +154,22 @@ class TeamController extends Controller
         return view('teams.create', compact('event'));
     }
 
-    /**
-     * Formulario de edición de equipo
-     */
     public function edit(Team $team)
     {
-        // ⛔ SEGURIDAD: Solo el líder del equipo o admin/staff pueden editar
         if (Auth::id() !== $team->leader_id && !Auth::user()->hasRole(['admin', 'staff'])) {
             abort(403, 'No tienes permiso para editar este equipo. Solo el líder puede hacerlo.');
         }
 
         $team->load(['event', 'members', 'leader', 'advisor', 'project']);
 
-        // Obtener asesores disponibles (docentes)
         $advisors = User::role('advisor')->orderBy('name')->get();
-
-        // Obtener eventos en período de inscripción o activos
         $events = Event::whereIn('status', [Event::STATUS_REGISTRATION, Event::STATUS_ACTIVE])->orderBy('name')->get();
 
         return view('teams.edit', compact('team', 'advisors', 'events'));
     }
 
-    /**
-     * Actualizar equipo
-     */
     public function update(UpdateTeamRequest $request, Team $team)
     {
-        // ⛔ SEGURIDAD: Solo el líder del equipo o admin/staff pueden editar
         if (Auth::id() !== $team->leader_id && !Auth::user()->hasRole(['admin', 'staff'])) {
             abort(403, 'No tienes permiso para actualizar este equipo.');
         }
@@ -218,72 +182,58 @@ class TeamController extends Controller
             ->with('success', 'Equipo actualizado correctamente.');
     }
 
-    /**
-     * Enviar solicitud para UNIRSE a un equipo
-     */
     public function requestJoin(JoinTeamRequest $request, Team $team)
     {
         $user = Auth::user();
 
-        // ⛔ Validar que el evento esté en período de inscripciones
         if (!$team->event->allowsTeamRegistration()) {
             return back()->with('error', 'No se pueden unir al equipo porque el evento no está en período de inscripciones.');
         }
 
-        // Verificar si ya existe relación
         $existing = $team->members()->where('user_id', $user->id)->first();
         if ($existing) {
-            if ($existing->pivot->is_accepted)
+            if ($existing->pivot->is_accepted) {
                 return back()->with('error', 'Ya estás en este equipo.');
+            }
 
-            if ($existing->pivot->requested_by_user)
+            if ($existing->pivot->requested_by_user) {
                 return back()->with('error', 'Ya enviaste una solicitud.');
+            }
 
             return back()->with('error', 'Tienes una invitación pendiente.');
         }
 
-        // Crear solicitud
         $team->members()->attach($user->id, [
             'is_accepted' => false,
             'requested_by_user' => true,
             'role' => $request->role
         ]);
 
-        // Notificar líder
         $team->leader->notify(new TeamJoinRequestNotification($team, $user));
 
         return back()->with('success', 'Solicitud enviada.');
     }
 
-    /**
-     * Aceptar solicitud o invitación (LÍDER o invitado)
-     */
     public function accept(Team $team, User $user, Request $request)
     {
-        // ⛔ Validar que el evento esté en período de inscripciones
         if (!$team->event->allowsTeamRegistration()) {
             return back()->with('error', 'No se pueden aceptar solicitudes porque el evento no está en período de inscripciones.');
         }
 
-        // 👉 Validar límite de integrantes ANTES de aceptar
-        $maxMembers = $team->event->max_team_members ?? 5; // ajusta el campo si se llama distinto
-        // Contar solo miembros ya aceptados
+        $maxMembers = $team->event->max_team_members ?? 5;
         $currentAccepted = $team->members()
             ->wherePivot('is_accepted', true)
             ->count();
 
-        // Verificar si este usuario ya está aceptado (por si acaso)
         $isAlreadyAccepted = $team->members()
             ->where('user_id', $user->id)
             ->wherePivot('is_accepted', true)
             ->exists();
 
-        // Si todavía no está aceptado y ya estamos al tope, NO dejar aceptar
         if (!$isAlreadyAccepted && $currentAccepted >= $maxMembers) {
             return back()->with('error', "No puedes aceptar más integrantes. El equipo ya alcanzó el máximo de {$maxMembers} miembros permitidos.");
         }
 
-        // Borrar la notificación del líder (si viene en el request)
         if ($request->notification) {
             Auth::user()
                 ->notifications()
@@ -291,26 +241,17 @@ class TeamController extends Controller
                 ->first()?->delete();
         }
 
-        // Marcar como aceptado en el pivot
         $team->members()->updateExistingPivot($user->id, [
             'is_accepted' => true
         ]);
 
-        // 🔔 Notificar al usuario solicitante que fue ACEPTADO
         $user->notify(new TeamJoinResponseNotification($team, 'accepted'));
 
         return back()->with('success', 'Miembro aceptado.');
     }
 
-
-
-
-    /**
-     * Rechazar solicitud o invitación
-     */
     public function reject(Team $team, User $user, Request $request)
     {
-        // Borrar la notificación del líder
         if ($request->notification) {
             Auth::user()
                 ->notifications()
@@ -318,44 +259,31 @@ class TeamController extends Controller
                 ->first()?->delete();
         }
 
-        // Quitar al usuario de la tabla pivot (no se une)
         $team->members()->detach($user->id);
 
-        // 🔔 Notificar al usuario solicitante que fue RECHAZADO
         $user->notify(new TeamJoinResponseNotification($team, 'rejected'));
 
         return back()->with('success', 'Solicitud rechazada.');
     }
 
-    /**
-     * Validar si el correo ingresado existe en el sistema (solo líder).
-     */
-    /**
-     * Validar correo e INVITAR al usuario si existe (solo líder).
-     */
     public function checkInvitationEmail(Request $request, Team $team)
     {
         $user = Auth::user();
 
-        // Solo el líder puede usar este cuadro
         if ($team->leader_id !== $user->id) {
             abort(403, 'Solo el líder del equipo puede invitar miembros.');
         }
 
-        // Validar que el evento permita inscripciones
         if (!$team->event->allowsTeamRegistration()) {
             return back()->with('error', 'El evento no está en período de inscripciones.');
         }
 
-        // Validar solo formato de correo (NO existencia todavía)
         $data = $request->validate([
             'email' => ['required', 'email'],
         ]);
 
-        // Buscar usuario por correo
         $invitedUser = User::where('email', $data['email'])->first();
 
-        // Si no existe el usuario => mensaje "Usuario no registrado"
         if (!$invitedUser) {
             return back()
                 ->withErrors([
@@ -364,7 +292,6 @@ class TeamController extends Controller
                 ->withInput();
         }
 
-        // Evitar invitarse a sí mismo
         if ($invitedUser->id === $user->id) {
             return back()
                 ->withErrors([
@@ -373,7 +300,6 @@ class TeamController extends Controller
                 ->withInput();
         }
 
-        // Verificar si ya es miembro o tiene algo pendiente
         $existing = $team->members()->where('user_id', $invitedUser->id)->first();
 
         if ($existing) {
@@ -400,7 +326,6 @@ class TeamController extends Controller
                 ->withInput();
         }
 
-        // Límite de integrantes (miembros + invitaciones pendientes)
         $maxMembers = $team->event->max_team_members ?? 5;
         $currentTotal = $team->members()->count();
 
@@ -412,43 +337,31 @@ class TeamController extends Controller
                 ->withInput();
         }
 
-        // Crear invitación en la tabla pivot (igual que en store)
         $team->members()->attach($invitedUser->id, [
             'is_accepted' => false,
             'requested_by_user' => false,
             'role' => 'Miembro',
         ]);
 
-        // Notificación dentro del sistema (como cuando se crea el equipo)
         $invitedUser->notify(new TeamInvitationNotification($team));
 
-        // Mensaje de éxito (se muestra en el cuadro)
         return back()->with('invite_check_success', "Se ha enviado una invitación a {$invitedUser->email}.");
     }
 
-
-
-    /**
-     * Aceptar invitación (cuando el usuario actual es el invitado)
-     */
     public function acceptInvitation(Team $team, $notification = null)
     {
         $user = Auth::user();
 
-        // ⛔ Validar que el evento esté en período de inscripciones
         if (!$team->event->allowsTeamRegistration()) {
             return back()->with('error', 'No se pueden aceptar invitaciones porque el evento no está en período de inscripciones.');
         }
 
-        // Marcar notificación como leída
         if ($notification) {
             $user->notifications()
                 ->where('id', $notification)
                 ->first()?->delete();
         }
 
-
-        // Verificar que el usuario tiene una invitación pendiente
         $member = $team->members()->where('user_id', $user->id)->first();
 
         if (!$member) {
@@ -459,7 +372,6 @@ class TeamController extends Controller
             return back()->with('success', 'Ya eres miembro de este equipo.');
         }
 
-        // Aceptar invitación
         $team->members()->updateExistingPivot($user->id, [
             'is_accepted' => true
         ]);
@@ -467,62 +379,47 @@ class TeamController extends Controller
         return back()->with('success', '¡Te has unido al equipo exitosamente!');
     }
 
-    /**
-     * Rechazar invitación (cuando el usuario actual es el invitado)
-     */
     public function rejectInvitation(Team $team, $notification = null)
     {
         $user = Auth::user();
 
-        // Marcar notificación como leída
         if ($notification) {
             $user->notifications()
                 ->where('id', $notification)
                 ->first()?->delete();
         }
 
-
-        // Verificar que el usuario tiene una invitación pendiente
         $member = $team->members()->where('user_id', $user->id)->first();
 
         if (!$member) {
             return back()->with('error', 'No tienes una invitación pendiente para este equipo.');
         }
 
-        // Rechazar invitación (remover de la tabla pivot)
         $team->members()->detach($user->id);
 
         return back()->with('success', 'Invitación rechazada.');
     }
 
-    /**
-     * Responder a solicitud de asesoría (aceptar o rechazar)
-     */
     public function respondAdvisory(Team $team, string $status, Request $request)
     {
         $user = Auth::user();
 
-        // ⛔ Validar que el evento permita inscripciones (solo para aceptar)
         if ($status === 'accepted' && !$team->event->allowsTeamRegistration()) {
             return back()->with('error', 'No se pueden aceptar solicitudes de asesoría porque el evento no está en período de inscripciones.');
         }
 
-        // Verificar que el usuario es el asesor solicitado
         if ($team->advisor_id !== $user->id) {
             return back()->with('error', 'No tienes permiso para responder a esta solicitud.');
         }
 
-        // Verificar que la solicitud está pendiente
         if ($team->advisor_status !== 'pending') {
             return back()->with('error', 'Esta solicitud ya fue respondida.');
         }
 
-        // Validar el status
         if (!in_array($status, ['accepted', 'rejected'])) {
             return back()->with('error', 'Estado inválido.');
         }
 
-        // Marcar notificación como leída si existe
         if ($request->notification) {
             $user->notifications()->where('id', $request->notification)->update(['read_at' => now()]);
         }
@@ -531,7 +428,6 @@ class TeamController extends Controller
             $team->update(['advisor_status' => 'accepted']);
             return back()->with('success', '¡Has aceptado ser asesor de este equipo!');
         } else {
-            // Si rechaza, limpiar el advisor_id
             $team->update([
                 'advisor_id' => null,
                 'advisor_status' => null
@@ -540,28 +436,21 @@ class TeamController extends Controller
         }
     }
 
-    /**
-     * Abandonar equipo (miembro se sale voluntariamente)
-     */
     public function leaveTeam(Team $team)
     {
         $user = Auth::user();
 
-        // Verificar que el usuario es miembro del equipo
         $member = $team->members()->where('user_id', $user->id)->first();
         if (!$member) {
             return back()->with('error', 'No eres miembro de este equipo.');
         }
 
-        // El líder no puede abandonar (debe transferir liderazgo primero)
         if ($team->leader_id === $user->id) {
             return back()->with('error', 'Como líder, debes transferir el liderazgo a otro miembro antes de abandonar el equipo.');
         }
 
-        // Remover del equipo
         $team->members()->detach($user->id);
 
-        // Registrar actividad
         ActivityLog::log('left_team', "El usuario '{$user->name}' abandonó el equipo '{$team->name}'", $team, [
             'user_id' => $user->id,
             'user_name' => $user->name,
@@ -571,38 +460,29 @@ class TeamController extends Controller
             ->with('success', 'Has abandonado el equipo correctamente.');
     }
 
-    /**
-     * Expulsar miembro del equipo (solo líder)
-     */
     public function kickMember(Team $team, User $user)
     {
         $leader = Auth::user();
 
-        // Solo el líder puede expulsar
         if ($team->leader_id !== $leader->id) {
             return back()->with('error', 'Solo el líder del equipo puede expulsar miembros.');
         }
 
-        // No se puede expulsar a sí mismo
         if ($user->id === $leader->id) {
             return back()->with('error', 'No puedes expulsarte a ti mismo.');
         }
 
-        // Verificar que el usuario es miembro del equipo
         $member = $team->members()->where('user_id', $user->id)->first();
         if (!$member) {
             return back()->with('error', 'Este usuario no es miembro del equipo.');
         }
 
-        // ⛔ Validar que el evento esté abierto
         if ($team->event->isClosed()) {
             return back()->with('error', 'No se pueden expulsar miembros porque el evento está cerrado.');
         }
 
-        // Remover del equipo
         $team->members()->detach($user->id);
 
-        // Registrar actividad
         ActivityLog::log('kicked_member', "El líder '{$leader->name}' expulsó a '{$user->name}' del equipo '{$team->name}'", $team, [
             'kicked_user_id' => $user->id,
             'kicked_user_name' => $user->name,
@@ -611,24 +491,18 @@ class TeamController extends Controller
         return back()->with('success', "'{$user->name}' ha sido expulsado del equipo.");
     }
 
-    /**
-     * Transferir liderazgo a otro miembro (solo líder)
-     */
     public function transferLeadership(Team $team, User $user)
     {
         $currentLeader = Auth::user();
 
-        // Solo el líder puede transferir
         if ($team->leader_id !== $currentLeader->id) {
             return back()->with('error', 'Solo el líder actual puede transferir el liderazgo.');
         }
 
-        // No se puede transferir a sí mismo
         if ($user->id === $currentLeader->id) {
             return back()->with('error', 'Ya eres el líder del equipo.');
         }
 
-        // Verificar que el nuevo líder es miembro aceptado del equipo
         $member = $team->members()
             ->where('user_id', $user->id)
             ->wherePivot('is_accepted', true)
@@ -638,15 +512,12 @@ class TeamController extends Controller
             return back()->with('error', 'Este usuario no es un miembro activo del equipo.');
         }
 
-        // ⛔ Validar que el evento esté abierto
         if ($team->event->isClosed()) {
             return back()->with('error', 'No se puede transferir liderazgo porque el evento está cerrado.');
         }
 
-        // Transferir liderazgo
         $team->update(['leader_id' => $user->id]);
 
-        // Registrar actividad
         ActivityLog::log('transferred_leadership', "'{$currentLeader->name}' transfirió el liderazgo a '{$user->name}' en el equipo '{$team->name}'", $team, [
             'old_leader_id' => $currentLeader->id,
             'old_leader_name' => $currentLeader->name,
@@ -657,19 +528,14 @@ class TeamController extends Controller
         return back()->with('success', "El liderazgo ha sido transferido a '{$user->name}'.");
     }
 
-    /**
-     * Cancelar invitación pendiente (solo líder)
-     */
     public function cancelInvitation(Team $team, User $user)
     {
         $leader = Auth::user();
 
-        // Solo el líder puede cancelar invitaciones
         if ($team->leader_id !== $leader->id) {
             return back()->with('error', 'Solo el líder del equipo puede cancelar invitaciones.');
         }
 
-        // Verificar que existe una invitación pendiente (no aceptada y no solicitada por el usuario)
         $invitation = $team->members()
             ->where('user_id', $user->id)
             ->wherePivot('is_accepted', false)
@@ -680,10 +546,8 @@ class TeamController extends Controller
             return back()->with('error', 'No hay invitación pendiente para este usuario.');
         }
 
-        // Remover la invitación
         $team->members()->detach($user->id);
 
-        // Marcar notificaciones relacionadas como leídas
         $user->unreadNotifications()
             ->where('type', 'App\Notifications\TeamInvitationNotification')
             ->whereJsonContains('data->team_id', $team->id)
@@ -691,5 +555,4 @@ class TeamController extends Controller
 
         return back()->with('success', "La invitación a '{$user->name}' ha sido cancelada.");
     }
-
 }

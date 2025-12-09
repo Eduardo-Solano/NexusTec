@@ -15,22 +15,16 @@ use Illuminate\Support\Facades\Storage;
 
 class ProjectController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request)
     {
-        // ⛔ SEGURIDAD: Los jueces NO pueden ver el listado general de proyectos
         if (Auth::user()->hasRole('judge')) {
             abort(403, 'Acceso denegado. Los jueces solo pueden acceder a sus proyectos asignados desde el Dashboard.');
         }
 
-        // Obtener lista de eventos para el filtro
         $events = \App\Models\Event::orderBy('name')->get();
 
         $query = Project::with(['team.event', 'team.leader', 'team.advisor', 'judges']);
 
-        // Filtro por búsqueda (nombre del proyecto o equipo)
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
@@ -41,7 +35,6 @@ class ProjectController extends Controller
             });
         }
 
-        // Filtro por evento
         if ($request->filled('event_id')) {
             $query->whereHas('team', function ($q) use ($request) {
                 $q->where('event_id', $request->event_id);
@@ -53,29 +46,22 @@ class ProjectController extends Controller
         return view('projects.index', compact('projects', 'events'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create(Request $request)
     {
-        // 1. Validar que nos pasen el ID del equipo
         if (!$request->has('team_id')) {
             return back()->with('error', 'Identificador de equipo faltante.');
         }
 
         $team = Team::findOrFail($request->query('team_id'));
 
-        // ⛔ Validar que el evento permita acciones de proyecto (estado activo)
         if (!$team->event->allowsProjectActions()) {
             return back()->with('error', 'No se pueden entregar proyectos porque el evento no está en curso.');
         }
 
-        // 2. Seguridad: Solo el LÍDER del equipo puede subir el proyecto
         if ($team->leader_id !== Auth::id()) {
             abort(403, 'Solo el líder del equipo puede entregar el proyecto.');
         }
 
-        // 3. Seguridad: Si ya entregaron, redirigir a ver el proyecto (evitar duplicados)
         if ($team->project) {
             return redirect()->route('projects.show', $team->project);
         }
@@ -83,32 +69,25 @@ class ProjectController extends Controller
         return view('projects.create', compact('team'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(StoreProjectRequest $request)
     {
         $validated = $request->validated();
 
         $team = Team::findOrFail($validated['team_id']);
 
-        // ⛔ Validar que el evento permita acciones de proyecto (estado activo)
         if (!$team->event->allowsProjectActions()) {
             return back()->with('error', 'No se pueden entregar proyectos porque el evento no está en curso.');
         }
 
-        // Seguridad: Solo el LÍDER del equipo puede entregar el proyecto
         if ($team->leader_id !== Auth::id()) {
             abort(403, 'Solo el líder del equipo puede entregar el proyecto.');
         }
 
-        // Seguridad: Si ya entregaron, evitar duplicados
         if ($team->project) {
             return redirect()->route('projects.show', $team->project)
                 ->with('info', 'El proyecto ya fue entregado anteriormente.');
         }
 
-        // Procesar archivos subidos
         $documentationPath = null;
         $imagePath = null;
 
@@ -126,7 +105,6 @@ class ProjectController extends Controller
             );
         }
 
-        // Crear el proyecto
         $project = Project::create([
             'name' => $request->name,
             'description' => $request->description,
@@ -137,24 +115,18 @@ class ProjectController extends Controller
             'video_url' => $request->video_url,
         ]);
 
-        // Registrar actividad
         ActivityLog::log('submitted', "Proyecto '{$project->name}' entregado por el equipo '{$team->name}'", $project, [
             'team_id' => $team->id,
             'team_name' => $team->name,
             'event_id' => $team->event_id,
         ]);
 
-        // Redirigir al evento con éxito
         return redirect()->route('events.show', $team->event_id)
             ->with('success', '¡Proyecto entregado exitosamente! 🚀');
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(Project $project)
     {
-        // ⛔ SEGURIDAD: Jueces solo pueden ver proyectos asignados
         if (Auth::user()->hasRole('judge')) {
             $isAssigned = $project->judges()->where('judge_id', Auth::id())->exists();
             if (!$isAssigned) {
@@ -162,17 +134,12 @@ class ProjectController extends Controller
             }
         }
 
-        // Cargar relaciones para mostrar info del equipo, asesor y jueces asignados
         $project->load(['team.members', 'team.leader', 'team.event', 'team.advisor', 'judges.judgeProfile', 'evaluations']);
         
-        // Obtener jueces disponibles para asignar (que no estén ya asignados a este proyecto)
-        // Y que estén asignados al EVENTO del proyecto
         $availableJudges = [];
         if (Auth::user() && Auth::user()->can('projects.edit')) {
             $assignedJudgeIds = $project->judges->pluck('id')->toArray();
             
-            // Obtener IDs de usuarios de los jueces asignados al evento
-            // La relación event->judges devuelve JudgeProfile, necesitamos los user_id
             $eventJudgeUserIds = $project->team->event->judges()->pluck('user_id');
 
             $availableJudges = User::role('judge')
@@ -185,21 +152,15 @@ class ProjectController extends Controller
         return view('projects.show', compact('project', 'availableJudges'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(Project $project)
     {
-        // Cargar relaciones necesarias
         $project->load(['team.leader', 'team.event', 'evaluations']);
         
-        // ⛔ Validar que el evento permita acciones de proyecto
         if (!$project->team->event->allowsProjectActions()) {
             return redirect()->route('projects.show', $project)
                 ->with('error', 'No se puede editar el proyecto porque el evento no está en curso.');
         }
         
-        // Verificar permisos: Solo líder del equipo o admin/staff
         $user = Auth::user();
         $isLeader = $project->team->leader_id === $user->id;
         $isAdminOrStaff = $user->hasAnyRole(['admin', 'staff']);
@@ -208,7 +169,6 @@ class ProjectController extends Controller
             abort(403, 'No tienes permiso para editar este proyecto.');
         }
         
-        // Verificar integridad: NO permitir editar si ya tiene evaluaciones
         if ($project->evaluations()->exists()) {
             return redirect()->route('projects.show', $project)
                 ->with('error', 'No se puede editar un proyecto que ya ha sido evaluado. Esto protege la integridad de las calificaciones.');
@@ -217,18 +177,13 @@ class ProjectController extends Controller
         return view('projects.edit', compact('project'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(UpdateProjectRequest $request, Project $project)
     {
-        // ⛔ Validar que el evento permita acciones de proyecto
         if (!$project->team->event->allowsProjectActions()) {
             return redirect()->route('projects.show', $project)
                 ->with('error', 'No se puede editar el proyecto porque el evento no está en curso.');
         }
         
-        // Verificar permisos: Solo líder del equipo o admin/staff
         $user = Auth::user();
         $isLeader = $project->team->leader_id === $user->id;
         $isAdminOrStaff = $user->hasAnyRole(['admin', 'staff']);
@@ -237,7 +192,6 @@ class ProjectController extends Controller
             abort(403, 'No tienes permiso para editar este proyecto.');
         }
         
-        // Verificar integridad: NO permitir editar si ya tiene evaluaciones
         if ($project->evaluations()->exists()) {
             return redirect()->route('projects.show', $project)
                 ->with('error', 'No se puede editar un proyecto que ya ha sido evaluado.');
@@ -245,7 +199,6 @@ class ProjectController extends Controller
         
         $validated = $request->validated();
 
-        // Manejar eliminación de archivos existentes
         if ($request->boolean('remove_documentation') && $project->documentation_path) {
             Storage::disk('public')->delete($project->documentation_path);
             $project->documentation_path = null;
@@ -256,9 +209,7 @@ class ProjectController extends Controller
             $project->image_path = null;
         }
 
-        // Procesar nuevos archivos subidos
         if ($request->hasFile('documentation')) {
-            // Eliminar archivo anterior si existe
             if ($project->documentation_path) {
                 Storage::disk('public')->delete($project->documentation_path);
             }
@@ -269,7 +220,6 @@ class ProjectController extends Controller
         }
 
         if ($request->hasFile('image')) {
-            // Eliminar archivo anterior si existe
             if ($project->image_path) {
                 Storage::disk('public')->delete($project->image_path);
             }
@@ -279,7 +229,6 @@ class ProjectController extends Controller
             );
         }
 
-        // Actualizar campos básicos
         $project->name = $validated['name'];
         $project->description = $validated['description'];
         $project->repository_url = $validated['repository_url'];
@@ -290,12 +239,8 @@ class ProjectController extends Controller
             ->with('success', 'Proyecto actualizado correctamente.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Project $project)
     {
-        // Verificar permisos: Solo líder del equipo o admin/staff
         $user = Auth::user();
         $isLeader = $project->team->leader_id === $user->id;
         $isAdminOrStaff = $user->hasAnyRole(['admin', 'staff']);
@@ -304,12 +249,10 @@ class ProjectController extends Controller
             abort(403, 'No tienes permiso para eliminar este proyecto.');
         }
         
-        // Verificar integridad: NO permitir eliminar si tiene evaluaciones
         if ($project->evaluations()->exists()) {
             return back()->with('error', 'No se puede eliminar un proyecto que ya ha sido evaluado. Esto protege la integridad de los datos históricos.');
         }
         
-        // Verificar integridad: NO permitir eliminar si el equipo tiene premios
         if ($project->team->awards()->exists()) {
             return back()->with('error', 'No se puede eliminar un proyecto cuyo equipo ha recibido premios.');
         }
@@ -317,48 +260,37 @@ class ProjectController extends Controller
         $eventId = $project->team->event_id;
         $projectName = $project->name;
         
-        // Primero remover jueces asignados (limpieza de tabla pivot)
         $project->judges()->detach();
 
-        // Eliminar archivos asociados
         $project->deleteFiles();
         
-        // Eliminar el proyecto
         $project->delete();
         
         return redirect()->route('events.show', $eventId)
             ->with('success', "Proyecto \"{$projectName}\" eliminado correctamente.");
     }
 
-    /**
-     * Asignar un juez a un proyecto
-     */
     public function assignJudge(AssignJudgeRequest $request, Project $project)
     {
-        // Verificar permisos
         if (!Auth::user()->can('projects.edit')) {
             abort(403);
         }
 
-        // ⛔ Validar que el evento permita evaluaciones (estado activo)
         if (!$project->team->event->allowsEvaluations()) {
             return back()->with('error', 'No se pueden asignar jueces porque el evento no está en curso.');
         }
 
         $validated = $request->validated();
 
-        // Verificar que el usuario sea juez
         $judge = User::findOrFail($validated['judge_id']);
         if (!$judge->hasRole('judge')) {
             return back()->with('error', 'El usuario seleccionado no es un juez.');
         }
 
-        // Verificar que no esté ya asignado
         if ($project->judges()->where('judge_id', $judge->id)->exists()) {
             return back()->with('error', 'Este juez ya está asignado al proyecto.');
         }
 
-        // Asignar juez
         $project->judges()->attach($judge->id, [
             'assigned_at' => now(),
             'is_completed' => false
@@ -367,23 +299,17 @@ class ProjectController extends Controller
         return back()->with('success', "Juez {$judge->name} asignado correctamente.");
     }
 
-    /**
-     * Remover un juez de un proyecto
-     */
     public function removeJudge(Project $project, User $judge)
     {
-        // Verificar permisos
         if (!Auth::user()->can('projects.edit')) {
             abort(403);
         }
 
-        // Verificar si ya evaluó (no permitir remover si ya hay evaluaciones)
         $hasEvaluations = $project->evaluations()->where('judge_id', $judge->id)->exists();
         if ($hasEvaluations) {
             return back()->with('error', 'No se puede remover un juez que ya ha evaluado el proyecto.');
         }
 
-        // Remover asignación
         $project->judges()->detach($judge->id);
 
         return back()->with('success', "Juez {$judge->name} removido del proyecto.");

@@ -4,64 +4,55 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Team extends Model
 {
-    /** @use HasFactory<\Database\Factories\TeamFactory> */
     use HasFactory;
 
     protected $fillable = [
         'name',
-        'event_id',
+        'description',
         'leader_id',
+        'event_id',
         'advisor_id',
-        'advisor_status'
+        'creator_id',
+        'status',
+        'max_members'
     ];
 
-    // El evento al que pertenece
-    public function event()
-    {
-        return $this->belongsTo(Event::class);
-    }
-
-    // El Líder (Creador) es un Usuario
     public function leader()
     {
         return $this->belongsTo(User::class, 'leader_id');
     }
 
-    // Los Miembros (Muchos a Muchos)
-    public function members()
+    public function creator()
     {
-        return $this->belongsToMany(User::class, 'team_user')
-            ->withPivot('is_accepted', 'role') // <--- ¡ESTO ES LO QUE FALTABA!
-            ->withTimestamps();
+        return $this->belongsTo(User::class, 'creator_id');
     }
 
-    // Un equipo tiene UN proyecto
+    public function members()
+    {
+        return $this->belongsToMany(User::class)->withPivot('is_accepted', 'requested_by_user');
+    }
+
+    public function event()
+    {
+        return $this->belongsTo(Event::class);
+    }
+
     public function project()
     {
         return $this->hasOne(Project::class);
     }
 
-    // Relación con el Asesor
     public function advisor()
     {
         return $this->belongsTo(User::class, 'advisor_id');
     }
 
-    // Premios obtenidos
     public function awards()
     {
         return $this->hasMany(Award::class);
-    }
-
-    public function users(): BelongsToMany
-    {
-        return $this->belongsToMany(User::class)
-            ->withPivot('role', 'is_accepted', 'requested_by_user') // Importante para que funcionen los datos extra del seeder
-            ->withTimestamps();
     }
     public function maxMembers(): int
     {

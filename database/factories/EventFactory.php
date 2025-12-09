@@ -10,18 +10,14 @@ class EventFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->sentence(3), // Ej: "Gran Hackathon 2025"
+            'name' => $this->faker->sentence(3),
             'description' => $this->faker->paragraph(),
-            // Fechas aleatorias entre hoy y dentro de un mes
-            'start_date' => $this->faker->dateTimeBetween('now', '+1 month'), 
+            'start_date' => $this->faker->dateTimeBetween('now', '+1 month'),
             'end_date' => $this->faker->dateTimeBetween('+1 month', '+2 months'),
             'status' => Event::STATUS_REGISTRATION,
         ];
     }
 
-    /**
-     * Estado: En inscripciones
-     */
     public function registration(): static
     {
         return $this->state(fn (array $attributes) => [
@@ -29,9 +25,6 @@ class EventFactory extends Factory
         ]);
     }
 
-    /**
-     * Estado: En curso (activo)
-     */
     public function active(): static
     {
         return $this->state(fn (array $attributes) => [
@@ -39,9 +32,6 @@ class EventFactory extends Factory
         ]);
     }
 
-    /**
-     * Estado: Cerrado/Finalizado
-     */
     public function closed(): static
     {
         return $this->state(fn (array $attributes) => [

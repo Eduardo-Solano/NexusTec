@@ -51,17 +51,11 @@
                             xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve"
                             style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;">
                             <defs>
-                                <!-- Filtros de neón mejorados - más auténticos y realistas -->
                                 <filter id="neon-cyan-main" x="-150%" y="-150%" width="400%" height="400%">
-                                    <!-- Capa externa muy difusa - resplandor lejano -->
                                     <feGaussianBlur in="SourceGraphic" stdDeviation="40" result="blur1" />
-                                    <!-- Capa media - brillo principal -->
                                     <feGaussianBlur in="SourceGraphic" stdDeviation="20" result="blur2" />
-                                    <!-- Capa interna - definición -->
                                     <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur3" />
-                                    <!-- Capa muy cercana - borde brillante -->
                                     <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur4" />
-                                    <!-- Composición con múltiples capas -->
                                     <feMerge>
                                         <feMergeNode in="blur1" />
                                         <feMergeNode in="blur1" />

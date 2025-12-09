@@ -14,11 +14,9 @@
     <form method="POST" action="{{ route('register') }}">
         @csrf
         
-        {{-- Campo oculto para el rol --}}
         <input type="hidden" name="role" value="student">
 
         <div class="space-y-4">
-            {{-- Nombre --}}
             <div>
                 <x-input-label for="name" :value="__('Nombre Completo')" class="text-gray-300" />
                 <x-text-input id="name"
@@ -27,7 +25,6 @@
                 <x-input-error :messages="$errors->get('name')" class="mt-2" />
             </div>
 
-            {{-- Teléfono --}}
             <div>
                 <x-input-label for="phone" :value="__('Teléfono')" class="text-gray-300" />
                 <x-text-input id="phone"
@@ -37,7 +34,6 @@
             </div>
         </div>
 
-        {{-- Datos Académicos --}}
         <div class="mt-6 space-y-4 border-t border-gray-700 pt-4">
             <h3 class="text-orange-400 text-sm font-bold uppercase tracking-wider flex items-center gap-2">
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -46,7 +42,6 @@
                 Datos Académicos
             </h3>
 
-            {{-- Número de Control --}}
             <div>
                 <x-input-label for="control_number" :value="__('Número de Control')" class="text-gray-300" />
                 <x-text-input id="control_number"
@@ -59,7 +54,6 @@
                 <x-input-error :messages="$errors->get('control_number')" class="mt-2" />
             </div>
 
-            {{-- Email (generado automáticamente) --}}
             <div>
                 <x-input-label for="email" :value="__('Correo Institucional')" class="text-gray-300" />
                 <x-text-input id="email"
@@ -69,7 +63,6 @@
                 <x-input-error :messages="$errors->get('email')" class="mt-2" />
             </div>
 
-            {{-- Carrera --}}
             <div>
                 <x-input-label for="career_id" :value="__('Carrera')" class="text-gray-300" />
                 <select name="career_id" id="career_id" required
@@ -84,7 +77,6 @@
                 <x-input-error :messages="$errors->get('career_id')" class="mt-2" />
             </div>
 
-            {{-- Semestre --}}
             <div>
                 <x-input-label for="semester" :value="__('Semestre')" class="text-gray-300" />
                 <select name="semester" id="semester" required
@@ -100,7 +92,6 @@
             </div>
         </div>
 
-        {{-- Contraseña --}}
         <div class="mt-6 space-y-4 border-t border-gray-700 pt-4">
             <h3 class="text-orange-400 text-sm font-bold uppercase tracking-wider flex items-center gap-2">
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

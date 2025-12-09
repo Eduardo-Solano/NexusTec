@@ -15,11 +15,6 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        // =========================================================
-        // 1. USUARIOS FIJOS (Para tus pruebas manuales)
-        // =========================================================
-
-        // 1.1 ADMIN
         $admin = User::firstOrCreate(
             ['email' => 'admin@nexustec.com'],
             [
@@ -30,7 +25,6 @@ class UserSeeder extends Seeder
         );
         $admin->assignRole('admin');
 
-        // 1.2 STAFF DE PRUEBA (EMP-001)
         $docente = User::firstOrCreate(
             ['email' => 'docente@nexustec.com'],
             [
@@ -39,7 +33,7 @@ class UserSeeder extends Seeder
                 'is_active' => true,
             ]
         );
-        $docente->assignRole(['staff', 'advisor']); // Le ponemos ambos para probar
+        $docente->assignRole(['staff', 'advisor']);
         
         StaffProfile::updateOrCreate(
             ['user_id' => $docente->id],
@@ -49,7 +43,6 @@ class UserSeeder extends Seeder
             ]
         );
 
-        // 1.3 JUEZ DE PRUEBA (Para evaluar eventos activos)
         $juezPrueba = User::firstOrCreate(
             ['email' => 'juez@nexustec.com'],
             [
@@ -68,50 +61,34 @@ class UserSeeder extends Seeder
             ]
         );
 
-        // =========================================================
-        // 2. GENERACIÓN MASIVA DE PERSONAL (Staff/Advisors)
-        // =========================================================
-        
-        // Obtenemos los nombres de las carreras para usarlos como departamentos
         $departments = Career::pluck('name')->toArray();
-        // Agregamos algunos departamentos administrativos extra
         $departments = array_merge($departments, ['Ciencias Básicas', 'Dirección Académica', 'Vinculación']);
 
-        // Generamos 30 usuarios de personal
         for ($i = 2; $i <= 31; $i++) {
-            // Formato EMP-002, EMP-003, etc.
             $empNumber = 'EMP-' . str_pad($i, 3, '0', STR_PAD_LEFT);
             
             $user = User::factory()->create([
-                'password' => Hash::make('password'), // Todos con 'password'
+                'password' => Hash::make('password'),
                 'is_active' => true,
             ]);
 
-            // Lógica de Roles (Simulación de tipos de personal)
-            // 40% Solo Organizadores (staff)
-            // 40% Solo Docentes (advisor)
-            // 20% Ambos (staff y advisor)
             $rand = rand(1, 100);
             
             if ($rand <= 40) {
-                $user->assignRole('staff'); // Es administrativo
+                $user->assignRole('staff');
             } elseif ($rand <= 80) {
-                $user->assignRole('advisor'); // Es docente
+                $user->assignRole('advisor');
             } else {
-                $user->assignRole(['staff', 'advisor']); // Es todólogo
+                $user->assignRole(['staff', 'advisor']);
             }
 
-            // Crear Perfil de Staff
             StaffProfile::create([
                 'user_id' => $user->id,
                 'employee_number' => $empNumber,
-                'department' => $departments[array_rand($departments)], // Depto aleatorio de la lista real
+                'department' => $departments[array_rand($departments)],
             ]);
         }
 
-        // =========================================================
-        // 3. POOL DE JUECES (Externos)
-        // =========================================================
         $specialties = Specialty::all();
         
         User::factory(20)->create()->each(function ($user) use ($specialties) {
@@ -123,9 +100,6 @@ class UserSeeder extends Seeder
             ]);
         });
 
-        // =========================================================
-        // 4. ESTUDIANTES SIN EQUIPO (50 Estudiantes sueltos)
-        // =========================================================
         $careers = Career::all();
         
         User::factory(50)->create()->each(function ($user) use ($careers) {
@@ -133,7 +107,6 @@ class UserSeeder extends Seeder
             StudentProfile::factory()->create([
                 'user_id' => $user->id,
                 'career_id' => $careers->random()->id,
-                // El control_number se genera en el Factory del perfil o aquí si lo prefieres
             ]);
         });
     }

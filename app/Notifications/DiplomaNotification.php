@@ -20,9 +20,6 @@ class DiplomaNotification extends Notification implements ShouldQueue
     protected ?Award $award;
     protected string $type;
 
-    /**
-     * Create a new notification instance.
-     */
     public function __construct(Event $event, Team $team, ?Award $award = null, string $type = 'participation')
     {
         $this->event = $event;
@@ -31,20 +28,13 @@ class DiplomaNotification extends Notification implements ShouldQueue
         $this->type = $type;
     }
 
-    /**
-     * Get the notification's delivery channels.
-     */
     public function via(object $notifiable): array
     {
         return ['mail'];
     }
 
-    /**
-     * Get the mail representation of the notification.
-     */
     public function toMail(object $notifiable): MailMessage
     {
-        // Generar el PDF del diploma
         $pdf = Pdf::loadView('exports.diploma', [
             'event' => $this->event,
             'participant' => $notifiable,
@@ -60,9 +50,8 @@ class DiplomaNotification extends Notification implements ShouldQueue
             ? 'diploma_ganador_' . str_replace(' ', '_', $notifiable->name) . '.pdf'
             : 'diploma_participacion_' . str_replace(' ', '_', $notifiable->name) . '.pdf';
 
-        // Construir el mensaje según el tipo
         if ($this->type === 'winner') {
-            $positionLabel = \App\Models\Award::POSITIONS[$this->award->position] ?? 'Ganador';
+            $positionLabel = Award::POSITIONS[$this->award->position] ?? 'Ganador';
             $subject = '🏆 ¡Felicidades! Diploma de ' . $positionLabel . ' - ' . $this->event->name;
             $greeting = '¡Felicidades, ' . $notifiable->name . '! 🎉';
             $introLines = [
@@ -100,9 +89,6 @@ class DiplomaNotification extends Notification implements ShouldQueue
         return $mail;
     }
 
-    /**
-     * Get the array representation of the notification.
-     */
     public function toArray(object $notifiable): array
     {
         return [
