@@ -295,7 +295,7 @@
 
                         {{-- LISTA DE MIEMBROS --}}
                         <div class="divide-y divide-gray-700">
-                            @foreach ($team->members as $member)
+                            @foreach ($members as $member)
                                 <div class="p-4 flex items-center justify-between hover:bg-gray-700/30 transition">
                                     <div class="flex items-center gap-4">
                                         <div
@@ -390,7 +390,7 @@
                                                     @endif
                                                 @endif
 
-                                                {{-- Si soy yo mismo y NO soy líder, puedo abandonar --}}
+                                                {{-- Si soy yo mismo y NO soy líder, puedo abandonar (solo si estoy aceptado) --}}
                                                 @if (auth()->id() === $member->id && $member->id !== $team->leader_id && $member->pivot->is_accepted)
                                                     <form action="{{ route('teams.leave', $team) }}" method="POST"
                                                         onsubmit="return confirm('¿Estás seguro de abandonar el equipo {{ $team->name }}?\n\nEsta acción no se puede deshacer.')">
@@ -413,6 +413,8 @@
                                 </div>
                             @endforeach
                         </div>
+
+
 
                         {{-- Leyenda de acciones --}}
                         @if ($team->event->isOpen() && (auth()->id() === $team->leader_id || $team->members->contains('id', auth()->id())))

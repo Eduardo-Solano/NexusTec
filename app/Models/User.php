@@ -50,28 +50,40 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-            'is_active'=> 'boolean',
+            'is_active' => 'boolean',
         ];
     }
 
     // --- RELACIONES DE PERFILES (1 a 1) ---
 
-    public function studentProfile() {
+    public function studentProfile()
+    {
         return $this->hasOne(StudentProfile::class);
     }
 
-    public function judgeProfile() {
+    public function judgeProfile()
+    {
         return $this->hasOne(JudgeProfile::class);
     }
 
-    public function staffProfile() {
+    public function staffProfile()
+    {
         return $this->hasOne(StaffProfile::class);
     }
 
     // Relación con equipos (muchos a muchos)
     public function teams()
     {
-        return $this->belongsToMany(Team::class)->withPivot('is_accepted');
+        return $this->belongsToMany(Team::class)
+            ->withPivot(['is_accepted', 'role', 'requested_by_user'])
+            ->withTimestamps();
+    }
+    public function activeTeams()
+    {
+        return $this->belongsToMany(Team::class)
+            ->withPivot(['is_accepted', 'role', 'requested_by_user'])
+            ->wherePivot('is_accepted', true)
+            ->withTimestamps();
     }
 
     //notificacion correo
