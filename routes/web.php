@@ -26,7 +26,7 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-// Dashboard
+// Dashboard (pública pero protegida por middleware)
 Route::get('/dashboard', function () {
     $user = Auth::user();
 
@@ -51,8 +51,8 @@ Route::get('/calendar', function () {
 Route::get('/winners', [PublicController::class, 'winners'])->name('public.winners');
 Route::get('/winners/{event}', [PublicController::class, 'eventWinners'])->name('public.event-winners');
 
+// Listado público de equipos y proyectos
 Route::get('/teams', [TeamController::class, 'index'])->name('teams.index');
-Route::get('/teams/{team}', [TeamController::class, 'show'])->name('teams.show');
 
 Route::get('/projects', [ProjectController::class, 'index'])->name('projects.index');
 Route::get('/projects/{project}', [ProjectController::class, 'show'])->name('projects.show');
@@ -66,13 +66,14 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::get('/recuperarcontra', fn() => view('auth.reset-password'));
 
-    // Dashboard
+    // Dashboard (versión con controlador)
     Route::middleware('verified')->get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Notificaciones
     Route::post('/notifications/{notification}/read', function ($notificationId) {
         $notification = Auth::user()->notifications()->find($notificationId);
-        if ($notification) $notification->markAsRead();
+        if ($notification)
+            $notification->markAsRead();
         return response()->json(['success' => true]);
     })->name('notifications.markAsRead');
 
@@ -84,9 +85,9 @@ Route::middleware(['auth'])->group(function () {
     // API endpoint for polling notifications
     Route::get('/notifications/poll', function () {
         $user = Auth::user();
-        
+
         $unreadNotifications = $user->unreadNotifications;
-        
+
         // Pending advisories (for advisors)
         $pendingAdvisories = collect();
         if ($user->hasRole('advisor') || $user->hasRole('staff')) {
@@ -95,7 +96,7 @@ Route::middleware(['auth'])->group(function () {
                 ->with(['event'])
                 ->get();
         }
-        
+
         // Pending evaluations (for judges)
         $pendingEvaluations = collect();
         if ($user->hasRole('judge')) {
@@ -104,9 +105,9 @@ Route::middleware(['auth'])->group(function () {
                 ->with(['team'])
                 ->get();
         }
-        
+
         $totalCount = $pendingAdvisories->count() + $pendingEvaluations->count() + $unreadNotifications->count();
-        
+
         return response()->json([
             'total' => $totalCount,
             'unread_notifications' => $unreadNotifications->map(fn($n) => [
@@ -152,7 +153,7 @@ Route::middleware(['auth'])->group(function () {
 
 // --- RUTAS DE ADMINISTRACIÓN Y STAFF (ROLE: ADMIN|STAFF) ---
 Route::middleware(['auth', 'role:admin|staff'])->group(function () {
-    
+
     // Eventos
     Route::get('/events/create', [EventController::class, 'create'])->name('events.create');
     Route::post('/events', [EventController::class, 'store'])->name('events.store');
@@ -160,7 +161,7 @@ Route::middleware(['auth', 'role:admin|staff'])->group(function () {
     Route::put('/events/{event}', [EventController::class, 'update'])->name('events.update');
     Route::patch('/events/{event}', [EventController::class, 'update']);
     Route::delete('/events/{event}', [EventController::class, 'destroy'])->name('events.destroy');
-    
+
     // Jueces en Eventos
     Route::post('/events/{event}/assign-judge', [EventController::class, 'assignJudge'])->name('events.assign-judge');
     Route::delete('/events/{event}/remove-judge/{judge}', [EventController::class, 'removeJudge'])->name('events.remove-judge');
@@ -208,6 +209,9 @@ Route::middleware(['auth', 'role:student'])->group(function () {
     Route::get('/projects/create', [ProjectController::class, 'create'])->name('projects.create');
     Route::post('/projects', [ProjectController::class, 'store'])->name('projects.store');
 });
+
+// 🔹 Detalle público de equipo (esta va DESPUÉS de /teams/create)
+Route::get('/teams/{team}', [TeamController::class, 'show'])->name('teams.show');
 
 // --- RUTAS COMPARTIDAS ADMIN/STAFF/STUDENT ---
 Route::middleware(['auth', 'role:admin|staff|student'])->group(function () {
