@@ -1,0 +1,63 @@
+{
+  "_auto-sRkgK8jz.js": {
+    "file": "assets/auto-sRkgK8jz.js",
+    "name": "auto"
+  },
+  "resources/css/app.css": {
+    "file": "assets/app-DY99UZtL.css",
+    "src": "resources/css/app.css",
+    "isEntry": true,
+    "name": "app",
+    "names": [
+      "app.css"
+    ]
+  },
+  "resources/js/app.js": {
+    "file": "assets/app-CJy8ASEk.js",
+    "name": "app",
+    "src": "resources/js/app.js",
+    "isEntry": true
+  },
+  "resources/js/pages/dashboard.js": {
+    "file": "assets/dashboard-BSmIU2Tm.js",
+    "name": "dashboard",
+    "src": "resources/js/pages/dashboard.js",
+    "isEntry": true,
+    "imports": [
+      "_auto-sRkgK8jz.js"
+    ]
+  },
+  "resources/js/pages/projects-show.js": {
+    "file": "assets/projects-show-DkBAIrqg.js",
+    "name": "projects-show",
+    "src": "resources/js/pages/projects-show.js",
+    "isEntry": true
+  },
+  "resources/js/pages/reports-by-career.js": {
+    "file": "assets/reports-by-career-BPes8ZRS.js",
+    "name": "reports-by-career",
+    "src": "resources/js/pages/reports-by-career.js",
+    "isEntry": true,
+    "imports": [
+      "_auto-sRkgK8jz.js"
+    ]
+  },
+  "resources/js/pages/reports-by-period.js": {
+    "file": "assets/reports-by-period-D0haKH3x.js",
+    "name": "reports-by-period",
+    "src": "resources/js/pages/reports-by-period.js",
+    "isEntry": true,
+    "imports": [
+      "_auto-sRkgK8jz.js"
+    ]
+  },
+  "resources/js/pages/reports-index.js": {
+    "file": "assets/reports-index-CSbJEhXC.js",
+    "name": "reports-index",
+    "src": "resources/js/pages/reports-index.js",
+    "isEntry": true,
+    "imports": [
+      "_auto-sRkgK8jz.js"
+    ]
+  }
+}
