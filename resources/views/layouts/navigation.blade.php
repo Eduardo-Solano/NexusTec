@@ -108,6 +108,8 @@
 
             <div class="flex items-center">
 
+
+                
                 @auth
                     <div class="relative me-3 ms-6 group" x-data="{
                         // Conteo real (para el dropdown)
