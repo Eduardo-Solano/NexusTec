@@ -523,45 +523,63 @@
                 <!-- Charts Section -->
                 @if (isset($data['event_progress']))
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-12">
-                        <div class="glass-card p-6 rounded-3xl relative overflow-hidden">
-                            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
-                                <span class="p-2 bg-blue-500/10 text-blue-500 rounded-lg"><svg class="w-5 h-5"
-                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                                    </svg></span>
-                                Equipos Registrados (14 días)
-                            </h3>
-                            <div class="h-64 w-full">
-                                <canvas id="teamsChart"></canvas>
+                        <!-- Teams Chart -->
+                        <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-gray-900/60 via-gray-800/60 to-black/60 backdrop-blur-xl text-white p-6 shadow-2xl border border-gray-700/50">
+                            <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100"></div>
+                            <div class="absolute top-0 right-0 w-64 h-64 bg-blue-600/20 rounded-full blur-3xl -mr-16 -mt-16 animate-pulse"></div>
+                            
+                            <div class="relative z-10">
+                                <h3 class="text-lg font-bold text-white mb-6 flex items-center gap-2">
+                                    <span class="p-2 bg-blue-500/20 text-blue-400 rounded-lg"><svg class="w-5 h-5"
+                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                        </svg></span>
+                                    Equipos Registrados (14 días)
+                                </h3>
+                                <div class="h-64 w-full">
+                                    <canvas id="teamsChart"></canvas>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="glass-card p-6 rounded-3xl relative overflow-hidden">
-                            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
-                                <span class="p-2 bg-purple-500/10 text-purple-500 rounded-lg"><svg class="w-5 h-5"
-                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
-                                    </svg></span>
-                                Estudiantes por Carrera
-                            </h3>
-                            <div class="h-64 w-full">
-                                <canvas id="careersChart"></canvas>
+                        <!-- Careers Chart -->
+                        <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-gray-900/60 via-gray-800/60 to-black/60 backdrop-blur-xl text-white p-6 shadow-2xl border border-gray-700/50">
+                            <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100"></div>
+                            <div class="absolute top-0 right-0 w-64 h-64 bg-pink-600/20 rounded-full blur-3xl -mr-16 -mt-16 animate-pulse"></div>
+
+                            <div class="relative z-10">
+                                <h3 class="text-lg font-bold text-white mb-6 flex items-center gap-2">
+                                    <span class="p-2 bg-purple-500/20 text-purple-400 rounded-lg"><svg class="w-5 h-5"
+                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
+                                        </svg></span>
+                                    Estudiantes por Carrera
+                                </h3>
+                                <div class="h-64 w-full">
+                                    <canvas id="careersChart"></canvas>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="glass-card p-6 rounded-3xl relative overflow-hidden lg:col-span-2">
-                            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
-                                <span class="p-2 bg-green-500/10 text-green-500 rounded-lg"><svg class="w-5 h-5"
-                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                    </svg></span>
-                                Participación por Evento
-                            </h3>
-                            <div class="h-80 w-full">
-                                <canvas id="eventsChart"></canvas>
+                        <!-- Events Chart -->
+                        <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-gray-900/60 via-gray-800/60 to-black/60 backdrop-blur-xl text-white p-6 shadow-2xl border border-gray-700/50 lg:col-span-2">
+                            <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100"></div>
+                            <div class="absolute top-0 right-0 w-96 h-96 bg-emerald-600/20 rounded-full blur-3xl -mr-20 -mt-20 animate-pulse"></div>
+
+                            <div class="relative z-10">
+                                <h3 class="text-lg font-bold text-white mb-6 flex items-center gap-2">
+                                    <span class="p-2 bg-green-500/20 text-green-400 rounded-lg"><svg class="w-5 h-5"
+                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg></span>
+                                    Participación por Evento
+                                </h3>
+                                <div class="h-80 w-full">
+                                    <canvas id="eventsChart"></canvas>
+                                </div>
                             </div>
                         </div>
                     </div>

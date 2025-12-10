@@ -82,6 +82,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         label: 'Registros Diarios',
                         data: dailyData,
                         backgroundColor: barGradient,
+                        borderColor: '#8B5CF6', // Purple Border
+                        borderWidth: { top: 2, right: 1, left: 1, bottom: 0 },
                         borderRadius: 4,
                         barPercentage: 0.6,
                         categoryPercentage: 0.8,
@@ -154,9 +156,16 @@ document.addEventListener('DOMContentLoaded', function () {
                 datasets: [{
                     data: window.dashboardData.studentsByCareerCounts,
                     backgroundColor: [
+                        'rgba(139, 92, 246, 0.6)', // Purple
+                        'rgba(236, 72, 153, 0.6)', // Pink
+                        'rgba(59, 130, 246, 0.6)', // Blue
+                        'rgba(16, 185, 129, 0.6)', // Emerald
+                        'rgba(245, 158, 11, 0.6)'  // Amber
+                    ],
+                    borderColor: [
                         '#8B5CF6', '#EC4899', '#3B82F6', '#10B981', '#F59E0B'
                     ],
-                    borderWidth: 0,
+                    borderWidth: 2,
                     hoverOffset: 15,
                     borderRadius: 20, // Bordes redondeados en los segmentos
                     spacing: 5
@@ -200,6 +209,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     label: 'Equipos',
                     data: window.dashboardData.projectsByEventCounts,
                     backgroundColor: gradientBar,
+                    borderColor: '#34D399', // Emerald Border
+                    borderWidth: { top: 2, right: 1, left: 1, bottom: 0 },
                     borderRadius: { topLeft: 20, topRight: 20 },
                     barThickness: 50,
                     maxBarThickness: 60,
