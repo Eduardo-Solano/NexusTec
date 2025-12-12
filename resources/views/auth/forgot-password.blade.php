@@ -16,8 +16,8 @@
 
         <div class="flex items-center justify-end mt-4">
             <x-primary-button>
-                {{ __('Correo Electronico') }}
+                {{ __('Verificar Correo') }}
             </x-primary-button>
         </div>
-    </form>
+    </form>t
 </x-guest-layout>

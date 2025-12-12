@@ -57,8 +57,8 @@
             <div>
                 <x-input-label for="email" :value="__('Correo Institucional')" class="text-gray-300" />
                 <x-text-input id="email"
-                    class="block mt-1 w-full bg-gray-800 border-gray-600 text-gray-400 rounded-lg cursor-not-allowed"
-                    type="email" name="email" :value="old('email')" required readonly />
+                    class="mt-1 w-full bg-gray-800 border-gray-600 text-gray-400 rounded-lg cursor-not-allowed"
+                    type="email" name="email" :value="old('email')" />
                 <p class="mt-1 text-xs text-gray-500">Se genera automáticamente: número_control@itoaxaca.edu.mx</p>
                 <x-input-error :messages="$errors->get('email')" class="mt-2" />
             </div>
@@ -203,7 +203,7 @@
             </a>
             <button type="submit"
                 class="bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition transform hover:scale-105">
-                {{ __('Verificar Correo') }}
+                {{ __('Registrarse') }}
             </button>
         </div>
     </form>
